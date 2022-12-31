@@ -1,4 +1,5 @@
 import os
+import re
 from pprint import pprint
 from typing import Dict, List, Union
 
@@ -50,7 +51,21 @@ def get_gold_summaries_file_handles(file_id, training: bool = True) -> List[str]
 
 
 def clean_company_name(line: str):
-    name = line.strip().split('plc')[0] + ' plc'
+    line = line.strip()
+    # Clear of irrelevant strings
+    reg_to_drop = r'''(?x) # flag to allow comments and multi-line regex
+            Annual | Report | Accounts | Financial | Statements | Chairman | Executive
+    '''
+    pattern = re.compile(reg_to_drop, re.IGNORECASE)
+    line = pattern.sub("", line)
+    # Extract the name of the company
+    name = line.split('plc')[0] + ' plc '
+    # Try to match the year on the line and add to the identifier
+    year = re.findall(r'\d{4}', line)
+    if year:
+        name += year[0]
+    # Ensure unnecessary spaces are removed
+    name = " ".join(name.split())
     return name
 
 
@@ -72,6 +87,11 @@ def get_company_from_id(file_id, training: bool = True) -> Union[str, None]:
 
 
 def get_id_to_company_mapping(training: bool = True) -> Dict[str, str]:
+    """
+        Many-to-one relationship, as reports are issued per year for a company
+    :param training:
+    :return:
+    """
     path = 'data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
@@ -89,5 +109,6 @@ def main():
     # print(file_handles)
     # print(get_company_from_id('17'))
     pprint(get_id_to_company_mapping())
+
 
 main()
