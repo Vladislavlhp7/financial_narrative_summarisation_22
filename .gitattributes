@@ -1,0 +1,4 @@
+tmp/corpus_embedding.pickle filter=lfs diff=lfs merge=lfs -text
+dissertation/screen.ps filter=lfs diff=lfs merge=lfs -text
+tmp/training_corpus_2023-02-07[[:space:]]16-33.csv filter=lfs diff=lfs merge=lfs -text
+tmp/validation_corpus_2023-02-07[[:space:]]16-33.csv filter=lfs diff=lfs merge=lfs -text
