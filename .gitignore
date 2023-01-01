@@ -153,4 +153,5 @@ dmypy.json
 cython_debug/
 
 data/
+resources/
 .DS_Store
