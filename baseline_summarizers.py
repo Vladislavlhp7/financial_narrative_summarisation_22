@@ -4,8 +4,8 @@ from sumy.summarizers.lex_rank import LexRankSummarizer
 from sumy.summarizers.lsa import LsaSummarizer
 from sumy.summarizers.luhn import LuhnSummarizer
 
+from thesis.query import get_report, get_summary, calc_rouge_agg_from_gold_summaries
 from thesis.metrics import calc_rouge, calc_rouge_agg
-from thesis.query import get_report, get_summary
 
 baseline_summarizers = {
     'lex': LexRankSummarizer,
@@ -37,7 +37,7 @@ def main():
     calc_rouge(txt1=summary_gold, txt2=summary, stats=['f'], verbose=True)
 
     # Calculate aggregate Rouge on all gold summaries
-    rouge_df = calc_rouge_agg(summary=summary, file_id=file_id)
+    rouge_df = calc_rouge_agg_from_gold_summaries(summary=summary, file_id=file_id)
     print(rouge_df)
 
 
