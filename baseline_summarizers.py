@@ -4,8 +4,8 @@ from sumy.summarizers.lex_rank import LexRankSummarizer
 from sumy.summarizers.lsa import LsaSummarizer
 from sumy.summarizers.luhn import LuhnSummarizer
 
+from thesis.metrics import calc_rouge
 from thesis.query import get_report, get_summary, calc_rouge_agg_from_gold_summaries
-from thesis.metrics import calc_rouge, calc_rouge_agg
 
 baseline_summarizers = {
     'lex': LexRankSummarizer,
