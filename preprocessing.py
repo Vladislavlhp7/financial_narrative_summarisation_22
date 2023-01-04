@@ -65,21 +65,20 @@ def merge_characters(doc: str):
     :param doc:
     :return:
     """
-    # Remove end-line spacing universal in split words cases
-    # reg_to_drop = r'(?<=\w)(\t\n)(?=\w)'
-    # pattern = regex.compile(reg_to_drop)
-    # doc = pattern.sub(" \t ", doc)
-    # reg_to_merge =r'''        (?x)   # flag to allow comments and multi-line regex
-    #             (?<=\w)\ (?=\w\ )    # Case 1 - 'T h e 	 o b j e c t i v e'
-    #             | (?<=\’)\s          # Case 2 - apostrophes ’s
-    #             | \s(?=\’)           # Case 2 - apostrophes <ENT>’s
-    # '''
-    doc_spacing_ocr_issue = '\t'
-    if doc.count(doc_spacing_ocr_issue) > 0:
-        reg_to_merge = r'\ '
-        pattern = regex.compile(reg_to_merge)
-        doc = pattern.sub("", doc)
-    return doc
+    # Rule-based merging
+    doc_merged = ""
+    doc_split = doc.split('\n')
+    max_lines = len(doc_split)
+    for i, line in enumerate(doc_split):
+        line_new = str(line)
+        # If there is a `\ \t \ ` assume tabs are spaces and delete spaces
+        if regex.findall(pattern=r'(?<=\w)\ \t\ ', string=line):
+            pattern = regex.compile(r'\ ')
+            line_new = pattern.sub("", line)
+        if i != max_lines - 1:  # control final end-line
+            line_new += '\n'
+        doc_merged += line_new
+    return doc_merged
 
 
 def preprocess(doc: str) -> Tuple[str, stanza.Document]:
@@ -117,4 +116,5 @@ some of the most prospective shale acreage in Poland"""
     print(merge_characters(doc))
     print(clean(merge_characters(doc)))
 
-# main()
+
+main()
