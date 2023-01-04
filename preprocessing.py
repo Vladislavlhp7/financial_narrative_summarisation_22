@@ -38,10 +38,11 @@ def clean(doc: str):
     reg_to_drop = r'''(?x) # flag to allow comments and multi-line regex
             [^\w_ |        # alpha-numeric
             \p{Sc} |       # currencies
-            \%\&\'\"\(\)\.\,\?\!\-\;\\\/ ]
+            \%\&\"\\'\’\(\)\.\,\?\!\-\;\\\/ ]  # preserve apostrophe `’`
         '''
     pattern = regex.compile(reg_to_drop, regex.UNICODE)
     doc = pattern.sub("", doc)
+    doc = doc.replace("’", "'")  # replace special unicode apostrophe with normal one
     # remove duplicated spaces after dropping special symbols
     doc = " ".join(doc.split())
     return doc
@@ -57,11 +58,13 @@ def merge(doc: str):
     reg_to_drop = r'(?<=\w)(\t\n)(?=\w)'
     pattern = regex.compile(reg_to_drop)
     doc = pattern.sub(" \t ", doc)
-    # Case 1 - 'T h e 	 o b j e c t i v e'
-    reg_to_merge = r'(?<=\w)\ (?=\w\ )'
+    reg_to_merge =r'''        (?x)   # flag to allow comments and multi-line regex
+                (?<=\w)\ (?=\w\ )    # Case 1 - 'T h e 	 o b j e c t i v e'
+                | (?<=\’)\s          # Case 2 - apostrophes ’s
+                | \s(?=\’)           # Case 2 - apostrophes <ENT>’s
+    '''
     pattern = regex.compile(reg_to_merge)
     doc = pattern.sub("", doc)
-
     return doc
 
 
@@ -90,6 +93,7 @@ b u d g e t e d 	 n e w 	 p o s i t i o n s 	 n o w 	 b e i n g 	 f i l l e d 	 
 w a y 	 t h e 	 e n l a r g e d 	 G r o u p 	 w i l l 	 b e n e f i t 	 f r o m 	 t h e 	 e c o n o m i e s 	 o f 	 s c a l e	
 r e s u l t i n g 	 f r o m 	 t h e 	 m e r g e r 	 o f 	 t h e 	 t w o 	 companies.
     """
+    print(merge(doc))
     print(clean(merge(doc)))
 
-main()
+# main()
