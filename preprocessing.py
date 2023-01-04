@@ -47,6 +47,24 @@ def clean(doc: str):
     return doc
 
 
+def merge(doc: str):
+    """
+        Try to merge split characters into words
+    :param doc:
+    :return:
+    """
+    # Remove end-line spacing universal in split words cases
+    reg_to_drop = r'(?<=\w)(\t\n)(?=\w)'
+    pattern = regex.compile(reg_to_drop)
+    doc = pattern.sub(" \t ", doc)
+    # Case 1 - 'T h e 	 o b j e c t i v e'
+    reg_to_merge = r'(?<=\w)\ (?=\w\ )'
+    pattern = regex.compile(reg_to_merge)
+    doc = pattern.sub("", doc)
+
+    return doc
+
+
 def preprocess(doc: str) -> Tuple[str, stanza.Document]:
     MODELS_DIR = 'resources'
     os.makedirs(MODELS_DIR, exist_ok=True)
@@ -62,3 +80,16 @@ def preprocess(doc: str) -> Tuple[str, stanza.Document]:
     for i, sentence in enumerate(doc_tokenized.sentences):
         doc_preprocessed_str += tokenized_sent_to_str(sentence) + ' '
     return doc_preprocessed_str, doc_tokenized
+
+
+def main():
+    doc = """
+    I n 	 a d d i t i o n , 	 X T A Q ’ s 	 s a l e s , 	 d e v e l o p m e n t 	 a n d 	 i m p l e m e n t a t i o n 	 s t a f f	
+w i l l 	 s t r e n g t h e n 	 t h e 	 C o m p a n y’ s 	 e x i s t i n g 	 t e a m 	 w i t h 	 a 	 n u m b e r 	 o f	
+b u d g e t e d 	 n e w 	 p o s i t i o n s 	 n o w 	 b e i n g 	 f i l l e d 	 b y 	 X T A Q ’ s 	 s t a f f . 	 I n 	 t h i s	
+w a y 	 t h e 	 e n l a r g e d 	 G r o u p 	 w i l l 	 b e n e f i t 	 f r o m 	 t h e 	 e c o n o m i e s 	 o f 	 s c a l e	
+r e s u l t i n g 	 f r o m 	 t h e 	 m e r g e r 	 o f 	 t h e 	 t w o 	 companies.
+    """
+    print(clean(merge(doc)))
+
+main()
