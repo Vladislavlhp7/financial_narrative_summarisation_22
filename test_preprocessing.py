@@ -1,6 +1,6 @@
 import unittest
 
-from thesis.preprocessing import clean, merge
+from thesis.preprocessing import clean, merge_characters
 
 
 class TestPreprocessing(unittest.TestCase):
@@ -15,6 +15,8 @@ class TestPreprocessing(unittest.TestCase):
             tainment
         '''
         self.assertEqual('entertainment', clean(doc))
+        doc = 'self-assessment'
+        self.assertEqual('self-assessment', clean(doc))
 
     def test_unicode_symbols(self):
         doc = 'Our  business'
@@ -22,9 +24,11 @@ class TestPreprocessing(unittest.TestCase):
         doc = '67,000 Oz®•‡'
         self.assertEqual('67,000 Oz', clean(doc))
 
-    def test_merging(self):
-        doc = "T h e  G r o u p ’ s "
-        self.assertEqual("The  Group’s ", merge(doc))
+    def test_merging_characters(self):
+        doc = "T h e \t G r o u p ’ s "
+        self.assertEqual("The\tGroup’s", merge_characters(doc))
+        doc = 'pa yment\tr eserv e'
+        self.assertEqual("payment\treserve", merge_characters(doc))
 
     def test_apostrophes(self):
         doc = "The Group’s"
@@ -33,3 +37,33 @@ class TestPreprocessing(unittest.TestCase):
     def test_spaces(self):
         doc = " The   Group "
         self.assertEqual("The Group", clean(doc))
+
+    def test_emails(self):
+        doc = "info@acalplc.co.uk"
+        self.assertEqual("", clean(doc))
+
+    def test_urls(self):
+        doc = "WWW.ACALPLC.CO.UK"
+        self.assertEqual("", clean(doc))
+        doc = 'www.acalplc.co.uk'
+        self.assertEqual("", clean(doc))
+        doc = 'WWW.3LEGSRESOURCES.COM'
+        self.assertEqual("", clean(doc))
+
+    def test_hours(self):
+        doc = '12:26'
+        self.assertEqual("", clean(doc))
+
+    def test_uk_phones(self):
+        doc = '+44 1624 811 611'
+        self.assertEqual("", clean(doc))
+        doc = '+44 121 415 7047'
+        self.assertEqual("", clean(doc))
+        doc = '(01582) 723131'
+        self.assertEqual("", clean(doc))
+        # doc = '+44 (0) 1785 715772'  # does not work
+        # self.assertEqual("", clean(doc))
+
+    def test_dates(self):
+        doc = '23/04/2010'
+        self.assertEqual("", clean(doc))

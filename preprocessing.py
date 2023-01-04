@@ -34,6 +34,17 @@ def clean(doc: str):
     doc = " ".join(doc.split())
     # reconnect words split by end-of-line hyphenation with lookbehind
     doc = regex.sub(r"(?<=[a-z])-\s", '', doc)
+    # remove emails, urls, hours, UK phones, dates
+    doc = doc.replace('WWW.', 'www.')  # ensure url starts lowercase to be caught by regex below
+    reg_to_drop = r"""(?x)
+        (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])
+        | (https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})
+        | ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+        | ^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$
+        | ^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$
+    """
+    pattern = regex.compile(reg_to_drop, regex.UNICODE)
+    doc = pattern.sub("", doc)
     # Remove non-alphanumeric and non-special financial characters
     reg_to_drop = r'''(?x) # flag to allow comments and multi-line regex
             [^\w_ |        # alpha-numeric
@@ -48,23 +59,26 @@ def clean(doc: str):
     return doc
 
 
-def merge(doc: str):
+def merge_characters(doc: str):
     """
         Try to merge split characters into words
     :param doc:
     :return:
     """
     # Remove end-line spacing universal in split words cases
-    reg_to_drop = r'(?<=\w)(\t\n)(?=\w)'
-    pattern = regex.compile(reg_to_drop)
-    doc = pattern.sub(" \t ", doc)
-    reg_to_merge =r'''        (?x)   # flag to allow comments and multi-line regex
-                (?<=\w)\ (?=\w\ )    # Case 1 - 'T h e 	 o b j e c t i v e'
-                | (?<=\’)\s          # Case 2 - apostrophes ’s
-                | \s(?=\’)           # Case 2 - apostrophes <ENT>’s
-    '''
-    pattern = regex.compile(reg_to_merge)
-    doc = pattern.sub("", doc)
+    # reg_to_drop = r'(?<=\w)(\t\n)(?=\w)'
+    # pattern = regex.compile(reg_to_drop)
+    # doc = pattern.sub(" \t ", doc)
+    # reg_to_merge =r'''        (?x)   # flag to allow comments and multi-line regex
+    #             (?<=\w)\ (?=\w\ )    # Case 1 - 'T h e 	 o b j e c t i v e'
+    #             | (?<=\’)\s          # Case 2 - apostrophes ’s
+    #             | \s(?=\’)           # Case 2 - apostrophes <ENT>’s
+    # '''
+    doc_spacing_ocr_issue = '\t'
+    if doc.count(doc_spacing_ocr_issue) > 0:
+        reg_to_merge = r'\ '
+        pattern = regex.compile(reg_to_merge)
+        doc = pattern.sub("", doc)
     return doc
 
 
@@ -93,7 +107,14 @@ b u d g e t e d 	 n e w 	 p o s i t i o n s 	 n o w 	 b e i n g 	 f i l l e d 	 
 w a y 	 t h e 	 e n l a r g e d 	 G r o u p 	 w i l l 	 b e n e f i t 	 f r o m 	 t h e 	 e c o n o m i e s 	 o f 	 s c a l e	
 r e s u l t i n g 	 f r o m 	 t h e 	 m e r g e r 	 o f 	 t h e 	 t w o 	 companies.
     """
-    print(merge(doc))
-    print(clean(merge(doc)))
+    print(merge_characters(doc))
+    print(clean(merge_characters(doc)))
+    doc = """
+    Operational highlights
+• Continued primary focus, with ConocoPhillips, on our three western 
+concessions in the Polish Baltic Basin, which we believe represent 
+some of the most prospective shale acreage in Poland"""
+    print(merge_characters(doc))
+    print(clean(merge_characters(doc)))
 
 # main()
