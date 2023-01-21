@@ -1,6 +1,7 @@
 import os.path
 import regex
 from typing import Tuple
+from unidecode import unidecode
 
 import stanza
 
@@ -54,8 +55,14 @@ def clean(doc: str):
     pattern = regex.compile(reg_to_drop, regex.UNICODE)
     doc = pattern.sub("", doc)
     doc = doc.replace("’", "'")  # replace special unicode apostrophe with normal one
+    # Deal with unmerged apostrophes
+    apostrophes = r"\s*\'s"
+    pattern = regex.compile(apostrophes, regex.UNICODE)
+    doc = pattern.sub("'s", doc)
     # remove duplicated spaces after dropping special symbols
     doc = " ".join(doc.split())
+    # normalise accents and umlauts
+    # doc = unidecode(doc)  # unfortunately normalizes currencies as well
     return doc
 
 
@@ -69,6 +76,8 @@ def merge_characters(doc: str):
     doc_merged = ""
     doc_split = doc.split('\n')
     max_lines = len(doc_split)
+    # Line-level operation is safer and more flexible
+    # as in some reports only a few lines require character merging
     for i, line in enumerate(doc_split):
         line_new = str(line)
         # If there is a `\ \t \ ` assume tabs are spaces and delete spaces
@@ -81,7 +90,7 @@ def merge_characters(doc: str):
     return doc_merged
 
 
-def preprocess(doc: str) -> Tuple[str, stanza.Document]:
+def preprocess(doc: str, nlp: stanza.Pipeline = None) -> Tuple[str, stanza.Document]:
     MODELS_DIR = 'resources'
     os.makedirs(MODELS_DIR, exist_ok=True)
     MODELS_PATH = 'resources/en_ewt_models'
@@ -90,12 +99,18 @@ def preprocess(doc: str) -> Tuple[str, stanza.Document]:
     # Clean the data
     doc = clean(doc)
     # Split content document into sentences
-    nlp = stanza.Pipeline(processors='tokenize,ner,mwt,pos', lang='en', models_dir=MODELS_DIR, treebank='en_ewt')
+    if nlp is None:
+        nlp = stanza.Pipeline(processors='tokenize', lang='en', models_dir=MODELS_DIR, treebank='en_ewt')
     doc_tokenized = nlp(doc)
+    ## TODO: remove super short sentences (less than 3 words)
     doc_preprocessed_str = ""
     for i, sentence in enumerate(doc_tokenized.sentences):
         doc_preprocessed_str += tokenized_sent_to_str(sentence) + ' '
     return doc_preprocessed_str, doc_tokenized
+
+
+def preprocess_documents():
+    pass
 
 
 def main():
@@ -117,4 +132,4 @@ some of the most prospective shale acreage in Poland"""
     print(clean(merge_characters(doc)))
 
 
-main()
+# main()

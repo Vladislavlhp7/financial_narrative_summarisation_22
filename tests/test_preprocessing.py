@@ -1,6 +1,6 @@
 import unittest
 
-from thesis.preprocessing import clean, merge_characters
+from preprocessing import clean, merge_characters
 
 
 class TestPreprocessing(unittest.TestCase):
@@ -23,6 +23,8 @@ class TestPreprocessing(unittest.TestCase):
         self.assertEqual('Our business', clean(doc))
         doc = '67,000 Oz®•‡'
         self.assertEqual('67,000 Oz', clean(doc))
+        # doc = 'Ë'
+        # self.assertEqual('E', clean(doc))
 
     def test_merging_characters(self):
         doc = "T h e \t G r o u p ’ s "
@@ -34,6 +36,8 @@ class TestPreprocessing(unittest.TestCase):
 
     def test_apostrophes(self):
         doc = "The Group’s"
+        self.assertEqual("The Group's", clean(doc))
+        doc = "The Group 's"
         self.assertEqual("The Group's", clean(doc))
 
     def test_spaces(self):
