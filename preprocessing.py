@@ -1,7 +1,7 @@
 import os.path
 import regex
 from typing import Tuple
-from unidecode import unidecode
+from nltk import sent_tokenize
 
 import stanza
 
@@ -25,8 +25,13 @@ def clean_company_name(line: str):
     return name
 
 
-def tokenized_sent_to_str(tokenized_sent):
-    return ' '.join(t.text for t in tokenized_sent.words)
+def tokenized_sent_to_str(tokenized_sent) -> str:
+    # connect tokens into sentences
+    txt = ' '.join(t.text for t in tokenized_sent.words)
+    # remove redundant spaces around sentence delimiters
+    for p in ".,?!:;":
+        txt = txt.replace(f' {p}', f'{p}')
+    return txt
 
 
 def clean(doc: str):
@@ -61,6 +66,9 @@ def clean(doc: str):
     doc = pattern.sub("'s", doc)
     # remove duplicated spaces after dropping special symbols
     doc = " ".join(doc.split())
+    # remove redundant spaces around sentence delimiters
+    for p in ".,?!:;":
+        doc = doc.replace(f' {p}', f'{p}')
     # normalise accents and umlauts
     # doc = unidecode(doc)  # unfortunately normalizes currencies as well
     return doc
@@ -90,19 +98,21 @@ def merge_characters(doc: str):
     return doc_merged
 
 
-def preprocess(doc: str, nlp: stanza.Pipeline = None) -> Tuple[str, stanza.Document]:
-    MODELS_DIR = 'resources'
-    os.makedirs(MODELS_DIR, exist_ok=True)
-    MODELS_PATH = 'resources/en_ewt_models'
-    if not os.path.exists(MODELS_PATH):
-        stanza.download('en', MODELS_DIR)
+def preprocess(doc: str, nlp: stanza.Pipeline = None,
+               models_path: str = 'resources/en_ewt_models') -> Tuple[str, stanza.Document]:
+    models_dir = "/".join(models_path.split('/')[:-1])
+    os.makedirs(models_dir, exist_ok=True)
+    if not os.path.exists(models_path):
+        stanza.download('en', models_dir)
     # Clean the data
     doc = clean(doc)
+    # Naively remove super short sentences (less than 3 words)
+    # Use number of spaces as a proxy for number of words
+    doc = " ".join([s for s in sent_tokenize(doc) if s.count(' ') >= 3])
     # Split content document into sentences
     if nlp is None:
-        nlp = stanza.Pipeline(processors='tokenize', lang='en', models_dir=MODELS_DIR, treebank='en_ewt')
+        nlp = stanza.Pipeline(processors='tokenize', lang='en', models_dir=models_dir, treebank='en_ewt')
     doc_tokenized = nlp(doc)
-    ## TODO: remove super short sentences (less than 3 words)
     doc_preprocessed_str = ""
     for i, sentence in enumerate(doc_tokenized.sentences):
         doc_preprocessed_str += tokenized_sent_to_str(sentence) + ' '
@@ -130,6 +140,5 @@ concessions in the Polish Baltic Basin, which we believe represent
 some of the most prospective shale acreage in Poland"""
     print(merge_characters(doc))
     print(clean(merge_characters(doc)))
-
 
 # main()

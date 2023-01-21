@@ -1,6 +1,6 @@
 import unittest
 
-from preprocessing import clean, merge_characters
+from preprocessing import clean, merge_characters, preprocess
 
 
 class TestPreprocessing(unittest.TestCase):
@@ -73,3 +73,11 @@ class TestPreprocessing(unittest.TestCase):
     def test_dates(self):
         doc = '23/04/2010'
         self.assertEqual("", clean(doc))
+
+    def test_short_sentences(self):
+        doc = "Next sentence will be removed. This one."
+        doc_preprocessed_str, _ = preprocess(doc, models_path='../resources/en_ewt_models')
+        self.assertEqual(doc_preprocessed_str, "Next sentence will be removed. ")
+        doc = "Next sentence will be removed. ."
+        doc_preprocessed_str, _ = preprocess(doc, models_path='../resources/en_ewt_models')
+        self.assertEqual(doc_preprocessed_str, "Next sentence will be removed. ")
