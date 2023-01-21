@@ -1,11 +1,12 @@
 import os
 import random
+from pprint import pprint
 from typing import Dict, Union, List, Tuple
 
 import numpy as np
 
-from thesis.metrics import calc_rouge_agg, calc_rouge_specific
-from thesis.preprocessing import clean_company_name, preprocess, tokenized_sent_to_str
+from metrics import calc_rouge_agg, calc_rouge_specific
+from preprocessing import clean_company_name, preprocess, tokenized_sent_to_str
 
 
 def get_file_handles(training: bool = True, gold: bool = False) -> Dict[str, str]:
@@ -53,6 +54,14 @@ def get_gold_summaries_file_handles(file_id, training: bool = True) -> Dict[str,
         if str(report_id) == str(file_id):
             file_handles[str(summary_id)] = f'{path}{f}'
     return file_handles
+
+
+def get_raw_data_dir(training: bool = True) -> str:
+    path = 'data/'
+    data_type = 'training/' if training else 'validation/'
+    path += data_type
+    path += 'annual_reports/'
+    return path
 
 
 def get_company_from_id(file_id, training: bool = True) -> Union[str, None]:
@@ -139,8 +148,12 @@ def get_most_similar_sentence(gold_summary_sent: str, report_preprocessed) -> Tu
     sent_rouge_scores = []
     for i, sent_tokenized in enumerate(report_preprocessed.sentences):
         sent = tokenized_sent_to_str(sent_tokenized)
-        rouge_score = calc_rouge_specific(sent, gold_summary_sent)
-        sent_rouge_scores.append(rouge_score)
+        try:
+            rouge_score = calc_rouge_specific(sent, gold_summary_sent)
+            sent_rouge_scores.append(rouge_score)
+        except ValueError:
+            print(sent)
+            print(gold_summary_sent, end='\n\n')
     best_report_sent_idx = int(np.argmax(sent_rouge_scores))
     best_report_sent = tokenized_sent_to_str(report_preprocessed.sentences[best_report_sent_idx])
     return best_report_sent_idx, best_report_sent
@@ -148,10 +161,11 @@ def get_most_similar_sentence(gold_summary_sent: str, report_preprocessed) -> Tu
 
 def get_most_similar_sentences(gold_summaries_preprocessed_dict, report_preprocessed) -> Dict[str, List[str]]:
     """
-        Match each sentence from the gold summary with the one from the report
-        which maximises the Rouge metric as specified in:
+        Match each sentence from the gold summary with the one from the report which maximises the Rouge metric as specified in:
         - Chen et al., 2018. Fast abstractive summarization with reinforce-selected sentence rewriting
+
         - Nallapati et al., 2016. Abstractive text summarization using sequence-to-sequence RNNs and beyond
+
         - Zmandar et al., 2021. Joint abstractive and extractive method for long financial document summarization
     :param gold_summaries_preprocessed_dict: cleaned, preprocessed and tokenized summary
     :param report_preprocessed: cleaned, preprocessed and tokenized report
@@ -169,8 +183,8 @@ def get_most_similar_sentences(gold_summaries_preprocessed_dict, report_preproce
 def match_maximizing_summary_with_report(gold_summaries_preprocessed_dict, report_preprocessed):
     """
         "For each summary sentence exactly one document sentence is matched, [...]
-         Eventually summary level ROUGE scores are calculated and summary with maximum
-         score is chosen for further processing and training" - (Zmandar et al., 2021)
+Eventually summary level ROUGE scores are calculated and summary with maximum
+score is chosen for further processing and training" (Zmandar et al., 2021)
     :param report_preprocessed:
     :param gold_summaries_preprocessed_dict:
     :return:
@@ -194,7 +208,7 @@ def match_maximizing_summary_with_report(gold_summaries_preprocessed_dict, repor
         for report_sentence in matched_report_sentences:
             matched_report += tokenized_sent_to_str(report_sentence) + ' '
         # Deal with tokenized apostrophes
-        matched_report = matched_report.replace(" 's", "'s")
+        # matched_report = matched_report.replace(" 's", "'s")
         rouge_score = calc_rouge_specific(matched_report, gold_summary)
         if rouge_score > max_score:
             max_score = rouge_score
@@ -206,13 +220,13 @@ def match_maximizing_summary_with_report(gold_summaries_preprocessed_dict, repor
 def match_maximizing_summary_with_report_by_file_id(file_id, training: bool = True):
     """
         "For each summary sentence exactly one document sentence is matched, [...]
-         Eventually summary level ROUGE scores are calculated and summary with maximum
-         score is chosen for further processing and training" - (Zmandar et al., 2021)
+Eventually summary level ROUGE scores are calculated and summary with maximum
+score is chosen for further processing and training" - (Zmandar et al., 2021)
     :param file_id:
     :param training:
     :return:
     """
-    report = get_report(file_id=file_id)[:5_000]
+    report = get_report(file_id=file_id)#[:5_000]
     gold_summaries = get_all_summaries(file_id=file_id, training=training)
 
     # Preprocess documents
@@ -222,6 +236,10 @@ def match_maximizing_summary_with_report_by_file_id(file_id, training: bool = Tr
         _, summaries_preprocessed_dict[idx] = preprocess(gold_summary)
     return match_maximizing_summary_with_report(gold_summaries_preprocessed_dict=summaries_preprocessed_dict,
                                                 report_preprocessed=report_preprocessed)
+
+
+def get_report_sentences_binary_labels():
+    pass
 
 
 def calc_rouge_agg_from_gold_summaries(summary: str, file_id, training: bool = True, stats=None, verbose: bool = True):
@@ -241,13 +259,21 @@ def main():
     # gold_summary = get_summary(17)
     # _, gold_summary_split = preprocess(gold_summary)
     # _, report_split = preprocess(report)
-    # d = get_most_similar_sentences(gold_summary_split=gold_summary_split, report_split=report_split)
+    # d = get_most_similar_sentences(gold_summary_split, report_split)
     # print(d)
 
     # ################################################
     maximising_report_match, maximising_gold_summary = match_maximizing_summary_with_report_by_file_id(17)
     print(maximising_report_match)
     print(maximising_gold_summary)
+
+    # ################################################
+    # maximising_gold_summary = get_summary(17)
+    # s, f = preprocess(maximising_gold_summary)
+    # print(maximising_gold_summary)
+    # for p in f.sentences:
+    #     print(p)
+    # print(s)
 
 
 main()
