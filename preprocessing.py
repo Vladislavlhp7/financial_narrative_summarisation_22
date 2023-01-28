@@ -1,4 +1,6 @@
 import os.path
+import re
+
 import regex
 from typing import Tuple
 from nltk import sent_tokenize
@@ -25,9 +27,12 @@ def clean_company_name(line: str):
     return name
 
 
-def tokenized_sent_to_str(tokenized_sent) -> str:
+def tokenized_sent_to_str(tokenized_sent, use_stanza: bool = False) -> str:
     # connect tokens into sentences
-    txt = ' '.join(t.text for t in tokenized_sent.words)
+    if use_stanza:
+        txt = str(' '.join(t.text for t in tokenized_sent.words))
+    else:
+        txt = tokenized_sent
     # remove redundant spaces around sentence delimiters
     for p in ".,?!:;":
         txt = txt.replace(f' {p}', f'{p}')
@@ -98,29 +103,36 @@ def merge_characters(doc: str):
     return doc_merged
 
 
-def preprocess(doc: str, nlp: stanza.Pipeline = None,
+class Tokenize:
+    def __init__(self, doc):
+        self.sentences = sent_tokenize(doc)
+
+
+def preprocess(doc: str, use_stanza: bool = False,
                models_path: str = 'resources/en_ewt_models') -> Tuple[str, stanza.Document]:
-    models_dir = "/".join(models_path.split('/')[:-1])
-    os.makedirs(models_dir, exist_ok=True)
-    if not os.path.exists(models_path):
-        stanza.download('en', models_dir)
+    # Remove lines with less than 2 non-digit words
+    doc = "\n".join([l for l in doc.split('\n') if len(re.findall(r'\b[^\d\W]+\b', l)) > 1]).strip()
+    # Remove upper-cased lines
+    doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
     # Clean the data
     doc = clean(doc)
-    # Naively remove super short sentences (less than 3 words)
-    # Use number of spaces as a proxy for number of words
-    doc = " ".join([s for s in sent_tokenize(doc) if s.count(' ') >= 3])
+    # Remove super short sentences with less than 3 words
+    doc = " ".join([s for s in sent_tokenize(doc) if len(re.findall(r'\w+', s)) >= 3]).strip()
     # Split content document into sentences
-    if nlp is None:
-        nlp = stanza.Pipeline(processors='tokenize', lang='en', models_dir=models_dir, treebank='en_ewt')
-    doc_tokenized = nlp(doc)
+    if not use_stanza:
+        doc_tokenized = Tokenize(doc)
+    else:
+        models_dir = "/".join(models_path.split('/')[:-1])
+        os.makedirs(models_dir, exist_ok=True)
+        if not os.path.exists(models_path):
+            stanza.download('en', models_dir)
+        nlp = stanza.Pipeline(processors='tokenize', lang='en', models_dir=models_dir, treebank='en_ewt',
+                              download_method=None)
+        doc_tokenized = nlp(doc)
     doc_preprocessed_str = ""
     for i, sentence in enumerate(doc_tokenized.sentences):
-        doc_preprocessed_str += tokenized_sent_to_str(sentence) + ' '
-    return doc_preprocessed_str, doc_tokenized
-
-
-def preprocess_documents():
-    pass
+        doc_preprocessed_str += tokenized_sent_to_str(sentence, use_stanza=use_stanza) + ' '
+    return doc_preprocessed_str.strip(), doc_tokenized
 
 
 def main():
