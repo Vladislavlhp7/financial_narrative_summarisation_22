@@ -109,6 +109,7 @@ class Tokenize:
 
 
 def preprocess(doc: str, use_stanza: bool = False,
+               is_lower: bool = True,
                models_path: str = 'resources/en_ewt_models') -> Tuple[str, stanza.Document]:
     # Remove lines with less than 2 non-digit words
     doc = "\n".join([l for l in doc.split('\n') if len(re.findall(r'\b[^\d\W]+\b', l)) > 1]).strip()
@@ -116,6 +117,9 @@ def preprocess(doc: str, use_stanza: bool = False,
     doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
     # Clean the data
     doc = clean(doc)
+    # Lowercase document
+    if is_lower:
+        doc = doc.lower()
     # Remove super short sentences with less than 3 words
     doc = " ".join([s for s in sent_tokenize(doc) if len(re.findall(r'\w+', s)) >= 3]).strip()
     # Split content document into sentences
@@ -132,7 +136,8 @@ def preprocess(doc: str, use_stanza: bool = False,
     doc_preprocessed_str = ""
     for i, sentence in enumerate(doc_tokenized.sentences):
         doc_preprocessed_str += tokenized_sent_to_str(sentence, use_stanza=use_stanza) + ' '
-    return doc_preprocessed_str.strip(), doc_tokenized
+    doc_preprocessed_str = doc_preprocessed_str.strip()
+    return doc_preprocessed_str, doc_tokenized
 
 
 def main():
