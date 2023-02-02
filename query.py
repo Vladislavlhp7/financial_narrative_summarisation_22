@@ -329,7 +329,6 @@ def get_file_handles_binary(training: bool = True) -> Dict[str, str]:
     """
         Retrieve file handles for training and validation report sentences and binary labels
     :param training: bool
-    :param gold: bool
     :return: dict of file paths
     """
     path = get_binary_labels_data_dir(training=training)
@@ -358,7 +357,7 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False, r
                 sent_label_mapping_df = pd.DataFrame().from_dict(sent_label_mapping, orient='index').reset_index()
                 sent_label_mapping_df.columns = ['sent', 'label']
                 # Compute simple statistics
-                sent_label_mapping_df['words_count'] = sent_label_mapping_df['sent'].apply(lambda x: len(x.split())+1)
+                sent_label_mapping_df['words_count'] = sent_label_mapping_df['sent'].apply(lambda x: len(x.split()) + 1)
                 sent_label_mapping_df.to_csv(binary_file_path, index=False)
         except Exception as e:
             print('------------------------------------------')
@@ -414,7 +413,7 @@ def get_sentence_embedding_data_from_corpus(model, training: bool = True, store_
 
 
 def main():
-    # generate_binary_labels_for_data(training=False)
+    generate_binary_labels_for_data(training=False)
     pass
 
 

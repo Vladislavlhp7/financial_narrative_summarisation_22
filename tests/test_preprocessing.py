@@ -80,10 +80,10 @@ class TestPreprocessing(unittest.TestCase):
 
     def test_short_sentences(self):
         doc = "Next sentence will be removed. This one."
-        doc_preprocessed_str, _ = preprocess(doc, is_lower=False, models_path='../resources/en_ewt_models', use_stanza=True)
+        doc_preprocessed_str, _ = preprocess(doc, is_lower=False)
         self.assertEqual(doc_preprocessed_str, "Next sentence will be removed.")
         doc = "Next sentence will be removed. a."
-        doc_preprocessed_str, _ = preprocess(doc, is_lower=False, models_path='../resources/en_ewt_models', use_stanza=True)
+        doc_preprocessed_str, _ = preprocess(doc, is_lower=False)
         self.assertEqual(doc_preprocessed_str, "Next sentence will be removed.")
 
     def test_single_words_per_line(self):
@@ -93,7 +93,6 @@ class TestPreprocessing(unittest.TestCase):
         doc = "To stay.\nTOBEREMOVED\n"  # too short sentences
         doc_preprocessed_str, _ = preprocess(doc, is_lower=False)
         self.assertEqual(doc_preprocessed_str, "")
-
 
     def test_uppercased_sent(self):
         doc = "NETWORKING INTERNET SERVICE AGGREGATION (NOT IP) (NOT IP)\n"
@@ -110,3 +109,9 @@ class TestPreprocessing(unittest.TestCase):
                 which will underpin growth in the coming years."""
         doc_str, doc_obj = preprocess(doc)
         self.assertEqual(doc_obj.sentences, [s.lower() for s in sent_tokenize(clean(doc))])
+        doc = """
+            construction & infrastructure, partnership housing, urban regeneration and property services will all undertake employee engagement surveys in 2018. of materials and plant spend covered by group-wide supply chain agreements strategic report operating review continued supply chain and subcontractors we are committed to developing long-term partnerships with highquality suppliers and subcontractors.
+        """
+        doc_str, doc_obj = preprocess(doc)
+        self.assertEqual(doc_obj.sentences, [s.lower() for s in sent_tokenize(clean(doc))])
+        print(doc_obj.sentences)

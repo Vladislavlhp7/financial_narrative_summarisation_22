@@ -1,11 +1,8 @@
-import os.path
 import re
+from typing import Tuple
 
 import regex
-from typing import Tuple
 from nltk import sent_tokenize
-
-import stanza
 
 
 def clean_company_name(line: str):
@@ -27,16 +24,11 @@ def clean_company_name(line: str):
     return name
 
 
-def tokenized_sent_to_str(tokenized_sent, use_stanza: bool = False) -> str:
-    # connect tokens into sentences
-    if use_stanza:
-        txt = str(' '.join(t.text for t in tokenized_sent.words))
-    else:
-        txt = tokenized_sent
+def tokenized_sent_to_str(tokenized_sent) -> str:
     # remove redundant spaces around sentence delimiters
     for p in ".,?!:;":
-        txt = txt.replace(f' {p}', f'{p}')
-    return txt
+        tokenized_sent = tokenized_sent.replace(f' {p}', f'{p}')
+    return tokenized_sent
 
 
 def clean(doc: str):
@@ -100,6 +92,8 @@ def merge_characters(doc: str):
         if i != max_lines - 1:  # control final end-line
             line_new += '\n'
         doc_merged += line_new
+    # Swap tabs for single spaces
+    doc_merged = doc_merged.replace('\t', ' ')
     return doc_merged
 
 
@@ -107,39 +101,37 @@ class Tokenize:
     def __init__(self, doc):
         self.sentences = sent_tokenize(doc)
 
+    def remove_short_sentences(self, num_words: int = 3):
+        self.sentences = [s for s in self.sentences if len(re.findall(r'\w+', s)) >= num_words]
 
-def preprocess(doc: str, use_stanza: bool = False,
-               is_lower: bool = True,
-               models_path: str = 'resources/en_ewt_models') -> Tuple[str, stanza.Document]:
-    # Remove lines with less than 2 non-digit words
-    doc = "\n".join([l for l in doc.split('\n') if len(re.findall(r"[a-zA-Z]+'?[a-zA-Z]+", l)) > 1]).strip()
+    def lowercase_sentences(self):
+        for i, s in enumerate(self.sentences):
+            self.sentences[i] = s.lower()
+
+    def remove_ultra_long_sentences(self, tokens: int = 50):
+        pass
+
+    def __str__(self):
+        d = ""
+        for i, sentence in enumerate(self.sentences):
+            d += tokenized_sent_to_str(sentence) + ' '
+        d = d.strip()
+        return d
+
+
+def preprocess(doc: str, is_lower: bool = True) -> Tuple[str, Tokenize]:
     # Remove upper-cased lines
     doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
     # Clean the data
     doc = clean(doc)
-    # Remove super short sentences with less than 3 words
-    doc = " ".join([s for s in sent_tokenize(doc) if len(re.findall(r'\w+', s)) >= 3]).strip()
     # Split content document into sentences
-    if not use_stanza:
-        doc_tokenized = Tokenize(doc)
-    else:
-        models_dir = "/".join(models_path.split('/')[:-1])
-        os.makedirs(models_dir, exist_ok=True)
-        if not os.path.exists(models_path):
-            stanza.download('en', models_dir)
-        nlp = stanza.Pipeline(processors='tokenize', lang='en', models_dir=models_dir, treebank='en_ewt',
-                              download_method=None)
-        doc_tokenized = nlp(doc)
-    doc_preprocessed_str = ""
-    for i, sentence in enumerate(doc_tokenized.sentences):
-        doc_preprocessed_str += tokenized_sent_to_str(sentence, use_stanza=use_stanza) + ' '
-    doc_preprocessed_str = doc_preprocessed_str.strip()
+    doc_tokenized = Tokenize(doc)
     # Lowercase document and sentences
     if is_lower:
-        doc_preprocessed_str = doc_preprocessed_str.lower()
-        for i, s in enumerate(doc_tokenized.sentences):
-            doc_tokenized.sentences[i] = s.lower()
-    return doc_preprocessed_str, doc_tokenized
+        doc_tokenized.lowercase_sentences()
+    # Remove super short sentences with less than 3 words
+    doc_tokenized.remove_short_sentences(num_words=3)
+    return str(doc_tokenized), doc_tokenized
 
 
 def main():
@@ -153,11 +145,11 @@ r e s u l t i n g 	 f r o m 	 t h e 	 m e r g e r 	 o f 	 t h e 	 t w o 	 compan
     print(merge_characters(doc))
     print(clean(merge_characters(doc)))
     doc = """
-    Operational highlights
-• Continued primary focus, with ConocoPhillips, on our three western 
-concessions in the Polish Baltic Basin, which we believe represent 
-some of the most prospective shale acreage in Poland"""
+        Operational highlights
+    • Continued primary focus, with ConocoPhillips, on our three western 
+    concessions in the Polish Baltic Basin, which we believe represent 
+    some of the most prospective shale acreage in Poland"""
     print(merge_characters(doc))
     print(clean(merge_characters(doc)))
 
-# main()
+main()
