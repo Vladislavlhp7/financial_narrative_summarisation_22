@@ -61,6 +61,8 @@ class TestPreprocessing(unittest.TestCase):
     def test_hours(self):
         doc = '12:26'
         self.assertEqual("", clean(doc))
+        doc = '12:26:10'
+        self.assertEqual("", clean(doc))
 
     def test_uk_phones(self):
         doc = '+44 1624 811 611'
