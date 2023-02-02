@@ -117,9 +117,6 @@ def preprocess(doc: str, use_stanza: bool = False,
     doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
     # Clean the data
     doc = clean(doc)
-    # Lowercase document
-    if is_lower:
-        doc = doc.lower()
     # Remove super short sentences with less than 3 words
     doc = " ".join([s for s in sent_tokenize(doc) if len(re.findall(r'\w+', s)) >= 3]).strip()
     # Split content document into sentences
@@ -137,6 +134,11 @@ def preprocess(doc: str, use_stanza: bool = False,
     for i, sentence in enumerate(doc_tokenized.sentences):
         doc_preprocessed_str += tokenized_sent_to_str(sentence, use_stanza=use_stanza) + ' '
     doc_preprocessed_str = doc_preprocessed_str.strip()
+    # Lowercase document and sentences
+    if is_lower:
+        doc_preprocessed_str = doc_preprocessed_str.lower()
+        for i, s in enumerate(doc_tokenized.sentences):
+            doc_tokenized.sentences[i] = s.lower()
     return doc_preprocessed_str, doc_tokenized
 
 

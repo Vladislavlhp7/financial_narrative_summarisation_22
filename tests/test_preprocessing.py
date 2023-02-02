@@ -1,5 +1,7 @@
 import unittest
 
+from nltk import sent_tokenize
+
 from preprocessing import clean, merge_characters, preprocess
 
 
@@ -95,3 +97,14 @@ class TestPreprocessing(unittest.TestCase):
         doc = "NETWORKING INTERNET SERVICE AGGREGATION (NOT IP) (NOT IP)\n"
         doc_preprocessed_str, _ = preprocess(doc, is_lower=False)
         self.assertEqual(doc_preprocessed_str, "")
+
+    def test_overall_preprocessing(self):
+        doc = """Our most recent service 
+                satisfaction surveys again saw an increase to highest 
+                ever levels and we have clear plans in place to build  
+                on this further in 2014.
+                Alongside the delivery of a strong financial performance 
+                we also achieved a number of important milestones 
+                which will underpin growth in the coming years."""
+        doc_str, doc_obj = preprocess(doc)
+        self.assertEqual(doc_obj.sentences, [s.lower() for s in sent_tokenize(clean(doc))])
