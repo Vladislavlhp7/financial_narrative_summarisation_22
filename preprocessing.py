@@ -112,7 +112,7 @@ def preprocess(doc: str, use_stanza: bool = False,
                is_lower: bool = True,
                models_path: str = 'resources/en_ewt_models') -> Tuple[str, stanza.Document]:
     # Remove lines with less than 2 non-digit words
-    doc = "\n".join([l for l in doc.split('\n') if len(re.findall(r'\b[^\d\W]+\b', l)) > 1]).strip()
+    doc = "\n".join([l for l in doc.split('\n') if len(re.findall(r"[a-zA-Z]+'?[a-zA-Z]+", l)) > 1]).strip()
     # Remove upper-cased lines
     doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
     # Clean the data
