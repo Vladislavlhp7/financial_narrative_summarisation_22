@@ -31,7 +31,39 @@ def tokenized_sent_to_str(tokenized_sent) -> str:
     return tokenized_sent
 
 
+def merge_characters(doc: str):
+    """
+        Try to merge split characters into words and split sentences by spaces \
+        where characters are separated with spaces and words with tabs
+    :param doc:
+    :return:
+    """
+    # Rule-based merging
+    doc_merged = ""
+    doc_split = doc.split('\n')
+    max_lines = len(doc_split)
+    # Line-level operation is safer and more flexible
+    # as in some reports only a few lines require character merging
+    for i, line in enumerate(doc_split):
+        line_new = str(line)
+        # If there is a `\ \t \ ` assume tabs are spaces and delete spaces
+        if regex.findall(pattern=r'(?<=\w)\ \t\ ', string=line):
+            pattern = regex.compile(r'\ ')
+            line_new = pattern.sub("", line)
+        if i != max_lines - 1:  # control final end-line
+            line_new += '\n'
+        doc_merged += line_new
+    # Swap tabs for single spaces
+    doc_merged = doc_merged.replace('\t', ' ')
+    return doc_merged
+
+
 def clean(doc: str):
+    # Remove upper-cased lines
+    doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
+    # Perform character-level merging when tabs are used as spaces
+    doc = "\n".join([merge_characters(l) for l in doc.split('\n')])
+    # Make document compact
     doc = doc.replace('\n', ' ')
     # remove duplicated spaces
     doc = " ".join(doc.split())
@@ -71,32 +103,6 @@ def clean(doc: str):
     return doc
 
 
-def merge_characters(doc: str):
-    """
-        Try to merge split characters into words
-    :param doc:
-    :return:
-    """
-    # Rule-based merging
-    doc_merged = ""
-    doc_split = doc.split('\n')
-    max_lines = len(doc_split)
-    # Line-level operation is safer and more flexible
-    # as in some reports only a few lines require character merging
-    for i, line in enumerate(doc_split):
-        line_new = str(line)
-        # If there is a `\ \t \ ` assume tabs are spaces and delete spaces
-        if regex.findall(pattern=r'(?<=\w)\ \t\ ', string=line):
-            pattern = regex.compile(r'\ ')
-            line_new = pattern.sub("", line)
-        if i != max_lines - 1:  # control final end-line
-            line_new += '\n'
-        doc_merged += line_new
-    # Swap tabs for single spaces
-    doc_merged = doc_merged.replace('\t', ' ')
-    return doc_merged
-
-
 class Tokenize:
     def __init__(self, doc):
         self.sentences = sent_tokenize(doc)
@@ -120,8 +126,6 @@ class Tokenize:
 
 
 def preprocess(doc: str, is_lower: bool = True) -> Tuple[str, Tokenize]:
-    # Remove upper-cased lines
-    doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
     # Clean the data
     doc = clean(doc)
     # Split content document into sentences

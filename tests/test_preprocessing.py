@@ -30,10 +30,10 @@ class TestPreprocessing(unittest.TestCase):
 
     def test_merging_characters(self):
         doc = "T h e \t G r o u p ’ s "
-        self.assertEqual("The\tGroup’s", merge_characters(doc))
+        self.assertEqual("The Group’s", merge_characters(doc))
         doc = 'pa yment \t r eserv e'
-        self.assertEqual("payment\treserve", merge_characters(doc))
-        doc = 'He	is	currently	the	Chairman'
+        self.assertEqual("payment reserve", merge_characters(doc))
+        doc = 'He is currently the Chairman'
         self.assertEqual(doc, merge_characters(doc))
 
     def test_apostrophes(self):
