@@ -164,8 +164,7 @@ def get_most_similar_sentence(gold_summary_sent: str, report_preprocessed) -> Tu
     return best_report_sent_idx, best_report_sent
 
 
-def get_most_similar_sentences(gold_summaries_preprocessed_dict, report_preprocessed) -> Tuple[
-    Dict[str, List[str]], List[int]]:
+def get_most_similar_sentences(gold_summaries_preprocessed_dict, report_preprocessed) -> Tuple[Dict[str, List[str]], List[int]]:
     """
         Match each sentence from the gold summary with the one from the report which maximises the Rouge metric as specified in:
         - Chen et al., 2018. Fast abstractive summarization with reinforce-selected sentence rewriting

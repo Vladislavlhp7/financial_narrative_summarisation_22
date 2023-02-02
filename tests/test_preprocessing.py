@@ -94,7 +94,7 @@ class TestPreprocessing(unittest.TestCase):
         doc_preprocessed_str, _ = preprocess(doc, is_lower=False)
         self.assertEqual(doc_preprocessed_str, "")
 
-    def test_uppercased_sent(self):
+    def test_uppercase_sent(self):
         doc = "NETWORKING INTERNET SERVICE AGGREGATION (NOT IP) (NOT IP)\n"
         doc_preprocessed_str, _ = preprocess(doc, is_lower=False)
         self.assertEqual(doc_preprocessed_str, "")
@@ -109,9 +109,3 @@ class TestPreprocessing(unittest.TestCase):
                 which will underpin growth in the coming years."""
         doc_str, doc_obj = preprocess(doc)
         self.assertEqual(doc_obj.sentences, [s.lower() for s in sent_tokenize(clean(doc))])
-        doc = """
-            construction & infrastructure, partnership housing, urban regeneration and property services will all undertake employee engagement surveys in 2018. of materials and plant spend covered by group-wide supply chain agreements strategic report operating review continued supply chain and subcontractors we are committed to developing long-term partnerships with highquality suppliers and subcontractors.
-        """
-        doc_str, doc_obj = preprocess(doc)
-        self.assertEqual(doc_obj.sentences, [s.lower() for s in sent_tokenize(clean(doc))])
-        print(doc_obj.sentences)

@@ -139,21 +139,6 @@ def preprocess(doc: str, is_lower: bool = True) -> Tuple[str, Tokenize]:
 
 
 def main():
-    doc = """
-    I n 	 a d d i t i o n , 	 X T A Q ’ s 	 s a l e s , 	 d e v e l o p m e n t 	 a n d 	 i m p l e m e n t a t i o n 	 s t a f f	
-w i l l 	 s t r e n g t h e n 	 t h e 	 C o m p a n y’ s 	 e x i s t i n g 	 t e a m 	 w i t h 	 a 	 n u m b e r 	 o f	
-b u d g e t e d 	 n e w 	 p o s i t i o n s 	 n o w 	 b e i n g 	 f i l l e d 	 b y 	 X T A Q ’ s 	 s t a f f . 	 I n 	 t h i s	
-w a y 	 t h e 	 e n l a r g e d 	 G r o u p 	 w i l l 	 b e n e f i t 	 f r o m 	 t h e 	 e c o n o m i e s 	 o f 	 s c a l e	
-r e s u l t i n g 	 f r o m 	 t h e 	 m e r g e r 	 o f 	 t h e 	 t w o 	 companies.
-    """
-    print(merge_characters(doc))
-    print(clean(merge_characters(doc)))
-    doc = """
-        Operational highlights
-    • Continued primary focus, with ConocoPhillips, on our three western 
-    concessions in the Polish Baltic Basin, which we believe represent 
-    some of the most prospective shale acreage in Poland"""
-    print(merge_characters(doc))
-    print(clean(merge_characters(doc)))
+    pass
 
 main()
