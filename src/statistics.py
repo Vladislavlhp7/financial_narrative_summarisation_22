@@ -72,7 +72,7 @@ def get_stats_gold_summaries_extraction(training: bool = True, save_file: bool =
         extraction_stats.append(extraction_stats_per_report)
     extraction_stats_df = pd.DataFrame(extraction_stats)
     if save_file:
-        os.makedirs('tmp', exist_ok=True)
+        os.makedirs('../tmp', exist_ok=True)
         data_type = 'training' if training else 'validation'
         extraction_stats_df.to_csv(f'tmp/gold_summaries_extraction_{data_type}.csv')
     return extraction_stats_df

@@ -2,7 +2,7 @@ import unittest
 
 from nltk import sent_tokenize
 
-from preprocessing import clean, merge_characters, preprocess
+from src.preprocessing import clean, merge_characters, preprocess
 
 
 class TestPreprocessing(unittest.TestCase):
