@@ -1,14 +1,11 @@
 import os
 import random
-from datetime import datetime
 from typing import Dict, Union
 
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
 from archive.query import get_report_sentences_binary_labels_by_rouge_maximisation
-from metrics import calc_rouge_agg
 from preprocessing import clean_company_name, preprocess
 
 
@@ -211,6 +208,10 @@ def get_file_handles_binary(training: bool = True) -> Dict[str, str]:
 
 
 def generate_binary_labels_for_data(training: bool = True, gold: bool = False, rouge_maximisation: bool = False):
+    """
+    Create a csv file containing a mapping between preprocessed sentences and a binary score which represents \
+    whether the sentence is found in the gold summaries. Compute simple statistics like word count
+    """
     for file_path in tqdm(get_file_handles(training=training, gold=gold)):
         file_id = file_path.split('/')[-1]
         try:
@@ -231,53 +232,6 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False, r
             print('------------------------------------------')
             print(f'{str(e)} at file {file_id}')
             print('------------------------------------------')
-
-
-def calc_rouge_agg_from_gold_summaries(summary: str, file_id, training: bool = True, stats=None, verbose: bool = True):
-    summaries_gold = get_all_summaries(file_id, training)
-    return calc_rouge_agg(summary=summary, summaries_gold=summaries_gold, stats=stats, verbose=verbose)
-
-
-def get_sentence_embedding_data_per_file(model, file_id, training: bool = True, store_df: bool = True):
-    path = get_binary_labels_data_dir(training=training) + file_id + '.csv'
-    df = pd.read_csv(path)
-    # df['file_id'] = int(file_id)
-    X_sent = df['sent']
-    X = np.array([model.wv.get_sentence_vector(sent) for sent in X_sent])
-    df['sent_embedding'] = X.tolist()
-    # assert (df.columns == ['sent', 'label', 'sent_embedding']).all()
-    df = df[['sent', 'label', 'sent_embedding']]
-    if store_df:
-        t = datetime.now().strftime("%Y-%m-%d %H")
-        data_type = 'training' if training else 'validation'
-        f_dir = '../tmp/sent_embed'
-        os.makedirs(f_dir, exist_ok=True)
-        f = f'{f_dir}/{data_type}_{file_id}_{t}.csv'
-        df = df.reset_index(drop=True)
-        df.to_csv(f)
-    return df
-
-
-def get_sentence_embedding_data_from_corpus(model, training: bool = True, store_df: bool = True):
-    """
-        Return a ready-to-use embedding and label arrays.
-    """
-    files = get_file_handles_binary()
-    dfs = []
-    data_type = 'training' if training else 'validation'
-    for file_id in tqdm(files.keys(), 'Generating sentence-level embeddings from corpus'):
-        df = get_sentence_embedding_data_per_file(model=model, file_id=file_id, training=training)
-        dfs.append(df)
-    dfs = pd.concat(dfs)
-    X = dfs['sent_embedding']
-    y = np.array(dfs['label']).reshape(-1, 1)
-    if store_df:
-        t = datetime.now().strftime("%Y-%m-%d %H-%M")
-        f = f'tmp/{data_type}_corpus_{t}.csv'
-        print(f'Storing corpus embedding df at {f}')
-        dfs = dfs.reset_index(drop=True)
-        dfs.to_csv(f)
-    return X, y
 
 
 def main():

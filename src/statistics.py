@@ -9,6 +9,8 @@ from nltk.corpus.reader.plaintext import PlaintextCorpusReader
 from nltk.tokenize import word_tokenize, sent_tokenize
 import pandas as pd
 
+from src.metrics import calc_rouge_agg
+
 
 def compute_corpus_stats(raw_data: bool = True, training: bool = True):
     if not raw_data:
@@ -35,6 +37,11 @@ def compute_statistics_on_document(doc: str):
         "sents": len(sents)
     }
     return d
+
+
+def calc_rouge_agg_from_gold_summaries(summary: str, file_id, training: bool = True, stats=None, verbose: bool = True):
+    summaries_gold = get_all_summaries(file_id, training)
+    return calc_rouge_agg(summary=summary, summaries_gold=summaries_gold, stats=stats, verbose=verbose)
 
 
 def get_stats_gold_summaries_extraction(training: bool = True, save_file: bool = True):
