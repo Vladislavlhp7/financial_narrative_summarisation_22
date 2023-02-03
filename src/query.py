@@ -5,7 +5,6 @@ from typing import Dict, Union
 import pandas as pd
 from tqdm import tqdm
 
-from archive.query import get_report_sentences_binary_labels_by_rouge_maximisation
 from preprocessing import clean_company_name, preprocess
 
 
@@ -16,7 +15,7 @@ def get_file_handles(training: bool = True, gold: bool = False) -> Dict[str, str
     :param gold: bool
     :return: dict of file paths
     """
-    path = '../data/'
+    path = 'data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     data_type = 'gold_summaries/' if gold else 'annual_reports/'
@@ -39,7 +38,7 @@ def get_gold_summaries_file_handles(file_id, training: bool = True) -> Dict[str,
     :param training: bool
     :return: list of file paths
     """
-    path = '../data/'
+    path = 'data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'gold_summaries/'
@@ -57,7 +56,7 @@ def get_gold_summaries_file_handles(file_id, training: bool = True) -> Dict[str,
 
 
 def get_raw_data_dir(training: bool = True) -> str:
-    path = '../data/'
+    path = 'data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'annual_reports/'
@@ -65,7 +64,7 @@ def get_raw_data_dir(training: bool = True) -> str:
 
 
 def get_company_from_id(file_id, training: bool = True) -> Union[str, None]:
-    path = '../data/'
+    path = 'data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'annual_reports/'
@@ -87,7 +86,7 @@ def get_id_to_company_mapping(training: bool = True) -> Dict[str, str]:
     :param training:
     :return:
     """
-    path = '../data/'
+    path = 'data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'annual_reports/'
@@ -99,7 +98,7 @@ def get_id_to_company_mapping(training: bool = True) -> Dict[str, str]:
 
 
 def get_report(file_id, training: bool = True) -> str:
-    path = '../data/'
+    path = 'data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'annual_reports/'
@@ -177,7 +176,7 @@ def get_report_sentences_binary_labels_from_str(file_id, training: bool = True, 
 
 
 def get_binary_labels_data_dir(training: bool = True, gold: bool = False):
-    file_path = '../data/'
+    file_path = 'data/'
     if training:
         file_path += 'training_binary/'
     else:
@@ -207,7 +206,7 @@ def get_file_handles_binary(training: bool = True) -> Dict[str, str]:
     return file_handles
 
 
-def generate_binary_labels_for_data(training: bool = True, gold: bool = False, rouge_maximisation: bool = False):
+def generate_binary_labels_for_data(training: bool = True, gold: bool = False):
     """
     Create a csv file containing a mapping between preprocessed sentences and a binary score which represents \
     whether the sentence is found in the gold summaries. Compute simple statistics like word count
@@ -217,12 +216,8 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False, r
         try:
             binary_file_path = get_binary_labels_data_dir(training=training, gold=gold) + file_id + '.csv'
             if not os.path.exists(binary_file_path):
-                if not rouge_maximisation:
-                    sent_label_mapping = get_report_sentences_binary_labels_from_str(file_id=file_id, training=training,
-                                                                                     all_summaries=True)
-                else:
-                    sent_label_mapping = get_report_sentences_binary_labels_by_rouge_maximisation(file_id=file_id,
-                                                                                                  training=training)
+                sent_label_mapping = get_report_sentences_binary_labels_from_str(file_id=file_id, training=training,
+                                                                                 all_summaries=True)
                 sent_label_mapping_df = pd.DataFrame().from_dict(sent_label_mapping, orient='index').reset_index()
                 sent_label_mapping_df.columns = ['sent', 'label']
                 # Compute simple statistics
@@ -236,6 +231,7 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False, r
 
 def main():
     generate_binary_labels_for_data(training=True)
+    print(os.getcwd())
     pass
 
 
