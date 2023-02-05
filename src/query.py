@@ -1,21 +1,23 @@
 import os
+import pickle
 import random
 from typing import Dict, Union
 
 import pandas as pd
+from nltk import word_tokenize
 from tqdm import tqdm
 
-from preprocessing import clean_company_name, preprocess
+from preprocessing import clean_company_name, preprocess, clean
 
 
-def get_file_handles(training: bool = True, gold: bool = False) -> Dict[str, str]:
+def get_file_handles(training: bool = True, gold: bool = False, root: str = '..') -> Dict[str, str]:
     """
         Retrieve file handles for training and validation reports and gold summaries
     :param training: bool
     :param gold: bool
     :return: dict of file paths
     """
-    path = 'data/'
+    path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     data_type = 'gold_summaries/' if gold else 'annual_reports/'
@@ -31,14 +33,14 @@ def get_file_handles(training: bool = True, gold: bool = False) -> Dict[str, str
     return file_handles
 
 
-def get_gold_summaries_file_handles(file_id, training: bool = True) -> Dict[str, str]:
+def get_gold_summaries_file_handles(file_id, training: bool = True, root: str = '..') -> Dict[str, str]:
     """
         There are a few gold summaries per report, and they are enumerated as <report>_<#summary>.txt
     :param file_id: str/int
     :param training: bool
     :return: list of file paths
     """
-    path = 'data/'
+    path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'gold_summaries/'
@@ -53,6 +55,61 @@ def get_gold_summaries_file_handles(file_id, training: bool = True) -> Dict[str,
         if str(report_id) == str(file_id):
             file_handles[str(summary_id)] = f'{path}{f}'
     return file_handles
+
+
+def assemble_corpus_str(training: bool = True, validation: bool = True, save_file: bool = True,
+                        root: str = '..', file_path: str = None):
+    default_file_path = f'{root}/tmp/corpus.txt'
+    if file_path is None:
+        file_path = default_file_path
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as f:
+                corpus = f.read()
+            return corpus
+    corpus = ''
+    if training:
+        for file_id in tqdm(get_file_handles(training=True, root=root).keys(), 'Retrieving training data'):
+            report = get_report(file_id=file_id, training=True, root=root)
+            report = clean(report).lower()
+            corpus += report + '\n'
+    if validation:
+        for file_id in tqdm(get_file_handles(training=False, root=root).keys(), 'Retrieving validation data'):
+            report = get_report(file_id=file_id, training=False, root=root)
+            report = clean(report).lower()
+            corpus = report + '\n'
+    if save_file:
+        if file_path is None:
+            file_path = default_file_path
+        with open(f'{file_path}', 'w') as f:
+            f.write(corpus)
+    return corpus
+
+
+def assemble_word_embeddings_pickle(embedding_model, corpus_file_path: str = None, save_file: bool = True,
+                                    root: str = '..', file_path: str = None):
+    # Try directly loading existing embedding dict from pickle file
+    default_file_path = f'{root}/tmp/corpus_embeddings.pickle'
+    if file_path is None:
+        file_path = default_file_path
+    if os.path.exists(file_path):
+        print(f'Reading embedding dict from {file_path}')
+        with open(file_path, 'rb') as handle:
+            token2embedding = pickle.load(handle)
+        return token2embedding
+    # Or pull corpus and re-generate the embeeding dict
+    print(f'Loading corpus to re-generate embedding dict')
+    corpus = assemble_corpus_str(file_path=corpus_file_path, root=root)
+    tokens = sorted(list(set(word_tokenize(corpus))))
+    token2embedding = {}
+    for token in tokens:
+        token2embedding[token] = embedding_model[token]
+    if save_file:
+        if file_path is None:
+            file_path = default_file_path
+        print(f'Saving embedding dict to {file_path}')
+        with open(file_path, 'wb') as handle:
+            pickle.dump(token2embedding, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return token2embedding
 
 
 def get_raw_data_dir(training: bool = True) -> str:
@@ -97,8 +154,8 @@ def get_id_to_company_mapping(training: bool = True) -> Dict[str, str]:
     return id_to_company_dict
 
 
-def get_report(file_id, training: bool = True) -> str:
-    path = 'data/'
+def get_report(file_id, training: bool = True, root: str = '..') -> str:
+    path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'annual_reports/'
@@ -229,10 +286,16 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False):
             print('------------------------------------------')
 
 
-def main():
-    generate_binary_labels_for_data(training=True)
-    print(os.getcwd())
+def assemble_data_csv(training: bool = True) -> pd.DataFrame:
     pass
 
 
-main()
+def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
+    pass
+
+
+def main():
+    generate_binary_labels_for_data(training=False)
+    pass
+
+# main()
