@@ -2,7 +2,7 @@ import os
 import pickle
 import random
 from datetime import datetime
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 import pandas as pd
 from nltk import word_tokenize
@@ -58,16 +58,17 @@ def get_gold_summaries_file_handles(file_id, training: bool = True, root: str = 
     return file_handles
 
 
-def assemble_corpus_str(training: bool = True, validation: bool = True, save_file: bool = True,
-                        root: str = '..', file_path: str = None, verbose: bool = True):
+def assemble_corpus_unique_words(training: bool = True, validation: bool = True, save_file: bool = True,
+                                 root: str = '..', file_path: str = None, verbose: bool = True) -> List[str]:
     default_file_path = f'{root}/tmp/corpus.txt'
     if file_path is None:
         file_path = default_file_path
+    print(f'Assembling corpus unique words to be stored at {file_path}')
     if os.path.exists(file_path):
         with open(file_path, 'r') as f:
-            corpus = f.read()
-        return corpus
-    corpus = ''
+            corpus_str = f.read()
+        return corpus_str.split('\n')
+    corpus = set([])
     if training:
         for file_id in tqdm(get_file_handles(training=True, root=root).keys(), 'Retrieving training data'):
             if verbose:
@@ -75,7 +76,8 @@ def assemble_corpus_str(training: bool = True, validation: bool = True, save_fil
                 print(company, end='\n\n')
             report = get_report(file_id=file_id, training=True, root=root)
             report = clean(report).lower()
-            corpus += report + '\n'
+            tokens = set(word_tokenize(report))
+            corpus = corpus.union(tokens)
     if validation:
         for file_id in tqdm(get_file_handles(training=False, root=root).keys(), 'Retrieving validation data'):
             if verbose:
@@ -83,12 +85,15 @@ def assemble_corpus_str(training: bool = True, validation: bool = True, save_fil
                 print(company, end='\n\n')
             report = get_report(file_id=file_id, training=False, root=root)
             report = clean(report).lower()
-            corpus = report + '\n'
+            tokens = set(word_tokenize(report))
+            corpus = corpus.union(tokens)
     if save_file:
         if file_path is None:
             file_path = default_file_path
+        corpus_arr = sorted(list(corpus))
         with open(f'{file_path}', 'w') as f:
-            f.write(corpus)
+            for token in corpus_arr:
+                f.write(f"{token}\n")
     return corpus
 
 
@@ -105,8 +110,7 @@ def assemble_word_embeddings_pickle(embedding_model, corpus_file_path: str = Non
         return token2embedding
     # Or pull corpus and re-generate the embedding dict
     print(f'Loading corpus to re-generate embedding dict')
-    corpus = assemble_corpus_str(file_path=corpus_file_path, root=root)
-    tokens = sorted(list(set(word_tokenize(corpus))))
+    tokens = assemble_corpus_unique_words(file_path=corpus_file_path, root=root)
     token2embedding = {}
     for token in tokens:
         token2embedding[token] = embedding_model[token]
@@ -318,8 +322,8 @@ def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
 
 def main():
     # generate_binary_labels_for_data(training=False)
-    assemble_corpus_str(root='.')
     # assemble_data_csv(training=False, root='.')
+    assemble_corpus_unique_words(training=True, verbose=False, root='.')
     pass
 
 main()
