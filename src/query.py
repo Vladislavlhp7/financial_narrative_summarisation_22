@@ -59,22 +59,28 @@ def get_gold_summaries_file_handles(file_id, training: bool = True, root: str = 
 
 
 def assemble_corpus_str(training: bool = True, validation: bool = True, save_file: bool = True,
-                        root: str = '..', file_path: str = None):
+                        root: str = '..', file_path: str = None, verbose: bool = True):
     default_file_path = f'{root}/tmp/corpus.txt'
     if file_path is None:
         file_path = default_file_path
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as f:
-                corpus = f.read()
-            return corpus
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            corpus = f.read()
+        return corpus
     corpus = ''
     if training:
         for file_id in tqdm(get_file_handles(training=True, root=root).keys(), 'Retrieving training data'):
+            if verbose:
+                company  = get_company_from_id(file_id=file_id, training=True, root=root)
+                print(company, end='\n\n')
             report = get_report(file_id=file_id, training=True, root=root)
             report = clean(report).lower()
             corpus += report + '\n'
     if validation:
         for file_id in tqdm(get_file_handles(training=False, root=root).keys(), 'Retrieving validation data'):
+            if verbose:
+                company = get_company_from_id(file_id=file_id, training=False, root=root)
+                print(company, end='\n\n')
             report = get_report(file_id=file_id, training=False, root=root)
             report = clean(report).lower()
             corpus = report + '\n'
@@ -97,7 +103,7 @@ def assemble_word_embeddings_pickle(embedding_model, corpus_file_path: str = Non
         with open(file_path, 'rb') as handle:
             token2embedding = pickle.load(handle)
         return token2embedding
-    # Or pull corpus and re-generate the embeeding dict
+    # Or pull corpus and re-generate the embedding dict
     print(f'Loading corpus to re-generate embedding dict')
     corpus = assemble_corpus_str(file_path=corpus_file_path, root=root)
     tokens = sorted(list(set(word_tokenize(corpus))))
@@ -121,8 +127,8 @@ def get_raw_data_dir(training: bool = True) -> str:
     return path
 
 
-def get_company_from_id(file_id, training: bool = True) -> Union[str, None]:
-    path = 'data/'
+def get_company_from_id(file_id, training: bool = True, root: str = '..') -> Union[str, None]:
+    path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
     path += 'annual_reports/'
@@ -312,7 +318,8 @@ def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
 
 def main():
     # generate_binary_labels_for_data(training=False)
-    assemble_data_csv(training=False, root='.')
+    assemble_corpus_str(root='.')
+    # assemble_data_csv(training=False, root='.')
     pass
 
 main()
