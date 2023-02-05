@@ -30,11 +30,15 @@ def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
     return sent_tensor
 
 
-# pad a batch of sentences
-def pad_batch(train_sents_tensor):
-    max_len = max([x.shape[0] for x in train_sents_tensor])
+# pad a batch of sentence tensors
+def pad_batch(batch_sent_arr):
+    """
+    Provide a batch (list) of tensor sentences and pad them to the maximal size
+    Return a batch (list) of same-size sentences
+    """
+    max_len = max([x.shape[0] for x in batch_sent_arr])
     padded_batch = []
-    for train_sents in train_sents_tensor:
+    for train_sents in batch_sent_arr:
         padded_train_sents = torch.zeros(max_len, train_sents.shape[1], dtype=torch.float32)
         padded_train_sents[:train_sents.shape[0]] = train_sents
         padded_batch.append(padded_train_sents)
@@ -93,15 +97,15 @@ def train(model, embedding_model, dataloader, epochs: int = 60, lr: float = 1e-3
     for epoch in tqdm(range(epochs)):
         for i, (train_sents, train_labels) in enumerate(dataloader):
             # create a list of word embeddings per sentence
-            train_sents_tensor = [get_sentence_tensor(embedding_model=embedding_model,
-                                                      sentence=str(sent),
-                                                      seq_len=seq_len) for sent in train_sents]
-            # ensure all sentences in the batch have the same length, hence padding
-            train_sents_tensor = pad_batch(train_sents_tensor)
-            # stack sentence matrices onto each other
-            train_sents_tensor = torch.stack(train_sents_tensor)
+            batch_sent_arr = [get_sentence_tensor(embedding_model=embedding_model,
+                                                  sentence=str(sent),
+                                                  seq_len=seq_len) for sent in train_sents]
+            # ensure all sentences (tensors) in the batch have the same length, hence padding
+            batch_sent_arr_padded = pad_batch(batch_sent_arr)
+            # stack sentence tensors onto each other for a batch tensor
+            batch_sent_tensor = torch.stack(batch_sent_arr_padded)
 
-            output_labels = model(train_sents_tensor)
+            output_labels = model(batch_sent_tensor)
             train_labels = train_labels.long()
             loss = criterion(output_labels, train_labels)
             optimizer.zero_grad()
@@ -135,4 +139,4 @@ def main():
     train(model=model, embedding_model=embedding_model, dataloader=train_dataloader, lr=lr, epochs=EPOCHS, seq_len=seq_len)
 
 
-main()
+# main()
