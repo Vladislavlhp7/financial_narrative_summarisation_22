@@ -28,7 +28,7 @@ def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
             break
         sent_arr.append(get_word_embedding(embedding_model, word))
 
-    sent_tensor = torch.FloatTensor(sent_arr)
+    sent_tensor = torch.FloatTensor(np.array(sent_arr))
     return sent_tensor
 
 class EarlyTrainingStop():
@@ -64,6 +64,20 @@ def pad_batch(batch_sent_arr):
         padded_train_sents[:train_sents.shape[0]] = train_sents
         padded_batch.append(padded_train_sents)
     return padded_batch
+
+def batch_str_to_batch_tensors(train_sents, embedding_model, seq_len: int = 50):
+    """
+    Convert a list of batch sentences to a batch tensor
+    """
+    # create a list of word embeddings per sentence
+    batch_sent_arr = [get_sentence_tensor(embedding_model=embedding_model,
+                                          sentence=str(sent),
+                                          seq_len=seq_len) for sent in train_sents]
+    # ensure all sentences (tensors) in the batch have the same length, hence padding
+    batch_sent_arr_padded = pad_batch(batch_sent_arr)
+    # stack sentence tensors onto each other for a batch tensor
+    batch_sent_tensor = torch.stack(batch_sent_arr_padded)
+    return batch_sent_tensor
 
 
 class LSTM(nn.Module):
@@ -111,30 +125,60 @@ class FNS2021(Dataset):
         return sent, label
 
 
-def train(model, embedding_model, dataloader, epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
+def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, tb_writer, criterion, optimizer):
+    running_loss = 0.
+    last_loss = 0.
+
+    for i, (train_sents, train_labels) in enumerate(train_dataloader):
+        batch_sent_tensor = batch_str_to_batch_tensors(train_sents=train_sents, embedding_model=embedding_model,
+                                                       seq_len=seq_len)
+        output_labels = model(batch_sent_tensor)
+        train_labels = train_labels.long()
+        loss = criterion(output_labels, train_labels)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        running_loss += loss.item()
+        if i % 1000 == 999:
+            last_loss = running_loss / 1000  # loss per batch
+            print('  batch {} loss: {}'.format(i + 1, last_loss))
+            tb_x = epoch_index * len(train_dataloader) + i + 1
+            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
+            running_loss = 0.
+    return last_loss
+
+def train(model, embedding_model, train_dataloader, validation_dataloader, writer,
+          epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     for epoch in tqdm(range(epochs)):
-        for i, (train_sents, train_labels) in enumerate(dataloader):
-            # create a list of word embeddings per sentence
-            batch_sent_arr = [get_sentence_tensor(embedding_model=embedding_model,
-                                                  sentence=str(sent),
-                                                  seq_len=seq_len) for sent in train_sents]
-            # ensure all sentences (tensors) in the batch have the same length, hence padding
-            batch_sent_arr_padded = pad_batch(batch_sent_arr)
-            # stack sentence tensors onto each other for a batch tensor
-            batch_sent_tensor = torch.stack(batch_sent_arr_padded)
+        print('EPOCH {}:'.format(epoch + 1))
+        model.train(True)
+        training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len, epoch_index=epoch,
+                                        criterion=criterion, optimizer=optimizer, train_dataloader=train_dataloader)
+        model.train(False)
 
+        running_vloss = 0.
+        i = 0
+        for i, (v_sents, v_labels) in enumerate(validation_dataloader):
+            batch_sent_tensor = batch_str_to_batch_tensors(train_sents=v_sents, embedding_model=embedding_model,
+                                                           seq_len=seq_len)
             output_labels = model(batch_sent_tensor)
-            train_labels = train_labels.long()
-            loss = criterion(output_labels, train_labels)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            train_labels = v_labels.long()
+            vloss = criterion(output_labels, train_labels)
+            running_vloss += vloss
+        validation_loss = running_vloss / (i + 1)
+        print('LOSS train {} valid {}'.format(training_loss, validation_loss))
 
-            if (i + 1) % 100:
-                print(f'Epoch [{epoch}]\tStep [{i + 1}/{len(dataloader.dataset)}]\tLoss [{loss.item():.4f}]')
+        # Log the running loss averaged per batch
+        # for both training and validation
+        # writer.add_scalars('Training vs. Validation Loss',
+        #                    {'Training': training_loss, 'Validation': validation_loss}, epoch + 1)
+        # writer.flush()
+
+
 
 
 def main():
@@ -152,12 +196,14 @@ def main():
     model = LSTM(input_size=input_size, num_layers=num_layers)
     print('Loading Training & Validation Data')
     training_data = FNS2021(file='../tmp/training_corpus_20230129 16:01.csv', training=True)
-    # validation_data = FNS2021(file='../tmp/training_corpus_20230129 16:01.csv', training=False)
+    validation_data = FNS2021(file='../tmp/training_corpus_20230129 16:01.csv', training=False)
 
     train_dataloader = DataLoader(training_data, batch_size=batch_size, drop_last=True)
-    # validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
+    validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
     print('Starting LSTM training')
-    train(model=model, embedding_model=embedding_model, dataloader=train_dataloader, lr=lr, epochs=EPOCHS, seq_len=seq_len)
+    train(model=model, embedding_model=embedding_model,
+          train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
+          lr=lr, epochs=EPOCHS, seq_len=seq_len)
 
 
 # main()
