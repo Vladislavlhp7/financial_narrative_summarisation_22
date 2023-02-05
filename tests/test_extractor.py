@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-import numpy as np
 import torch
 
 from src.extractor import pad_batch
@@ -23,6 +22,6 @@ class TestExtractor(TestCase):
         # expected sent tensor
         sent_tensor_exp = torch.stack(pad_batch([
             sent1,  # sent 1
-            torch.cat([word_tensor_3, torch.zeros((1,10), dtype=torch.float)])]  # sent 2
+            torch.cat([word_tensor_3, torch.zeros((1, 10), dtype=torch.float)])]  # sent 2
         ))
-        self.assertTrue(torch.all(torch.eq(sent_tensor_exp,sent_tensor)))
+        self.assertTrue(torch.all(torch.eq(sent_tensor_exp, sent_tensor)))

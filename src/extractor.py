@@ -1,3 +1,5 @@
+import numpy as np
+
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -28,6 +30,25 @@ def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
 
     sent_tensor = torch.FloatTensor(sent_arr)
     return sent_tensor
+
+class EarlyTrainingStop():
+    """
+    Implement a class for early stopping of training when validation loss starts increasing
+    """
+    def __init__(self, validation_loss: np.float, delta: np.float = 0.0, counter: int = 0, patience: int = 3):
+        self.validation_loss = validation_loss
+        self.delta = delta
+        self.counter = counter
+        self.patience = patience
+
+    def early_stop(self, validation_loss: np.float):
+        if self.validation_loss <= validation_loss + self.delta:
+            self.counter += 1
+            if self.counter > self.patience:
+                return True
+        else:
+            self.counter = 0
+            self.validation_loss = validation_loss
 
 
 # pad a batch of sentence tensors
