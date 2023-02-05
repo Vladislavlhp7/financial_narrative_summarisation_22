@@ -35,13 +35,13 @@ class EarlyTrainingStop():
     """
     Implement a class for early stopping of training when validation loss starts increasing
     """
-    def __init__(self, validation_loss: np.float, delta: np.float = 0.0, counter: int = 0, patience: int = 3):
+    def __init__(self, validation_loss: float, delta: float = 0.0, counter: int = 0, patience: int = 3):
         self.validation_loss = validation_loss
         self.delta = delta
         self.counter = counter
         self.patience = patience
 
-    def early_stop(self, validation_loss: np.float):
+    def early_stop(self, validation_loss: float):
         if self.validation_loss <= validation_loss + self.delta:
             self.counter += 1
             if self.counter > self.patience:

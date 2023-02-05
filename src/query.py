@@ -1,6 +1,7 @@
 import os
 import pickle
 import random
+from datetime import datetime
 from typing import Dict, Union
 
 import pandas as pd
@@ -232,8 +233,8 @@ def get_report_sentences_binary_labels_from_str(file_id, training: bool = True, 
     return sent_label_mapping
 
 
-def get_binary_labels_data_dir(training: bool = True, gold: bool = False):
-    file_path = 'data/'
+def get_binary_labels_data_dir(training: bool = True, gold: bool = False, root: str = '..'):
+    file_path = f'{root}/data/'
     if training:
         file_path += 'training_binary/'
     else:
@@ -246,13 +247,13 @@ def get_binary_labels_data_dir(training: bool = True, gold: bool = False):
     return file_path
 
 
-def get_file_handles_binary(training: bool = True) -> Dict[str, str]:
+def get_file_handles_binary(training: bool = True, root: str = '..') -> Dict[str, str]:
     """
         Retrieve file handles for training and validation report sentences and binary labels
     :param training: bool
     :return: dict of file paths
     """
-    path = get_binary_labels_data_dir(training=training)
+    path = get_binary_labels_data_dir(training=training, root=root)
     if not os.path.exists(path):
         print(f'Specified path: {path} does not exist')
         return {}
@@ -286,8 +287,23 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False):
             print('------------------------------------------')
 
 
-def assemble_data_csv(training: bool = True) -> pd.DataFrame:
-    pass
+def assemble_data_csv(training: bool = True, store_df: bool = True, root: str = '..') -> pd.DataFrame:
+    files = get_file_handles_binary(training=training, root=root)
+    dfs = []
+    print(files)
+    for file_id in tqdm(files.keys(), 'Generating sentence-level embeddings from corpus'):
+        path = get_binary_labels_data_dir(training=training, root=root) + file_id + '.csv'
+        df = pd.read_csv(path)
+        dfs.append(df)
+    dfs = pd.concat(dfs)
+    if store_df:
+        data_type = 'training' if training else 'validation'
+        t = datetime.now().strftime("%Y-%m-%d %H-%M")
+        f = f'{root}/tmp/{data_type}_corpus_{t}.csv'
+        print(f'Storing corpus embedding df at {f}')
+        dfs = dfs.reset_index(drop=True)
+        dfs.to_csv(f)
+    return dfs
 
 
 def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
@@ -295,7 +311,8 @@ def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
 
 
 def main():
-    generate_binary_labels_for_data(training=False)
+    # generate_binary_labels_for_data(training=False)
+    assemble_data_csv(training=False, root='.')
     pass
 
-# main()
+main()
