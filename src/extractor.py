@@ -10,6 +10,8 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
+from src.query import get_embedding_model
+
 
 def get_word_embedding(model, word: str):
     """
@@ -31,10 +33,12 @@ def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
     sent_tensor = torch.FloatTensor(np.array(sent_arr))
     return sent_tensor
 
-class EarlyTrainingStop():
+
+class EarlyTrainingStop:
     """
     Implement a class for early stopping of training when validation loss starts increasing
     """
+
     def __init__(self, validation_loss: float, delta: float = 0.0, counter: int = 0, patience: int = 3):
         self.validation_loss = validation_loss
         self.delta = delta
@@ -64,6 +68,7 @@ def pad_batch(batch_sent_arr):
         padded_train_sents[:train_sents.shape[0]] = train_sents
         padded_batch.append(padded_train_sents)
     return padded_batch
+
 
 def batch_str_to_batch_tensors(train_sents, embedding_model, seq_len: int = 50):
     """
@@ -148,6 +153,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             running_loss = 0.
     return last_loss
 
+
 def train(model, embedding_model, train_dataloader, validation_dataloader, writer,
           epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
     criterion = nn.CrossEntropyLoss()
@@ -156,7 +162,8 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
     for epoch in tqdm(range(epochs)):
         print('EPOCH {}:'.format(epoch + 1))
         model.train(True)
-        training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len, epoch_index=epoch,
+        training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
+                                        epoch_index=epoch,
                                         criterion=criterion, optimizer=optimizer, train_dataloader=train_dataloader)
         model.train(False)
 
@@ -179,8 +186,6 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         # writer.flush()
 
 
-
-
 def main():
     lr = 1e-3
     EPOCHS = 60
@@ -189,9 +194,7 @@ def main():
     num_layers = 2
     batch_size = 16
 
-    print('Loading Financial Word Embeddings Model')
-    fasttext_cbow_path = '../resources/FinText_FastText_CBOW/Word_Embedding_2000_2015'
-    embedding_model = FastText.load(fasttext_cbow_path)  # FinText: (FastText/CBOW)
+    embedding_model = get_embedding_model(root='.')
 
     model = LSTM(input_size=input_size, num_layers=num_layers)
     print('Loading Training & Validation Data')
@@ -203,7 +206,6 @@ def main():
     print('Starting LSTM training')
     train(model=model, embedding_model=embedding_model,
           train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
-          lr=lr, epochs=EPOCHS, seq_len=seq_len)
-
+          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=None)
 
 # main()

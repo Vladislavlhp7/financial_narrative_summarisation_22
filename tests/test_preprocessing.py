@@ -19,6 +19,11 @@ class TestPreprocessing(unittest.TestCase):
         self.assertEqual('entertainment', clean(doc))
         doc = 'self-assessment'
         self.assertEqual('self-assessment', clean(doc))
+        doc = """
+        less: inter-
+        segment
+        """
+        self.assertEqual('less intersegment', clean(doc))
 
     def test_unicode_symbols(self):
         doc = 'Our  business'
@@ -109,3 +114,18 @@ class TestPreprocessing(unittest.TestCase):
                 which will underpin growth in the coming years."""
         doc_str, doc_obj = preprocess(doc)
         self.assertEqual(doc_obj.sentences, [s.lower() for s in sent_tokenize(clean(doc))])
+        doc = """Revenue by business segment
+                £m 2010/11 2009/10 Change
+                Hotels and 
+                Restaurants
+                1,177.3 1,096.0 7.4%
+                Costa 425.0 340.9 24.7%
+                Less: inter-
+                segment
+                (2.7) (1.9)
+                Revenue 1,599.6 1,435.0 11.5%
+                The growth in revenues has come 
+            """
+        doc_str, doc_obj = preprocess(doc)
+        for s in doc_obj.sentences:
+            print(s)

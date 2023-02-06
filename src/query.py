@@ -5,10 +5,11 @@ from datetime import datetime
 from typing import Dict, Union, List
 
 import pandas as pd
+from gensim.models import FastText
 from nltk import word_tokenize
 from tqdm import tqdm
 
-from preprocessing import clean_company_name, preprocess, clean
+from preprocessing import clean_company_name, preprocess
 
 
 def get_file_handles(training: bool = True, gold: bool = False, root: str = '..') -> Dict[str, str]:
@@ -58,79 +59,6 @@ def get_gold_summaries_file_handles(file_id, training: bool = True, root: str = 
     return file_handles
 
 
-def assemble_corpus_unique_words(training: bool = True, validation: bool = True, save_file: bool = True,
-                                 root: str = '..', file_path: str = None, verbose: bool = True) -> List[str]:
-    default_file_path = f'{root}/tmp/corpus.txt'
-    if file_path is None:
-        file_path = default_file_path
-    print(f'Assembling corpus unique words to be stored at {file_path}')
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as f:
-            corpus_str = f.read()
-        return corpus_str.split('\n')
-    corpus = set([])
-    if training:
-        for file_id in tqdm(get_file_handles(training=True, root=root).keys(), 'Retrieving training data'):
-            if verbose:
-                company  = get_company_from_id(file_id=file_id, training=True, root=root)
-                print(company, end='\n\n')
-            report = get_report(file_id=file_id, training=True, root=root)
-            report = clean(report).lower()
-            tokens = set(word_tokenize(report))
-            corpus = corpus.union(tokens)
-    if validation:
-        for file_id in tqdm(get_file_handles(training=False, root=root).keys(), 'Retrieving validation data'):
-            if verbose:
-                company = get_company_from_id(file_id=file_id, training=False, root=root)
-                print(company, end='\n\n')
-            report = get_report(file_id=file_id, training=False, root=root)
-            report = clean(report).lower()
-            tokens = set(word_tokenize(report))
-            corpus = corpus.union(tokens)
-    if save_file:
-        if file_path is None:
-            file_path = default_file_path
-        corpus_arr = sorted(list(corpus))
-        with open(f'{file_path}', 'w') as f:
-            for token in corpus_arr:
-                f.write(f"{token}\n")
-    return corpus
-
-
-def assemble_word_embeddings_pickle(embedding_model, corpus_file_path: str = None, save_file: bool = True,
-                                    root: str = '..', file_path: str = None):
-    # Try directly loading existing embedding dict from pickle file
-    default_file_path = f'{root}/tmp/corpus_embeddings.pickle'
-    if file_path is None:
-        file_path = default_file_path
-    if os.path.exists(file_path):
-        print(f'Reading embedding dict from {file_path}')
-        with open(file_path, 'rb') as handle:
-            token2embedding = pickle.load(handle)
-        return token2embedding
-    # Or pull corpus and re-generate the embedding dict
-    print(f'Loading corpus to re-generate embedding dict')
-    tokens = assemble_corpus_unique_words(file_path=corpus_file_path, root=root)
-    token2embedding = {}
-    for token in tokens:
-        token2embedding[token] = embedding_model[token]
-    if save_file:
-        if file_path is None:
-            file_path = default_file_path
-        print(f'Saving embedding dict to {file_path}')
-        with open(file_path, 'wb') as handle:
-            pickle.dump(token2embedding, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    return token2embedding
-
-
-def get_raw_data_dir(training: bool = True) -> str:
-    path = 'data/'
-    data_type = 'training/' if training else 'validation/'
-    path += data_type
-    path += 'annual_reports/'
-    return path
-
-
 def get_company_from_id(file_id, training: bool = True, root: str = '..') -> Union[str, None]:
     path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
@@ -175,7 +103,7 @@ def get_report(file_id, training: bool = True, root: str = '..') -> str:
     return f.read()
 
 
-def get_summary(file_id, summary_id=None, training: bool = True) -> str:
+def get_summary(file_id, summary_id=None, training: bool = True, root: str = '..') -> str:
     """
         Return a specific (or random) summary for a specific report
     :param file_id:
@@ -183,7 +111,7 @@ def get_summary(file_id, summary_id=None, training: bool = True) -> str:
     :param training:
     :return:
     """
-    file_handles = get_gold_summaries_file_handles(file_id, training)
+    file_handles = get_gold_summaries_file_handles(file_id, training, root=root)
     if summary_id:
         path = file_handles[str(summary_id)]
     else:
@@ -194,14 +122,14 @@ def get_summary(file_id, summary_id=None, training: bool = True) -> str:
     return summary
 
 
-def get_all_summaries(file_id, training: bool = True) -> Dict[str, str]:
+def get_all_summaries(file_id, training: bool = True, root: str = '..') -> Dict[str, str]:
     """
         Return all summaries (str) for a report
     :param file_id:
     :param training:
     :return:
     """
-    file_handles = get_gold_summaries_file_handles(file_id, training)
+    file_handles = get_gold_summaries_file_handles(file_id, training, root=root)
     summaries = {}
     for idx, path in file_handles.items():
         with open(path, "r") as f:
@@ -211,16 +139,16 @@ def get_all_summaries(file_id, training: bool = True) -> Dict[str, str]:
 
 
 def get_report_sentences_binary_labels_from_str(file_id, training: bool = True, all_summaries: bool = True,
-                                                summary_id=None):
+                                                summary_id=None, root: str = '..'):
     """
          Provide a mapping between each sentence and its binary label of whether \
             it is part of all/any summary/ies
     """
-    report = get_report(file_id=file_id, training=training)
+    report = get_report(file_id=file_id, training=training, root=root)
     if not all_summaries and summary_id is not None:
-        gold_summaries = get_summary(file_id=file_id, summary_id=summary_id)
+        gold_summaries = get_summary(file_id=file_id, summary_id=summary_id, root=root)
     else:
-        gold_summaries = get_all_summaries(file_id=file_id, training=training)
+        gold_summaries = get_all_summaries(file_id=file_id, training=training, root=root)
     # Preprocess report as list of sentences
     _, report_preprocessed = preprocess(report)
     summaries_preprocessed_dict = {}
@@ -274,18 +202,18 @@ def get_file_handles_binary(training: bool = True, root: str = '..') -> Dict[str
     return file_handles
 
 
-def generate_binary_labels_for_data(training: bool = True, gold: bool = False):
+def generate_binary_labels_for_data(training: bool = True, gold: bool = False, root: str = '..'):
     """
     Create a csv file containing a mapping between preprocessed sentences and a binary score which represents \
     whether the sentence is found in the gold summaries. Compute simple statistics like word count
     """
-    for file_path in tqdm(get_file_handles(training=training, gold=gold)):
+    for file_path in tqdm(get_file_handles(training=training, gold=gold, root=root)):
         file_id = file_path.split('/')[-1]
         try:
-            binary_file_path = get_binary_labels_data_dir(training=training, gold=gold) + file_id + '.csv'
+            binary_file_path = get_binary_labels_data_dir(training=training, gold=gold, root=root) + file_id + '.csv'
             if not os.path.exists(binary_file_path):
                 sent_label_mapping = get_report_sentences_binary_labels_from_str(file_id=file_id, training=training,
-                                                                                 all_summaries=True)
+                                                                                 all_summaries=True, root=root)
                 sent_label_mapping_df = pd.DataFrame().from_dict(sent_label_mapping, orient='index').reset_index()
                 sent_label_mapping_df.columns = ['sent', 'label']
                 # Compute simple statistics
@@ -300,14 +228,13 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False):
 def assemble_data_csv(training: bool = True, store_df: bool = True, root: str = '..') -> pd.DataFrame:
     files = get_file_handles_binary(training=training, root=root)
     dfs = []
-    print(files)
-    for file_id in tqdm(files.keys(), 'Generating sentence-level embeddings from corpus'):
+    data_type = 'training' if training else 'validation'
+    for file_id in tqdm(files.keys(), f'Assembling binary classification {data_type} file'):
         path = get_binary_labels_data_dir(training=training, root=root) + file_id + '.csv'
         df = pd.read_csv(path)
         dfs.append(df)
     dfs = pd.concat(dfs)
     if store_df:
-        data_type = 'training' if training else 'validation'
         t = datetime.now().strftime("%Y-%m-%d %H-%M")
         f = f'{root}/tmp/{data_type}_corpus_{t}.csv'
         print(f'Storing corpus embedding df at {f}')
@@ -316,14 +243,106 @@ def assemble_data_csv(training: bool = True, store_df: bool = True, root: str = 
     return dfs
 
 
+def get_raw_data_dir(training: bool = True, root: str = '..') -> str:
+    path = f'{root}/data/'
+    data_type = 'training/' if training else 'validation/'
+    path += data_type
+    path += 'annual_reports/'
+    return path
+
+
+def assemble_corpus_unique_words(training: bool = True, validation: bool = True, save_file: bool = True,
+                                 root: str = '..', file_path: str = None, verbose: bool = False) -> List[str]:
+    default_file_path = f'{root}/tmp/corpus.txt'
+    if file_path is None:
+        file_path = default_file_path
+    print(f'Assembling corpus unique words to be stored at {file_path}')
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            corpus_str = f.read()
+        return corpus_str.split('\n')
+    corpus = set([])
+    if training:
+        for file_id in tqdm(get_file_handles(training=True, root=root).keys(), 'Retrieving training data'):
+            if verbose:
+                company = get_company_from_id(file_id=file_id, training=True, root=root)
+                print(company, end='\n\n')
+            report = get_report(file_id=file_id, training=True, root=root)
+            report, _ = preprocess(report)
+            tokens = set(word_tokenize(report))
+            corpus = corpus.union(tokens)
+    if validation:
+        for file_id in tqdm(get_file_handles(training=False, root=root).keys(), 'Retrieving validation data'):
+            if verbose:
+                company = get_company_from_id(file_id=file_id, training=False, root=root)
+                print(company, end='\n\n')
+            report = get_report(file_id=file_id, training=False, root=root)
+            report, _ = preprocess(report)
+            tokens = set(word_tokenize(report))
+            corpus = corpus.union(tokens)
+    if save_file:
+        if file_path is None:
+            file_path = default_file_path
+        corpus_arr = sorted(list(corpus))
+        with open(f'{file_path}', 'w') as f:
+            for token in corpus_arr:
+                f.write(f"{token}\n")
+    return corpus
+
+
+def assemble_word_embeddings_pickle(embedding_weights, corpus_file_path: str = None, save_file: bool = True,
+                                    root: str = '..', file_path: str = None):
+    # Try directly loading existing embedding dict from pickle file
+    default_file_path = f'{root}/tmp/corpus_embeddings.pickle'
+    if file_path is None:
+        file_path = default_file_path
+    if os.path.exists(file_path):
+        print(f'Reading embedding dict from {file_path}')
+        with open(file_path, 'rb') as handle:
+            token2embedding = pickle.load(handle)
+        return token2embedding
+    # Or pull corpus and re-generate the embedding dict
+    print(f'Loading corpus to re-generate embedding dict')
+    tokens = assemble_corpus_unique_words(file_path=corpus_file_path, root=root)
+    token2embedding = {}
+    for token in tokens:
+        token2embedding[token] = embedding_weights[token]
+    if save_file:
+        if file_path is None:
+            file_path = default_file_path
+        print(f'Saving embedding dict to {file_path}')
+        with open(file_path, 'wb') as handle:
+            pickle.dump(token2embedding, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return token2embedding
+
+
+def get_embedding_model(root: str = '..'):
+    print('Loading Embedding Model')
+    path = f'{root}/resources/FinText_FastText_CBOW/Word_Embedding_2000_2015'
+    embedding_model = FastText.load(path)
+    return embedding_model
+
+
+def binary_classification_data_preparation(root: str = '..'):
+    """
+    Transform annual reports and summaries into files for sentence-level binary classification.
+    """
+    generate_binary_labels_for_data(training=True, root=root)
+    generate_binary_labels_for_data(training=False, root=root)
+    assemble_data_csv(training=True, root=root)
+    assemble_data_csv(training=False, root=root)
+    assemble_corpus_unique_words(root=root)
+    embedding_model = get_embedding_model(root=root)
+    embedding_weights = embedding_model.wv
+    assemble_word_embeddings_pickle(embedding_weights=embedding_weights, root=root)
+
+
 def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
     pass
 
 
 def main():
-    # generate_binary_labels_for_data(training=False)
-    # assemble_data_csv(training=False, root='.')
-    assemble_corpus_unique_words(training=True, verbose=False, root='.')
     pass
+
 
 main()
