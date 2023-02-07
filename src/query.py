@@ -272,8 +272,8 @@ def assemble_corpus_unique_words(training: bool = True, validation: bool = True,
             # apply word tokenization also on sentence level
             _, report_tokenized = preprocess(report)
             for s in report_tokenized.sentences:
-                tokens = set(word_tokenize(s))
-                corpus = corpus.union(tokens)
+                for t in word_tokenize(s):
+                    corpus.add(t)
     if validation:
         for file_id in tqdm(get_file_handles(training=False, root=root).keys(), 'Retrieving validation data'):
             if verbose:
@@ -284,8 +284,8 @@ def assemble_corpus_unique_words(training: bool = True, validation: bool = True,
             # apply word tokenization also on sentence level
             _, report_tokenized = preprocess(report)
             for s in report_tokenized.sentences:
-                tokens = set(word_tokenize(s))
-                corpus = corpus.union(tokens)
+                for t in word_tokenize(s):
+                    corpus.add(t)
     if save_file:
         if file_path is None:
             file_path = default_file_path
@@ -333,10 +333,10 @@ def binary_classification_data_preparation(root: str = '..'):
     """
     Transform annual reports and summaries into files for sentence-level binary classification.
     """
-    generate_binary_labels_for_data(training=True, root=root)
-    generate_binary_labels_for_data(training=False, root=root)
-    assemble_data_csv(training=True, root=root)
-    assemble_data_csv(training=False, root=root)
+    # generate_binary_labels_for_data(training=True, root=root)
+    # generate_binary_labels_for_data(training=False, root=root)
+    # assemble_data_csv(training=True, root=root)
+    # assemble_data_csv(training=False, root=root)
     assemble_corpus_unique_words(root=root)
     embedding_model = get_embedding_model(root=root)
     embedding_weights = embedding_model.wv
@@ -348,7 +348,7 @@ def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
 
 
 def main():
-    # binary_classification_data_preparation(root='.')
+    binary_classification_data_preparation(root='.')
     pass
 
 
