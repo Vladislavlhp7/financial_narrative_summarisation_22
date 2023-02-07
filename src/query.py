@@ -221,6 +221,10 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False, r
                                                                                  all_summaries=True, root=root)
                 sent_label_mapping_df = pd.DataFrame().from_dict(sent_label_mapping, orient='index').reset_index()
                 sent_label_mapping_df.columns = ['sent', 'label']
+                # Add extra columns to handle imbalanced data
+                sent_label_mapping_df.reset_index(inplace=True)
+                sent_label_mapping_df.rename(columns={'index': 'sent_num'}, inplace=True)
+                sent_label_mapping_df['report'] = int(file_id)
                 # Compute simple statistics
                 sent_label_mapping_df['words_count'] = sent_label_mapping_df['sent'].apply(lambda x: len(x.split()) + 1)
                 sent_label_mapping_df.to_csv(binary_file_path, index=False)
@@ -230,21 +234,31 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False, r
             print('------------------------------------------')
 
 
-def assemble_data_csv(training: bool = True, store_df: bool = True, root: str = '..') -> pd.DataFrame:
+def get_sentence_level_df(training: bool = True, store_df: bool = True, file_path: str = None, root: str = '..') -> pd.DataFrame:
+    """
+    Return a dataframe containing sentence rows for all reports.
+    """
+    data_type = 'training' if training else 'validation'
+    if file_path is not None and os.path.exists(file_path):
+        print(f'Loading assembled {data_type} dataframe from {file_path}')
+        return pd.read_csv(file_path)
     files = get_file_handles_binary(training=training, root=root)
     dfs = []
-    data_type = 'training' if training else 'validation'
     for file_id in tqdm(files.keys(), f'Assembling binary classification {data_type} file'):
         path = get_binary_labels_data_dir(training=training, root=root) + file_id + '.csv'
         df = pd.read_csv(path)
+        # Ensure the report id exists to partition data before model training
+        if 'report' not in df.columns:
+            df['report'] = int(file_id)
         dfs.append(df)
     dfs = pd.concat(dfs)
     if store_df:
-        t = datetime.now().strftime("%Y-%m-%d %H-%M")
-        f = f'{root}/tmp/{data_type}_corpus_{t}.csv'
-        print(f'Storing corpus embedding df at {f}')
+        if file_path is None:
+            t = datetime.now().strftime("%Y-%m-%d %H-%M")
+            file_path = f'{root}/tmp/{data_type}_corpus_{t}.csv'
+        print(f'Storing assembled {data_type} dataframe to {file_path}')
         dfs = dfs.reset_index(drop=True)
-        dfs.to_csv(f)
+        dfs.to_csv(file_path, index=False)
     return dfs
 
 
@@ -256,8 +270,8 @@ def get_raw_data_dir(training: bool = True, root: str = '..') -> str:
     return path
 
 
-def assemble_corpus_unique_words(training: bool = True, validation: bool = True, save_file: bool = True,
-                                 root: str = '..', file_path: str = None, verbose: bool = False) -> List[str]:
+def get_corpus_vocabulary(training: bool = True, validation: bool = True, save_file: bool = True,
+                          root: str = '..', file_path: str = None, verbose: bool = False) -> List[str]:
     default_file_path = f'{root}/tmp/corpus.txt'
     if file_path is None:
         file_path = default_file_path
@@ -315,7 +329,7 @@ def get_keyed_word_vectors_pickle(embedding_weights, corpus_file_path: str = Non
         return token2embedding
     # Or pull corpus and re-generate the embedding dict
     print(f'Loading corpus to re-generate embedding dict')
-    tokens = assemble_corpus_unique_words(file_path=corpus_file_path, root=root)
+    tokens = get_corpus_vocabulary(file_path=corpus_file_path, root=root)
     token2embedding = {}
     for token in tokens:
         token2embedding[token] = embedding_weights[token]
@@ -339,11 +353,11 @@ def binary_classification_data_preparation(root: str = '..'):
     """
     Transform annual reports and summaries into files for sentence-level binary classification.
     """
-    # generate_binary_labels_for_data(training=True, root=root)
-    # generate_binary_labels_for_data(training=False, root=root)
-    # assemble_data_csv(training=True, root=root)
-    # assemble_data_csv(training=False, root=root)
-    assemble_corpus_unique_words(root=root)
+    generate_binary_labels_for_data(training=True, root=root)
+    generate_binary_labels_for_data(training=False, root=root)
+    get_sentence_level_df(training=True, root=root)
+    get_sentence_level_df(training=False, root=root)
+    get_corpus_vocabulary(root=root)
     embedding_model = get_embedding_model(root=root)
     embedding_weights = embedding_model.wv
     get_keyed_word_vectors_pickle(embedding_weights=embedding_weights, root=root)
