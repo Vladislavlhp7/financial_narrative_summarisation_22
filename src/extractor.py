@@ -15,7 +15,11 @@ def get_word_embedding(model, word: str):
     """
     Directly return word embedding
     """
-    return model.wv[word]
+    try:  # if loaded directly from embedding model, e.g., FastText
+        return model.wv[word]
+    except AttributeError:  # if we use a pseudo-model, Keyed Word Vectors over Vocabulary
+        return model[word]
+
 
 
 def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
@@ -112,7 +116,7 @@ class FNS2021(Dataset):
         """
         self.total_data_df = pd.read_csv(file)
         train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
-                                                   random_state=random_state)
+                                                   random_state=random_state, stratify=self.total_data_df.label)
         if training:
             self.sent_labels_df = train_df
         else:
