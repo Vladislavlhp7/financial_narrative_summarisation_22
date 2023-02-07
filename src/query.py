@@ -268,18 +268,24 @@ def assemble_corpus_unique_words(training: bool = True, validation: bool = True,
                 company = get_company_from_id(file_id=file_id, training=True, root=root)
                 print(company, end='\n\n')
             report = get_report(file_id=file_id, training=True, root=root)
-            report, _ = preprocess(report)
-            tokens = set(word_tokenize(report))
-            corpus = corpus.union(tokens)
+            # As classification model works on sentence-level embedding vectors
+            # apply word tokenization also on sentence level
+            _, report_tokenized = preprocess(report)
+            for s in report_tokenized.sentences:
+                tokens = set(word_tokenize(s))
+                corpus = corpus.union(tokens)
     if validation:
         for file_id in tqdm(get_file_handles(training=False, root=root).keys(), 'Retrieving validation data'):
             if verbose:
                 company = get_company_from_id(file_id=file_id, training=False, root=root)
                 print(company, end='\n\n')
             report = get_report(file_id=file_id, training=False, root=root)
-            report, _ = preprocess(report)
-            tokens = set(word_tokenize(report))
-            corpus = corpus.union(tokens)
+            # As classification model works on sentence-level embedding vectors
+            # apply word tokenization also on sentence level
+            _, report_tokenized = preprocess(report)
+            for s in report_tokenized.sentences:
+                tokens = set(word_tokenize(s))
+                corpus = corpus.union(tokens)
     if save_file:
         if file_path is None:
             file_path = default_file_path
@@ -342,6 +348,7 @@ def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
 
 
 def main():
+    # binary_classification_data_preparation(root='.')
     pass
 
 

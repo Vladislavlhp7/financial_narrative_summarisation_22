@@ -1,10 +1,8 @@
 import numpy as np
-
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from gensim.models import FastText
 from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
