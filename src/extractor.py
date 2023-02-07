@@ -27,7 +27,6 @@ def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
         if i > seq_len:
             break
         sent_arr.append(get_word_embedding(embedding_model, word))
-
     sent_tensor = torch.FloatTensor(np.array(sent_arr))
     return sent_tensor
 
@@ -128,15 +127,17 @@ class FNS2021(Dataset):
         return sent, label
 
 
-def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, tb_writer, criterion, optimizer):
+def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer, device):
     running_loss = 0.
     last_loss = 0.
 
     for i, (train_sents, train_labels) in enumerate(train_dataloader):
         batch_sent_tensor = batch_str_to_batch_tensors(train_sents=train_sents, embedding_model=embedding_model,
                                                        seq_len=seq_len)
-        output_labels = model(batch_sent_tensor)
+        batch_sent_tensor.to(device)
         train_labels = train_labels.long()
+        train_labels.to(device)
+        output_labels = model(batch_sent_tensor)
         loss = criterion(output_labels, train_labels)
         optimizer.zero_grad()
         loss.backward()
@@ -147,7 +148,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             last_loss = running_loss / 1000  # loss per batch
             print('  batch {} loss: {}'.format(i + 1, last_loss))
             tb_x = epoch_index * len(train_dataloader) + i + 1
-            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
+            writer.add_scalar('Loss/train', last_loss, tb_x)
             running_loss = 0.
     return last_loss
 
@@ -159,12 +160,13 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
 
     for epoch in tqdm(range(epochs)):
         print('EPOCH {}:'.format(epoch + 1))
+        # Training 1 Epoch
         model.train(True)
         training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
-                                        epoch_index=epoch,
+                                        epoch_index=epoch, device=device, writer=writer,
                                         criterion=criterion, optimizer=optimizer, train_dataloader=train_dataloader)
+        # Validation
         model.train(False)
-
         running_vloss = 0.
         i = 0
         for i, (v_sents, v_labels) in enumerate(validation_dataloader):
@@ -194,7 +196,14 @@ def main():
     batch_size = 16
 
     writer = SummaryWriter()
+
+    # Set device to CPU or CUDA
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    cuda = torch.cuda.is_available()
+    if cuda:
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
+        a = torch.randn(3, 3)
+        print(a.device)
 
     embedding_model = get_embedding_model(root='.')
 

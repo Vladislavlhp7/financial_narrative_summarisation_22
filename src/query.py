@@ -17,6 +17,7 @@ def get_file_handles(training: bool = True, gold: bool = False, root: str = '..'
         Retrieve file handles for training and validation reports and gold summaries
     :param training: bool
     :param gold: bool
+    :param root: str
     :return: dict of file paths
     """
     path = f'{root}/data/'
@@ -40,6 +41,7 @@ def get_gold_summaries_file_handles(file_id, training: bool = True, root: str = 
         There are a few gold summaries per report, and they are enumerated as <report>_<#summary>.txt
     :param file_id: str/int
     :param training: bool
+    :param root: str
     :return: list of file paths
     """
     path = f'{root}/data/'
@@ -109,6 +111,7 @@ def get_summary(file_id, summary_id=None, training: bool = True, root: str = '..
     :param file_id:
     :param summary_id:
     :param training:
+    :param root: str
     :return:
     """
     file_handles = get_gold_summaries_file_handles(file_id, training, root=root)
@@ -127,6 +130,7 @@ def get_all_summaries(file_id, training: bool = True, root: str = '..') -> Dict[
         Return all summaries (str) for a report
     :param file_id:
     :param training:
+    :param root: str
     :return:
     """
     file_handles = get_gold_summaries_file_handles(file_id, training, root=root)
@@ -189,6 +193,7 @@ def get_file_handles_binary(training: bool = True, root: str = '..') -> Dict[str
     """
         Retrieve file handles for training and validation report sentences and binary labels
     :param training: bool
+    :param root: str
     :return: dict of file paths
     """
     path = get_binary_labels_data_dir(training=training, root=root)
@@ -256,11 +261,12 @@ def assemble_corpus_unique_words(training: bool = True, validation: bool = True,
     default_file_path = f'{root}/tmp/corpus.txt'
     if file_path is None:
         file_path = default_file_path
-    print(f'Assembling corpus unique words to be stored at {file_path}')
     if os.path.exists(file_path):
+        print(f'Loading corpus of unique words from {file_path}')
         with open(file_path, 'r') as f:
             corpus_str = f.read()
         return corpus_str.split('\n')
+    print(f'Assembling corpus of unique words to be stored at {file_path}')
     corpus = set([])
     if training:
         for file_id in tqdm(get_file_handles(training=True, root=root).keys(), 'Retrieving training data'):
@@ -296,14 +302,14 @@ def assemble_corpus_unique_words(training: bool = True, validation: bool = True,
     return corpus_arr
 
 
-def assemble_word_embeddings_pickle(embedding_weights, corpus_file_path: str = None, save_file: bool = True,
-                                    root: str = '..', file_path: str = None):
+def get_keyed_word_vectors_pickle(embedding_weights, corpus_file_path: str = None, save_file: bool = True,
+                                  root: str = '..', file_path: str = None):
     # Try directly loading existing embedding dict from pickle file
     default_file_path = f'{root}/tmp/corpus_embeddings.pickle'
     if file_path is None:
         file_path = default_file_path
     if os.path.exists(file_path):
-        print(f'Reading embedding dict from {file_path}')
+        print(f'Loading Keyed Word Vectors from {file_path}')
         with open(file_path, 'rb') as handle:
             token2embedding = pickle.load(handle)
         return token2embedding
@@ -340,15 +346,15 @@ def binary_classification_data_preparation(root: str = '..'):
     assemble_corpus_unique_words(root=root)
     embedding_model = get_embedding_model(root=root)
     embedding_weights = embedding_model.wv
-    assemble_word_embeddings_pickle(embedding_weights=embedding_weights, root=root)
+    get_keyed_word_vectors_pickle(embedding_weights=embedding_weights, root=root)
 
 
-def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
-    pass
+# def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
+#     pass
 
 
 def main():
-    binary_classification_data_preparation(root='.')
+    # binary_classification_data_preparation(root='.')
     pass
 
 
