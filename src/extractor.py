@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
-from src.query import get_embedding_model
+from src.query import get_embedding_model, get_keyed_word_vectors_pickle
 
 
 def get_word_embedding(model, word: str):
@@ -19,7 +19,6 @@ def get_word_embedding(model, word: str):
         return model.wv[word]
     except AttributeError:  # if we use a pseudo-model, Keyed Word Vectors over Vocabulary
         return model[word]
-
 
 
 def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
@@ -131,16 +130,14 @@ class FNS2021(Dataset):
         return sent, label
 
 
-def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer, device):
+def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer):
     running_loss = 0.
     last_loss = 0.
 
     for i, (train_sents, train_labels) in enumerate(train_dataloader):
         batch_sent_tensor = batch_str_to_batch_tensors(train_sents=train_sents, embedding_model=embedding_model,
                                                        seq_len=seq_len)
-        batch_sent_tensor.to(device)
         train_labels = train_labels.long()
-        train_labels.to(device)
         output_labels = model(batch_sent_tensor)
         loss = criterion(output_labels, train_labels)
         optimizer.zero_grad()
@@ -158,7 +155,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
 
 
 def train(model, embedding_model, train_dataloader, validation_dataloader, writer,
-          epochs: int = 60, lr: float = 1e-3, seq_len: int = 50, device: str = 'cpu'):
+          epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -167,8 +164,8 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         # Training 1 Epoch
         model.train(True)
         training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
-                                        epoch_index=epoch, device=device, writer=writer,
-                                        criterion=criterion, optimizer=optimizer, train_dataloader=train_dataloader)
+                                        epoch_index=epoch, writer=writer, criterion=criterion,
+                                        optimizer=optimizer, train_dataloader=train_dataloader)
         # Validation
         model.train(False)
         running_vloss = 0.
@@ -176,9 +173,7 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         for i, (v_sents, v_labels) in enumerate(validation_dataloader):
             batch_sent_tensor = batch_str_to_batch_tensors(train_sents=v_sents, embedding_model=embedding_model,
                                                            seq_len=seq_len)
-            batch_sent_tensor.to(device)
             train_labels = v_labels.long()
-            train_labels.to(device)
             output_labels = model(batch_sent_tensor)
             vloss = criterion(output_labels, train_labels)
             running_vloss += vloss
@@ -192,6 +187,8 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
 
 
 def main():
+    LOAD_KEYED_VECTOR = True
+
     lr = 1e-3
     EPOCHS = 60
     input_size = 300
@@ -202,27 +199,30 @@ def main():
     writer = SummaryWriter()
 
     # Set device to CPU or CUDA
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     cuda = torch.cuda.is_available()
     if cuda:
+        print('Computational device chosen: CUDA')
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
-        a = torch.randn(3, 3)
-        print(a.device)
+    else:
+        print('Computational device chosen: CPU')
 
-    embedding_model = get_embedding_model(root='.')
+    if LOAD_KEYED_VECTOR:
+        embedding_model = get_keyed_word_vectors_pickle(root='.')
+    else:
+        embedding_model = get_embedding_model(root='.')
 
     model = LSTM(input_size=input_size, num_layers=num_layers)
-    model.to(device)
 
     print('Loading Training & Validation Data')
-    training_data = FNS2021(file='../tmp/training_corpus_20230129 16:01.csv', training=True)
-    validation_data = FNS2021(file='../tmp/training_corpus_20230129 16:01.csv', training=False)
+    data_filename = 'training_corpus_2023-02-07 16-33.csv'
+    training_data = FNS2021(file=f'../tmp/{data_filename}', training=True)
+    validation_data = FNS2021(file=f'../tmp/{data_filename}', training=False)
     train_dataloader = DataLoader(training_data, batch_size=batch_size, drop_last=True)
     validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
 
     print('Starting LSTM training')
     train(model=model, embedding_model=embedding_model,
           train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
-          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=writer, device=device)
+          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=writer)
 
 # main()
