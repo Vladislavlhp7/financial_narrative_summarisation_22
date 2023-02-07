@@ -7,7 +7,7 @@ from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
-
+from torch.utils.tensorboard import SummaryWriter
 from src.query import get_embedding_model
 
 
@@ -153,7 +153,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
 
 
 def train(model, embedding_model, train_dataloader, validation_dataloader, writer,
-          epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
+          epochs: int = 60, lr: float = 1e-3, seq_len: int = 50, device: str = 'cpu'):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -170,18 +170,19 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         for i, (v_sents, v_labels) in enumerate(validation_dataloader):
             batch_sent_tensor = batch_str_to_batch_tensors(train_sents=v_sents, embedding_model=embedding_model,
                                                            seq_len=seq_len)
-            output_labels = model(batch_sent_tensor)
+            batch_sent_tensor.to(device)
             train_labels = v_labels.long()
+            train_labels.to(device)
+            output_labels = model(batch_sent_tensor)
             vloss = criterion(output_labels, train_labels)
             running_vloss += vloss
         validation_loss = running_vloss / (i + 1)
         print('LOSS train {} valid {}'.format(training_loss, validation_loss))
 
-        # Log the running loss averaged per batch
-        # for both training and validation
-        # writer.add_scalars('Training vs. Validation Loss',
-        #                    {'Training': training_loss, 'Validation': validation_loss}, epoch + 1)
-        # writer.flush()
+        # Log the running loss averaged per batch for both training and validation
+        writer.add_scalars('Training vs. Validation Loss',
+                           {'Training': training_loss, 'Validation': validation_loss}, epoch + 1)
+        writer.flush()
 
 
 def main():
@@ -192,18 +193,23 @@ def main():
     num_layers = 2
     batch_size = 16
 
+    writer = SummaryWriter()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
     embedding_model = get_embedding_model(root='.')
 
     model = LSTM(input_size=input_size, num_layers=num_layers)
+    model.to(device)
+
     print('Loading Training & Validation Data')
     training_data = FNS2021(file='../tmp/training_corpus_20230129 16:01.csv', training=True)
     validation_data = FNS2021(file='../tmp/training_corpus_20230129 16:01.csv', training=False)
-
     train_dataloader = DataLoader(training_data, batch_size=batch_size, drop_last=True)
     validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
+
     print('Starting LSTM training')
     train(model=model, embedding_model=embedding_model,
           train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
-          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=None)
+          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=writer, device=device)
 
 # main()

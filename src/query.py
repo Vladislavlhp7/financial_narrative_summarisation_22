@@ -286,14 +286,14 @@ def assemble_corpus_unique_words(training: bool = True, validation: bool = True,
             for s in report_tokenized.sentences:
                 for t in word_tokenize(s):
                     corpus.add(t)
+    corpus_arr = sorted(list(corpus))
     if save_file:
         if file_path is None:
             file_path = default_file_path
-        corpus_arr = sorted(list(corpus))
         with open(f'{file_path}', 'w') as f:
             for token in corpus_arr:
                 f.write(f"{token}\n")
-    return corpus
+    return corpus_arr
 
 
 def assemble_word_embeddings_pickle(embedding_weights, corpus_file_path: str = None, save_file: bool = True,
