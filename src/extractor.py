@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import numpy as np
 import pandas as pd
 import torch
@@ -41,7 +40,7 @@ class EarlyTrainingStop:
     Implement a class for early stopping of training when validation loss starts increasing
     """
 
-    def __init__(self, validation_loss: float = -np.inf, delta: float = 0.0, counter: int = 0, patience: int = 1):
+    def __init__(self, validation_loss: float = np.inf, delta: float = 0.0, counter: int = 0, patience: int = 1):
         self.validation_loss = validation_loss
         self.delta = delta
         self.counter = counter
@@ -155,7 +154,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             print('  batch {} loss: {}'.format(i + 1, last_loss))
             tb_x = epoch_index * len(train_dataloader) + i + 1
             writer.add_scalar('Loss/train', last_loss, tb_x)
-            running_loss = 0.
+            running_loss = 0.0
     return last_loss
 
 
@@ -193,6 +192,7 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         # Stop training if validation loss starts growing and save model parameters
         if early_stopper.early_stop(validation_loss=validation_loss):
             torch.save(model.state_dict(), model.name)
+            break
 
 
 def main():
