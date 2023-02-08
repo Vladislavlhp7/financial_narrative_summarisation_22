@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -94,6 +94,8 @@ class LSTM(nn.Module):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = True
+        dt = datetime.now().strftime("%Y-%m-%d-%H-%M")
+        self.name = f'LSTM_bin_classifier-{dt}.pt'
         self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers,
                             bidirectional=bidirectional, batch_first=batch_first)
         if bidirectional:
@@ -190,9 +192,7 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         writer.flush()
         # Stop training if validation loss starts growing and save model parameters
         if early_stopper.early_stop(validation_loss=validation_loss):
-            dt = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
-            path = f'LSTM_bin_classifier-{dt}.pt'
-            torch.save(model.state_dict(), path)
+            torch.save(model.state_dict(), model.name)
 
 
 def main():
@@ -204,8 +204,7 @@ def main():
     seq_len = 50
     num_layers = 2
     batch_size = 16
-
-    writer = SummaryWriter()  # TODO: log_dir=""
+    root = '.'
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
@@ -216,16 +215,19 @@ def main():
         print('Computational device chosen: CPU')
 
     if LOAD_KEYED_VECTOR:
-        embedding_model = get_keyed_word_vectors_pickle(root='.')
+        embedding_model = get_keyed_word_vectors_pickle(root=root)
     else:
-        embedding_model = get_embedding_model(root='.')
+        embedding_model = get_embedding_model(root=root)
 
     model = LSTM(input_size=input_size, num_layers=num_layers)
 
+    # writer_dir = f'{root}/tmp/tensorboard/'
+    writer = SummaryWriter(model.name)
+
     print('Loading Training & Validation Data')
     data_filename = 'training_corpus_2023-02-07 16-33.csv'
-    training_data = FNS2021(file=f'../tmp/{data_filename}', training=True)
-    validation_data = FNS2021(file=f'../tmp/{data_filename}', training=False)
+    training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True)
+    validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=False)
     train_dataloader = DataLoader(training_data, batch_size=batch_size, drop_last=True)
     validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
 
