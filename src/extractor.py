@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 import torch
@@ -8,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
-from src.query import get_embedding_model, get_keyed_word_vectors_pickle
+from query import get_embedding_model, get_keyed_word_vectors_pickle
 
 
 def get_word_embedding(model, word: str):
@@ -39,7 +41,7 @@ class EarlyTrainingStop:
     Implement a class for early stopping of training when validation loss starts increasing
     """
 
-    def __init__(self, validation_loss: float, delta: float = 0.0, counter: int = 0, patience: int = 3):
+    def __init__(self, validation_loss: float = -np.inf, delta: float = 0.0, counter: int = 0, patience: int = 1):
         self.validation_loss = validation_loss
         self.delta = delta
         self.counter = counter
@@ -138,9 +140,10 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
         batch_sent_tensor = batch_str_to_batch_tensors(train_sents=train_sents, embedding_model=embedding_model,
                                                        seq_len=seq_len)
         train_labels = train_labels.long()
+
+        optimizer.zero_grad()
         output_labels = model(batch_sent_tensor)
         loss = criterion(output_labels, train_labels)
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
@@ -158,6 +161,7 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
           epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    early_stopper = EarlyTrainingStop()
 
     for epoch in tqdm(range(epochs)):
         print('EPOCH {}:'.format(epoch + 1))
@@ -174,29 +178,34 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
             batch_sent_tensor = batch_str_to_batch_tensors(train_sents=v_sents, embedding_model=embedding_model,
                                                            seq_len=seq_len)
             train_labels = v_labels.long()
+
             output_labels = model(batch_sent_tensor)
             vloss = criterion(output_labels, train_labels)
             running_vloss += vloss
         validation_loss = running_vloss / (i + 1)
         print('LOSS train {} valid {}'.format(training_loss, validation_loss))
-
         # Log the running loss averaged per batch for both training and validation
         writer.add_scalars('Training vs. Validation Loss',
                            {'Training': training_loss, 'Validation': validation_loss}, epoch + 1)
         writer.flush()
+        # Stop training if validation loss starts growing and save model parameters
+        if early_stopper.early_stop(validation_loss=validation_loss):
+            dt = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
+            path = f'LSTM_bin_classifier-{dt}.pt'
+            torch.save(model.state_dict(), path)
 
 
 def main():
     LOAD_KEYED_VECTOR = True
 
     lr = 1e-3
-    EPOCHS = 60
+    EPOCHS = 3
     input_size = 300
     seq_len = 50
     num_layers = 2
     batch_size = 16
 
-    writer = SummaryWriter()
+    writer = SummaryWriter()  # TODO: log_dir=""
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
