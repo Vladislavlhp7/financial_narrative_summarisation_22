@@ -155,7 +155,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             tb_x = epoch_index * len(train_dataloader) + i + 1
             writer.add_scalar('Loss/train', last_loss, tb_x)
             running_loss = 0.0
-            torch.save(model.state_dict(), model.name)
+            # torch.save(model.state_dict(), model.name)
     return last_loss
 
 
