@@ -155,6 +155,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             tb_x = epoch_index * len(train_dataloader) + i + 1
             writer.add_scalar('Loss/train', last_loss, tb_x)
             running_loss = 0.0
+            torch.save(model.state_dict(), model.name)
     return last_loss
 
 
@@ -195,16 +196,11 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
             break
 
 
-def main():
+def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-3):
     LOAD_KEYED_VECTOR = True
-
-    lr = 1e-3
-    EPOCHS = 3
     input_size = 300
     seq_len = 50
     num_layers = 2
-    batch_size = 16
-    root = '.'
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
@@ -214,6 +210,7 @@ def main():
     else:
         print('Computational device chosen: CPU')
 
+    # Load Embeddings either by vocabulary keyed vector or FastText model
     if LOAD_KEYED_VECTOR:
         embedding_model = get_keyed_word_vectors_pickle(root=root)
     else:
@@ -221,8 +218,7 @@ def main():
 
     model = LSTM(input_size=input_size, num_layers=num_layers)
 
-    # writer_dir = f'{root}/tmp/tensorboard/'
-    writer = SummaryWriter(model.name)
+    writer = SummaryWriter('PyCharm-' + model.name)
 
     print('Loading Training & Validation Data')
     data_filename = 'training_corpus_2023-02-07 16-33.csv'
@@ -236,4 +232,27 @@ def main():
           train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
           lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=writer)
 
-# main()
+
+def experiment1(root: str = '..'):
+    lr = 1e-3
+    EPOCHS = 3
+    batch_size = 16
+    run(lr=lr, EPOCHS=EPOCHS, batch_size=batch_size, root=root)
+
+
+def experiment2(root: str = '..'):
+    # TODO: multiple learning rates, many epochs
+    pass
+
+
+def experiment3(root: str = '..'):
+    # TODO: Adaptive learning rate, many epochs
+    pass
+
+
+def main():
+    root = '..'
+    experiment1(root=root)
+
+
+main()
