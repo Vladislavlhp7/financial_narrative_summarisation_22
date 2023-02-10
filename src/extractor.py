@@ -1,4 +1,6 @@
 from datetime import datetime
+
+import nltk
 import numpy as np
 import pandas as pd
 import torch
@@ -251,6 +253,7 @@ def experiment3(root: str = '..'):
 
 
 def main():
+    nltk.download('punkt')
     root = '..'
     experiment1(root=root)
 
