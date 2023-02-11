@@ -158,7 +158,13 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             tb_x = epoch_index * len(train_dataloader) + i + 1
             writer.add_scalar('Loss/train', last_loss, tb_x)
             running_loss = 0.0
-            torch.save(model.state_dict(), model.name)
+            model.cpu()
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'epoch': epoch_index,
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': last_loss}, model.name)
+            model.cuda()
     return last_loss
 
 
@@ -195,7 +201,14 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         writer.flush()
         # Stop training if validation loss starts growing and save model parameters
         if early_stopper.early_stop(validation_loss=validation_loss):
-            torch.save(model.state_dict(), model.name)
+            model.cpu()
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'epoch': epoch,
+                'optimizer_state_dict': optimizer.state_dict(),
+                'training_loss': training_loss,
+                'validation_loss': validation_loss}, model.name)
+            model.cuda()
             break
 
 
