@@ -266,7 +266,6 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         current_epoch = checkpoint['epoch']
-        # loss = checkpoint['loss']
 
     train(model=model, embedding_model=embedding_model,
           train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,

@@ -329,7 +329,6 @@ def get_keyed_word_vectors_pickle(embedding_weights=None, corpus_file_path: str 
             token2embedding = pickle.load(handle)
         return token2embedding
     # Or pull corpus and re-generate the embedding dict
-    assert (embedding_weights is not None, "Embedding model weights are not provided")
     print(f'Loading corpus to re-generate embedding dict')
     tokens = get_corpus_vocabulary(file_path=corpus_file_path, root=root)
     token2embedding = {}
