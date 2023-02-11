@@ -43,7 +43,7 @@ class EarlyTrainingStop:
     Implement a class for early stopping of training when validation loss starts increasing
     """
 
-    def __init__(self, validation_loss: float = np.inf, delta: float = 0.0, counter: int = 0, patience: int = 1):
+    def __init__(self, validation_loss: float = np.inf, delta: float = 0.04, counter: int = 0, patience: int = 3):
         self.validation_loss = validation_loss
         self.delta = delta
         self.counter = counter
@@ -136,7 +136,7 @@ class FNS2021(Dataset):
         return sent, label
 
 
-def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer):
+def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer, save_checkpoint):
     running_loss = 0.
     last_loss = 0.
 
@@ -158,17 +158,18 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             tb_x = epoch_index * len(train_dataloader) + i + 1
             writer.add_scalar('Loss/train', last_loss, tb_x)
             running_loss = 0.0
-            model.cpu()
-            torch.save({
-                'model_state_dict': model.state_dict(),
-                'epoch': epoch_index,
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': last_loss}, model.name)
-            model.cuda()
+            if save_checkpoint:
+                model.cpu()
+                torch.save({
+                    'model_state_dict': model.state_dict(),
+                    'epoch': epoch_index,
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': last_loss}, model.name)
+                model.cuda()
     return last_loss
 
 
-def train(model, embedding_model, train_dataloader, validation_dataloader, writer,
+def train(model, embedding_model, train_dataloader, validation_dataloader, writer, save_checkpoint,
           epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -179,7 +180,7 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
         # Training 1 Epoch
         model.train(True)
         training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
-                                        epoch_index=epoch, writer=writer, criterion=criterion,
+                                        epoch_index=epoch, writer=writer, criterion=criterion, save_checkpoint=save_checkpoint,
                                         optimizer=optimizer, train_dataloader=train_dataloader)
         # Validation
         model.train(False)
@@ -218,6 +219,7 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
     input_size = 300
     seq_len = 50
     num_layers = 2
+    save_checkpoint = False
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
@@ -257,7 +259,7 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
     print('Starting LSTM training')
     train(model=model, embedding_model=embedding_model,
           train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
-          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=writer)
+          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=writer, save_checkpoint=save_checkpoint)
 
 
 def experiment1(root: str = '..'):
