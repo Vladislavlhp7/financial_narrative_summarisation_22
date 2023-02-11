@@ -25,7 +25,7 @@ def get_word_embedding(model, word: str):
         return model[word]
 
 
-def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 50):
+def get_sentence_tensor(embedding_model, sentence: str, seq_len: int = 100):
     """
     Assemble a sentence tensor by directly loading word embeddings from a pre-trained embedding model up to max length
     """
@@ -74,7 +74,7 @@ def pad_batch(batch_sent_arr):
     return padded_batch
 
 
-def batch_str_to_batch_tensors(train_sents, embedding_model, seq_len: int = 50):
+def batch_str_to_batch_tensors(train_sents, embedding_model, seq_len: int = 100):
     """
     Convert a list of batch sentences to a batch tensor
     """
@@ -170,7 +170,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
 
 
 def train(model, embedding_model, optimizer, train_dataloader, validation_dataloader, writer, save_checkpoint,
-          current_epoch: int = 0, epochs: int = 60, seq_len: int = 50):
+          current_epoch: int = 0, epochs: int = 60, seq_len: int = 100):
     criterion = nn.CrossEntropyLoss()
     early_stopper = EarlyTrainingStop()
 
@@ -214,7 +214,7 @@ def train(model, embedding_model, optimizer, train_dataloader, validation_datalo
 
 def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-3):
     input_size = 300
-    seq_len = 50
+    seq_len = 100
     num_layers = 2
     current_epoch = 0
 
