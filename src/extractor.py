@@ -1,9 +1,9 @@
 from datetime import datetime
-
 import nltk
 import numpy as np
 import pandas as pd
 import torch
+import gc
 import torch.nn as nn
 import torch.nn.functional as F
 from nltk import word_tokenize
@@ -228,6 +228,10 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
     cuda = torch.cuda.is_available()
     if cuda:
         print('Computational device chosen: CUDA')
+        # Empty CUDA cache
+        gc.collect()
+        torch.cuda.empty_cache()
+        # Set data types to default CUDA standard
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
     else:
         print('Computational device chosen: CPU')
@@ -274,8 +278,8 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
 
 def experiment1(root: str = '..'):
     lr = 1e-3
-    EPOCHS = 3
-    batch_size = 16
+    EPOCHS = 16
+    batch_size = 4
     run(lr=lr, EPOCHS=EPOCHS, batch_size=batch_size, root=root)
 
 
