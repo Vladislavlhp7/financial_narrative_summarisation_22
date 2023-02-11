@@ -9,9 +9,10 @@ import torch.nn.functional as F
 from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
-from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
-from query import get_embedding_model, get_keyed_word_vectors_pickle
+from tqdm import tqdm
+
+from query import get_embedding_model, get_keyed_word_vectors_pickle, recalc_keyed_vector
 
 
 def get_word_embedding(model, word: str):
@@ -157,7 +158,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
             tb_x = epoch_index * len(train_dataloader) + i + 1
             writer.add_scalar('Loss/train', last_loss, tb_x)
             running_loss = 0.0
-            # torch.save(model.state_dict(), model.name)
+            torch.save(model.state_dict(), model.name)
     return last_loss
 
 
@@ -199,6 +200,7 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
 
 
 def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-3):
+    REGEN_VOCAB = False
     LOAD_KEYED_VECTOR = True
     input_size = 300
     seq_len = 50
@@ -212,22 +214,32 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
     else:
         print('Computational device chosen: CPU')
 
-    # Load Embeddings either by vocabulary keyed vector or FastText model
-    if LOAD_KEYED_VECTOR:
-        embedding_model = get_keyed_word_vectors_pickle(root=root)
-    else:
-        embedding_model = get_embedding_model(root=root)
-
-    model = LSTM(input_size=input_size, num_layers=num_layers)
-
-    writer = SummaryWriter('PyCharm-' + model.name)
-
     print('Loading Training & Validation Data')
     data_filename = 'training_corpus_2023-02-07 16-33.csv'
     training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True)
     validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=False)
     train_dataloader = DataLoader(training_data, batch_size=batch_size, drop_last=True)
     validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
+
+    embedding_model = None
+    if REGEN_VOCAB:
+        embedding_model_weights = get_embedding_model(root=root).wv
+        embedding_model = recalc_keyed_vector(root=root, train_dataloader=train_dataloader,
+                                              validation_dataloader=validation_dataloader,
+                                              embedding_weights=embedding_model_weights,
+                                              file_path=f'{root}/tmp/corpus_embeddings_CSF.pickle')
+
+    # Load Embeddings either by vocabulary keyed vector or FastText model
+    if LOAD_KEYED_VECTOR:
+        embedding_model = get_keyed_word_vectors_pickle(root=root, file_path=f'{root}/tmp/corpus_embeddings_CSF.pickle')
+    elif not REGEN_VOCAB:
+        embedding_model = get_embedding_model(root=root)
+    else:
+        pass
+
+    model = LSTM(input_size=input_size, num_layers=num_layers)
+
+    writer = SummaryWriter('PyCharm-' + model.name)
 
     print('Starting LSTM training')
     train(model=model, embedding_model=embedding_model,

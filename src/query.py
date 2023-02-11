@@ -234,7 +234,8 @@ def generate_binary_labels_for_data(training: bool = True, gold: bool = False, r
             print('------------------------------------------')
 
 
-def get_sentence_level_df(training: bool = True, store_df: bool = True, file_path: str = None, root: str = '..') -> pd.DataFrame:
+def get_sentence_level_df(training: bool = True, store_df: bool = True, file_path: str = None,
+                          root: str = '..') -> pd.DataFrame:
     """
     Return a dataframe containing sentence rows for all reports.
     """
@@ -316,7 +317,7 @@ def get_corpus_vocabulary(training: bool = True, validation: bool = True, save_f
     return corpus_arr
 
 
-def get_keyed_word_vectors_pickle(embedding_weights = None, corpus_file_path: str = None, save_file: bool = True,
+def get_keyed_word_vectors_pickle(embedding_weights=None, corpus_file_path: str = None, save_file: bool = True,
                                   root: str = '..', file_path: str = None):
     # Try directly loading existing embedding dict from pickle file
     default_file_path = f'{root}/tmp/corpus_embeddings.pickle'
@@ -328,7 +329,7 @@ def get_keyed_word_vectors_pickle(embedding_weights = None, corpus_file_path: st
             token2embedding = pickle.load(handle)
         return token2embedding
     # Or pull corpus and re-generate the embedding dict
-    assert(embedding_weights is not None, "Embedding model weights are not provided")
+    assert (embedding_weights is not None, "Embedding model weights are not provided")
     print(f'Loading corpus to re-generate embedding dict')
     tokens = get_corpus_vocabulary(file_path=corpus_file_path, root=root)
     token2embedding = {}
@@ -348,6 +349,41 @@ def get_embedding_model(root: str = '..'):
     path = f'{root}/resources/FinText_FastText_CBOW/Word_Embedding_2000_2015'
     embedding_model = FastText.load(path)
     return embedding_model
+
+
+def recalc_keyed_vector(embedding_weights, train_dataloader, validation_dataloader, file_path: str = None,
+                        save_file: bool = True, root: str = '..'):
+    # Try directly loading existing embedding dict from pickle file
+    default_file_path = f'{root}/tmp/corpus_embeddings_CSF.pickle'
+    if file_path is None:
+        file_path = default_file_path
+    if os.path.exists(file_path):
+        print(f'Loading Keyed Word Vectors from {file_path}')
+        with open(file_path, 'rb') as handle:
+            token2embedding = pickle.load(handle)
+        return token2embedding
+    print('Pulling out vocabulary')
+    corpus = set()
+    for i, (sents, labels) in enumerate(train_dataloader):
+        for j, s in enumerate(sents):
+            for t in word_tokenize(s):
+                corpus.add(t)
+    for i, (sents, labels) in enumerate(validation_dataloader):
+        for j, s in enumerate(sents):
+            for t in word_tokenize(s):
+                corpus.add(t)
+    tokens = sorted(list(corpus))
+    print('Recalculating Keyed Word Vector Embeddings')
+    token2embedding = {}
+    for token in tokens:
+        token2embedding[token] = embedding_weights[token]
+    if save_file:
+        if file_path is None:
+            file_path = default_file_path
+        print(f'Saving embedding dict to {file_path}')
+        with open(file_path, 'wb') as handle:
+            pickle.dump(token2embedding, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return token2embedding
 
 
 def binary_classification_data_preparation(root: str = '..'):
