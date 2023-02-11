@@ -169,13 +169,12 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
     return last_loss
 
 
-def train(model, embedding_model, train_dataloader, validation_dataloader, writer, save_checkpoint,
-          epochs: int = 60, lr: float = 1e-3, seq_len: int = 50):
+def train(model, embedding_model, optimizer, train_dataloader, validation_dataloader, writer, save_checkpoint,
+          current_epoch: int = 0, epochs: int = 60, seq_len: int = 50):
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     early_stopper = EarlyTrainingStop()
 
-    for epoch in tqdm(range(epochs)):
+    for epoch in tqdm(range(current_epoch, epochs)):
         print('EPOCH {}:'.format(epoch + 1))
         # Training 1 Epoch
         model.train(True)
@@ -214,11 +213,15 @@ def train(model, embedding_model, train_dataloader, validation_dataloader, write
 
 
 def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-3):
-    REGEN_VOCAB = False
-    LOAD_KEYED_VECTOR = True
     input_size = 300
     seq_len = 50
     num_layers = 2
+    current_epoch = 0
+
+    REGEN_VOCAB = False
+    LOAD_KEYED_VECTOR = True
+    LOAD_EXISTING_MODEL = True
+    existing_model_path = 'LSTM_bin_classifier-2023-02-11-02-09.pt'
     save_checkpoint = False
 
     # Set device to CPU or CUDA
@@ -253,13 +256,21 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
         pass
 
     model = LSTM(input_size=input_size, num_layers=num_layers)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     writer = SummaryWriter('PyCharm-' + model.name)
 
     print('Starting LSTM training')
+    if LOAD_EXISTING_MODEL:
+        checkpoint = torch.load(existing_model_path, map_location=torch.device('cpu'))
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        current_epoch = checkpoint['epoch']
+        # loss = checkpoint['loss']
+
     train(model=model, embedding_model=embedding_model,
-          train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
-          lr=lr, epochs=EPOCHS, seq_len=seq_len, writer=writer, save_checkpoint=save_checkpoint)
+          train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,
+          current_epoch=current_epoch, epochs=EPOCHS, seq_len=seq_len, writer=writer, save_checkpoint=save_checkpoint)
 
 
 def experiment1(root: str = '..'):
