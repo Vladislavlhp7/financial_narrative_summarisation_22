@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -114,18 +115,33 @@ class LSTM(nn.Module):
 
 
 class FNS2021(Dataset):
-    def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1):
+    def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1, downsample_rate: float = 0.5):
         """
         Custom class for FNS 2021 Competition to load training and validation data. \
         Original validation data is used as testing
         """
         self.total_data_df = pd.read_csv(file)
+        if downsample_rate is not None:
+            self.downsample(rate=downsample_rate, random_state=random_state)
         train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
                                                    random_state=random_state, stratify=self.total_data_df.label)
         if training:
             self.sent_labels_df = train_df
         else:
             self.sent_labels_df = validation_df
+
+    def downsample(self, rate: float = 0.5, random_state: int = 1):
+        df = self.sent_labels_df
+        df.index.name = 'sent_index'
+        df.reset_index(inplace=True)
+        summary_df = df.loc[df['label'] == 1]
+        non_summary_df = df.loc[df['label'] == 0]
+        non_summary_df = resample(non_summary_df,
+                                  replace=True,
+                                  n_samples=int(len(non_summary_df) * (1 - rate)),
+                                  random_state=random_state)
+        self.sent_labels_df = pd.concat([summary_df, non_summary_df]).sort_values(['sent_index'])
+        # TODO: Downsample only when report data is predominantly 0-labeled
 
     def __len__(self):
         return len(self.total_data_df)
@@ -136,7 +152,8 @@ class FNS2021(Dataset):
         return sent, label
 
 
-def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer, save_checkpoint):
+def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer,
+                    save_checkpoint):
     running_loss = 0.
     last_loss = 0.
 
@@ -179,7 +196,8 @@ def train(model, embedding_model, optimizer, train_dataloader, validation_datalo
         # Training 1 Epoch
         model.train(True)
         training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
-                                        epoch_index=epoch, writer=writer, criterion=criterion, save_checkpoint=save_checkpoint,
+                                        epoch_index=epoch, writer=writer, criterion=criterion,
+                                        save_checkpoint=save_checkpoint,
                                         optimizer=optimizer, train_dataloader=train_dataloader)
         # Validation
         model.train(False)
