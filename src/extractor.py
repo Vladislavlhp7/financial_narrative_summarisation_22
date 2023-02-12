@@ -131,7 +131,7 @@ class FNS2021(Dataset):
             self.sent_labels_df = validation_df
 
     def downsample(self, rate: float = 0.5, random_state: int = 1):
-        df = self.sent_labels_df
+        df = self.total_data_df
         df.index.name = 'sent_index'
         df.reset_index(inplace=True)
         summary_df = df.loc[df['label'] == 1]
