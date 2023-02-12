@@ -237,10 +237,10 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
     current_epoch = 0
 
     REGEN_VOCAB = False
-    LOAD_KEYED_VECTOR = True
+    LOAD_KEYED_VECTOR = False
     LOAD_EXISTING_MODEL = False
     existing_model_path = 'LSTM_bin_classifier-2023-02-11-02-09.pt'
-    save_checkpoint = False
+    save_checkpoint = True
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
@@ -253,6 +253,7 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
     else:
         print('Computational device chosen: CPU')
+    embedding_model = None
 
     print('Loading Training & Validation Data')
     data_filename = 'training_corpus_2023-02-07 16-33.csv'
@@ -261,7 +262,6 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
     train_dataloader = DataLoader(training_data, batch_size=batch_size, drop_last=True)
     validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
 
-    embedding_model = None
     if REGEN_VOCAB:
         embedding_model_weights = get_embedding_model(root=root).wv
         embedding_model = recalc_keyed_vector(root=root, train_dataloader=train_dataloader,
@@ -276,7 +276,6 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
         embedding_model = get_embedding_model(root=root)
     else:
         pass
-
     model = LSTM(input_size=input_size, num_layers=num_layers)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -297,7 +296,7 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
 def experiment1(root: str = '..'):
     lr = 1e-3
     EPOCHS = 16
-    batch_size = 1
+    batch_size = 4
     run(lr=lr, EPOCHS=EPOCHS, batch_size=batch_size, root=root)
 
 
