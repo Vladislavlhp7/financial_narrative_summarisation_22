@@ -120,7 +120,7 @@ class FNS2021(Dataset):
         Custom class for FNS 2021 Competition to load training and validation data. \
         Original validation data is used as testing
         """
-        self.total_data_df = pd.read_csv(file)
+        self.total_data_df = pd.read_csv(file).drop(columns=['Unnamed: 0'], errors='ignore')
         if downsample_rate is not None:
             self.downsample(rate=downsample_rate, random_state=random_state)
         train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
@@ -129,6 +129,7 @@ class FNS2021(Dataset):
             self.sent_labels_df = train_df
         else:
             self.sent_labels_df = validation_df
+        self.sent_labels_df.reset_index(drop=True, inplace=True)
 
     def downsample(self, rate: float = 0.5, random_state: int = 1):
         df = self.total_data_df
@@ -140,7 +141,7 @@ class FNS2021(Dataset):
                                   replace=True,
                                   n_samples=int(len(non_summary_df) * (1 - rate)),
                                   random_state=random_state)
-        self.total_data_df = pd.concat([summary_df, non_summary_df]).sort_values(['sent_index'])
+        self.total_data_df = pd.concat([summary_df, non_summary_df]).sort_values(['sent_index']).reset_index(drop=True)
         # TODO: Downsample only when report data is predominantly 0-labeled
 
     def __len__(self):
