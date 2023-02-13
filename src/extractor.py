@@ -115,7 +115,7 @@ class LSTM(nn.Module):
 
 
 class FNS2021(Dataset):
-    def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1, downsample_rate: float = 0.5):
+    def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1, downsample_rate: float = 0.9):
         """
         Custom class for FNS 2021 Competition to load training and validation data. \
         Original validation data is used as testing
@@ -296,7 +296,7 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
 def experiment1(root: str = '..'):
     lr = 1e-3
     EPOCHS = 16
-    batch_size = 4
+    batch_size = 16
     run(lr=lr, EPOCHS=EPOCHS, batch_size=batch_size, root=root)
 
 
