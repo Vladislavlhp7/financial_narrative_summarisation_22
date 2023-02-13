@@ -153,15 +153,15 @@ class FNS2021(Dataset):
         return sent, label
 
 
-def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, optimizer,
-                    save_checkpoint):
-    running_loss = 0.
-    last_loss = 0.
+def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, device,
+                    optimizer, save_checkpoint):
+    running_loss = 0.0
+    last_loss = 0.0
 
     for i, (train_sents, train_labels) in enumerate(train_dataloader):
         batch_sent_tensor = batch_str_to_batch_tensors(train_sents=train_sents, embedding_model=embedding_model,
-                                                       seq_len=seq_len)
-        train_labels = train_labels.long()
+                                                       seq_len=seq_len).to(device)
+        train_labels = train_labels.long().to(device)
 
         optimizer.zero_grad()
         output_labels = model(batch_sent_tensor)
@@ -187,8 +187,8 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_ind
     return last_loss
 
 
-def train(model, embedding_model, optimizer, train_dataloader, validation_dataloader, writer, save_checkpoint,
-          current_epoch: int = 0, epochs: int = 60, seq_len: int = 100):
+def train_epochs(model, embedding_model, device, optimizer, train_dataloader, validation_dataloader, writer, save_checkpoint,
+                 current_epoch: int = 0, epochs: int = 60, seq_len: int = 100):
     criterion = nn.CrossEntropyLoss()
     early_stopper = EarlyTrainingStop()
 
@@ -198,37 +198,38 @@ def train(model, embedding_model, optimizer, train_dataloader, validation_datalo
         model.train(True)
         training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
                                         epoch_index=epoch, writer=writer, criterion=criterion,
-                                        save_checkpoint=save_checkpoint,
+                                        save_checkpoint=save_checkpoint, device=device,
                                         optimizer=optimizer, train_dataloader=train_dataloader)
         # Validation
-        model.train(False)
-        running_vloss = 0.
-        i = 0
-        for i, (v_sents, v_labels) in enumerate(validation_dataloader):
-            batch_sent_tensor = batch_str_to_batch_tensors(train_sents=v_sents, embedding_model=embedding_model,
-                                                           seq_len=seq_len)
-            train_labels = v_labels.long()
+        model.eval()
+        with torch.no_grad():
+            running_vloss = 0.0
+            i = 0
+            for i, (v_sents, v_labels) in enumerate(validation_dataloader):
+                batch_sent_tensor = batch_str_to_batch_tensors(train_sents=v_sents, embedding_model=embedding_model,
+                                                               seq_len=seq_len).to(device)
+                train_labels = v_labels.long().to(device)
 
-            output_labels = model(batch_sent_tensor)
-            vloss = criterion(output_labels, train_labels)
-            running_vloss += vloss
-        validation_loss = running_vloss / (i + 1)
-        print('LOSS train {} valid {}'.format(training_loss, validation_loss))
-        # Log the running loss averaged per batch for both training and validation
-        writer.add_scalars('Training vs. Validation Loss',
-                           {'Training': training_loss, 'Validation': validation_loss}, epoch + 1)
-        writer.flush()
-        # Stop training if validation loss starts growing and save model parameters
-        if early_stopper.early_stop(validation_loss=validation_loss):
-            model.cpu()
-            torch.save({
-                'model_state_dict': model.state_dict(),
-                'epoch': epoch,
-                'optimizer_state_dict': optimizer.state_dict(),
-                'training_loss': training_loss,
-                'validation_loss': validation_loss}, model.name)
-            model.cuda()
-            break
+                output_labels = model(batch_sent_tensor)
+                vloss = criterion(output_labels, train_labels)
+                running_vloss += vloss
+            validation_loss = running_vloss / (i + 1)
+            print('LOSS train {} valid {}'.format(training_loss, validation_loss))
+            # Log the running loss averaged per batch for both training and validation
+            writer.add_scalars('Training vs. Validation Loss',
+                               {'Training': training_loss, 'Validation': validation_loss}, epoch + 1)
+            writer.flush()
+            # Stop training if validation loss starts growing and save model parameters
+            if early_stopper.early_stop(validation_loss=validation_loss):
+                model.cpu()
+                torch.save({
+                    'model_state_dict': model.state_dict(),
+                    'epoch': epoch,
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'training_loss': training_loss,
+                    'validation_loss': validation_loss}, model.name)
+                model.cuda()
+                break
 
 
 def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-3):
@@ -245,6 +246,7 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if cuda:
         print('Computational device chosen: CUDA')
         # Empty CUDA cache
@@ -289,9 +291,9 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         current_epoch = checkpoint['epoch']
 
-    train(model=model, embedding_model=embedding_model,
-          train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,
-          current_epoch=current_epoch, epochs=EPOCHS, seq_len=seq_len, writer=writer, save_checkpoint=save_checkpoint)
+    train_epochs(model=model, embedding_model=embedding_model, device=device,
+                 train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,
+                 current_epoch=current_epoch, epochs=EPOCHS, seq_len=seq_len, writer=writer, save_checkpoint=save_checkpoint)
 
 
 def experiment1(root: str = '..'):
