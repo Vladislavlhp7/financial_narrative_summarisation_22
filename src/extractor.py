@@ -140,15 +140,15 @@ class FNS2021(Dataset):
                                   replace=True,
                                   n_samples=int(len(non_summary_df) * (1 - rate)),
                                   random_state=random_state)
-        self.sent_labels_df = pd.concat([summary_df, non_summary_df]).sort_values(['sent_index'])
+        self.total_data_df = pd.concat([summary_df, non_summary_df]).sort_values(['sent_index'])
         # TODO: Downsample only when report data is predominantly 0-labeled
 
     def __len__(self):
-        return len(self.total_data_df)
+        return len(self.sent_labels_df)
 
     def __getitem__(self, idx):
-        sent = self.total_data_df.loc[idx, 'sent']
-        label = self.total_data_df.loc[idx, 'label']
+        sent = self.sent_labels_df.loc[idx, 'sent']
+        label = self.sent_labels_df.loc[idx, 'label']
         return sent, label
 
 
