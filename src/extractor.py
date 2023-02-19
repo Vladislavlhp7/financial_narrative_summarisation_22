@@ -121,28 +121,29 @@ class FNS2021(Dataset):
         Original validation data is used as testing
         """
         self.total_data_df = pd.read_csv(file).drop(columns=['Unnamed: 0'], errors='ignore')
-        if downsample_rate is not None:
-            self.downsample(rate=downsample_rate, random_state=random_state)
+        self.total_data_df.index.name = 'sent_index'
+        self.total_data_df.reset_index(inplace=True)
         train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
                                                    random_state=random_state, stratify=self.total_data_df.label)
         if training:
+            if downsample_rate is not None:
+                train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
             self.sent_labels_df = train_df
         else:
             self.sent_labels_df = validation_df
         self.sent_labels_df.reset_index(drop=True, inplace=True)
 
-    def downsample(self, rate: float = 0.5, random_state: int = 1):
-        df = self.total_data_df
-        df.index.name = 'sent_index'
-        df.reset_index(inplace=True)
+    @staticmethod
+    def downsample(df: pd.DataFrame, rate: float = 0.5, random_state: int = 1):
+        # TODO: Downsample only when report data is predominantly 0-labeled
         summary_df = df.loc[df['label'] == 1]
         non_summary_df = df.loc[df['label'] == 0]
         non_summary_df = resample(non_summary_df,
                                   replace=True,
                                   n_samples=int(len(non_summary_df) * (1 - rate)),
                                   random_state=random_state)
-        self.total_data_df = pd.concat([summary_df, non_summary_df]).sort_values(['sent_index']).reset_index(drop=True)
-        # TODO: Downsample only when report data is predominantly 0-labeled
+        df = pd.concat([summary_df, non_summary_df]).sort_values(['sent_index'])  # .reset_index(drop=True)
+        return df
 
     def __len__(self):
         return len(self.sent_labels_df)
