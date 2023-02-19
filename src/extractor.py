@@ -277,14 +277,11 @@ def train_epochs(model, embedding_model, device, optimizer, train_dataloader, va
             break
 
 
-def run_experiment(config = None, root: str = '..'):
+def run_experiment(config=None, root: str = '..'):
     save_checkpoint = False
     input_size = 300  # FastText word-embedding dimensions
     seq_len = 100  # words per sentence
     num_layers = 2  # layers of LSTM model
-
-    config.test_batch_size = config.batch_size
-    torch.manual_seed(config.seed)  # pytorch random seed
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
@@ -302,6 +299,10 @@ def run_experiment(config = None, root: str = '..'):
     embedding_model = get_embedding_model(root=root)
 
     with wandb.init(project=config.project, config=config):
+        config = wandb.config
+        config.test_batch_size = config.batch_size
+        torch.manual_seed(config.seed)  # pytorch random seed
+
         print('Loading Training Data')
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
         training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True,
@@ -315,5 +316,6 @@ def run_experiment(config = None, root: str = '..'):
         model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=config.hidden_size)
         optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
         train_epochs(model=model, embedding_model=embedding_model, device=device,
-                     train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,
+                     train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
+                     optimizer=optimizer,
                      epochs=config.epochs, seq_len=seq_len, save_checkpoint=save_checkpoint)
