@@ -301,7 +301,7 @@ def run_experiment(config=None, root: str = '..'):
     with wandb.init(project='FNS-biLSTM-classification-sweep', config=config):
         config = wandb.config
         config.test_batch_size = config.batch_size
-        torch.manual_seed(config.seed)  # pytorch random seed
+        torch.manual_seed(1)  # pytorch random seed
 
         print('Loading Training Data')
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
