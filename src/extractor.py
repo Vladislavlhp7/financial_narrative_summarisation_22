@@ -9,8 +9,10 @@ import wandb
 from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
+
+from query import get_embedding_model
 
 
 def get_word_embedding(model, word: str):
@@ -113,7 +115,7 @@ class LSTM(nn.Module):
 
 class FNS2021(Dataset):
     def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1,
-                 downsample_rate: float = 0.9):
+                 downsample_rate: float = None):
         """
         Custom class for FNS 2021 Competition to load training and validation data. \
         Original validation data is used as testing
@@ -275,23 +277,13 @@ def train_epochs(model, embedding_model, device, optimizer, train_dataloader, va
             break
 
 
-def run_training_experiment(embedding_model, train_dataloader, validation_dataloader, batch_size: int = 16,
-                            epochs: int = 60, lr: float = 1e-3, hidden_size: int = 256):
+def run_experiment(config = None, root: str = '..'):
     save_checkpoint = False
     input_size = 300  # FastText word-embedding dimensions
     seq_len = 100  # words per sentence
     num_layers = 2  # layers of LSTM model
-    name = 'FNS-biLSTM-classification'
 
-    wandb.init(project=name)  # WandB – Initialize a new run
-
-    # WandB – Config is a variable that holds and saves hyperparameters and inputs
-    config = wandb.config  # Initialize config
-    config.batch_size = batch_size  # input batch size for training (default: 64)
-    config.test_batch_size = batch_size  # input batch size for testing (default: 1000)
-    config.epochs = epochs  # number of epochs to train (default: 10)
-    config.lr = lr  # learning rate (default: 0.01)
-    config.seed = 42
+    config.test_batch_size = config.batch_size
     torch.manual_seed(config.seed)  # pytorch random seed
 
     # Set device to CPU or CUDA
@@ -302,14 +294,26 @@ def run_training_experiment(embedding_model, train_dataloader, validation_datalo
         # Empty CUDA cache
         gc.collect()
         torch.cuda.empty_cache()
-        # Set data types to default CUDA standard
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')  # Set data types to default CUDA standard
     else:
         print('Computational device chosen: CPU')
 
-    model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=hidden_size)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # Load Embeddings directly from FastText model
+    embedding_model = get_embedding_model(root=root)
 
-    train_epochs(model=model, embedding_model=embedding_model, device=device,
-                 train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,
-                 epochs=epochs, seq_len=seq_len, save_checkpoint=save_checkpoint)
+    with wandb.init(project=config.project, config=config):
+        print('Loading Training Data')
+        data_filename = 'training_corpus_2023-02-07 16-33.csv'
+        training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True,
+                                downsample_rate=0.9)  # aggressive downsample
+        train_dataloader = DataLoader(training_data, batch_size=config.batch_size, drop_last=True)
+        print('Loading Validation Data')
+        validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=False,
+                                  downsample_rate=None)  # use all validation data
+        validation_dataloader = DataLoader(validation_data, batch_size=config.batch_size, drop_last=True)
+
+        model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=config.hidden_size)
+        optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+        train_epochs(model=model, embedding_model=embedding_model, device=device,
+                     train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,
+                     epochs=config.epochs, seq_len=seq_len, save_checkpoint=save_checkpoint)
