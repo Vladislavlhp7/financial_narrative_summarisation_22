@@ -1,19 +1,16 @@
+import gc
 from datetime import datetime
-import nltk
 import numpy as np
 import pandas as pd
 import torch
-import gc
 import torch.nn as nn
 import torch.nn.functional as F
+import wandb
 from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-from torch.utils.data import Dataset, DataLoader
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import Dataset
 from tqdm import tqdm
-
-from query import get_embedding_model, get_keyed_word_vectors_pickle, recalc_keyed_vector
 
 
 def get_word_embedding(model, word: str):
@@ -75,14 +72,14 @@ def pad_batch(batch_sent_arr):
     return padded_batch
 
 
-def batch_str_to_batch_tensors(train_sents, embedding_model, seq_len: int = 100):
+def batch_str_to_batch_tensors(sentence_list, embedding_model, seq_len: int = 100):
     """
     Convert a list of batch sentences to a batch tensor
     """
     # create a list of word embeddings per sentence
     batch_sent_arr = [get_sentence_tensor(embedding_model=embedding_model,
                                           sentence=str(sent),
-                                          seq_len=seq_len) for sent in train_sents]
+                                          seq_len=seq_len) for sent in sentence_list]
     # ensure all sentences (tensors) in the batch have the same length, hence padding
     batch_sent_arr_padded = pad_batch(batch_sent_arr)
     # stack sentence tensors onto each other for a batch tensor
@@ -115,7 +112,8 @@ class LSTM(nn.Module):
 
 
 class FNS2021(Dataset):
-    def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1, downsample_rate: float = 0.9):
+    def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1,
+                 downsample_rate: float = 0.9):
         """
         Custom class for FNS 2021 Competition to load training and validation data. \
         Original validation data is used as testing
@@ -153,96 +151,148 @@ class FNS2021(Dataset):
         return sent, label
 
 
-def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch_index, writer, criterion, device,
+def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, criterion, device,
                     optimizer, save_checkpoint):
+    model.train(True)
     running_loss = 0.0
     last_loss = 0.0
+    running_acc = 0.0  # Total accuracy for both classes
+    running_acc_1 = 0.0  # Accuracy for summary class
 
-    for i, (train_sents, train_labels) in enumerate(train_dataloader):
-        batch_sent_tensor = batch_str_to_batch_tensors(train_sents=train_sents, embedding_model=embedding_model,
+    for i, (data, labels) in enumerate(train_dataloader):
+        batch_sent_tensor = batch_str_to_batch_tensors(sentence_list=data, embedding_model=embedding_model,
                                                        seq_len=seq_len).to(device)
-        train_labels = train_labels.long().to(device)
-
-        optimizer.zero_grad()
-        output_labels = model(batch_sent_tensor)
-        loss = criterion(output_labels, train_labels)
+        target = labels.long().to(device)  # 1-dimensional integer tensor of size d
+        predicted = model(batch_sent_tensor)  # (d,2) float probability tensor
+        loss = criterion(predicted, target)
         loss.backward()
         optimizer.step()
+        optimizer.zero_grad()
 
+        # Calculate and record per-batch accuracy
+        winners = predicted.argmax(dim=1)  # each sentence has p0 and p1 probabilities with p0 + p1 = 1
+        corrects = (winners == target)  # match predicted output labels with observed labels
+        accuracy = corrects.sum().float() / float(target.size(0))
+        running_acc += accuracy
+        summary_winners = ((winners == target) * (target == 1)).float()
+        summary_winners_perc = summary_winners.sum() / max((target == 1).sum(), 1)
+        running_acc_1 += summary_winners_perc.sum()
+
+        # Increment per-batch loss
         running_loss += loss.item()
         if i % 1000 == 999:
             last_loss = running_loss / 1000  # loss per batch
-            print('  batch {} loss: {}'.format(i + 1, last_loss))
-            tb_x = epoch_index * len(train_dataloader) + i + 1
-            writer.add_scalar('Loss/train', last_loss, tb_x)
+            last_acc = running_acc / 1000  # total accuracy per batch
+            last_acc_1 = running_acc_1 / 1000  # summary sent accuracy per batch
+            print('  batch {} loss: {} total accuracy: {} summary accuracy: {}, '.format(i + 1, last_loss, last_acc,
+                                                                                         last_acc_1))
+            # Log training details on W&B
+            wandb.log({
+                "Training Loss": last_loss,
+                "Epoch": epoch + 1,
+                "Batch": i + 1,
+                "Total Training Accuracy": last_acc,
+                "Summary Training Accuracy": last_acc_1,
+            })
             running_loss = 0.0
+            running_acc = 0.0
+            running_acc_1 = 0.0
             if save_checkpoint:
                 model.cpu()
                 torch.save({
                     'model_state_dict': model.state_dict(),
-                    'epoch': epoch_index,
+                    'epoch': epoch,
                     'optimizer_state_dict': optimizer.state_dict(),
                     'loss': last_loss}, model.name)
                 model.cuda()
     return last_loss
 
 
-def train_epochs(model, embedding_model, device, optimizer, train_dataloader, validation_dataloader, writer, save_checkpoint,
-                 current_epoch: int = 0, epochs: int = 60, seq_len: int = 100):
+def validate(model, embedding_model, validation_dataloader, criterion, seq_len, device, epoch):
+    running_vloss = 0.0
+    running_acc = 0.0  # Total accuracy for both classes
+    running_acc_1 = 0.0  # Accuracy for summary class
+    model.eval()
+    with torch.no_grad():
+        for i, (v_data, v_labels) in enumerate(validation_dataloader):
+            batch_sent_tensor = batch_str_to_batch_tensors(sentence_list=v_data, embedding_model=embedding_model,
+                                                           seq_len=seq_len).to(device)
+            target = v_labels.long().to(device)
+            predicted = model(batch_sent_tensor)
+            vloss = criterion(predicted, target)
+            # Record accuracy & loss
+            running_vloss += vloss
+            # Calculate and record per-batch accuracy
+            winners = predicted.argmax(dim=1)  # each sentence has p0 and p1 probabilities with p0 + p1 = 1
+            corrects = (winners == target)  # match predicted output labels with observed labels
+            accuracy = corrects.sum().float() / float(target.size(0))
+            running_acc += accuracy
+            summary_winners = ((winners == target) * (target == 1)).float()
+            summary_winners_perc = summary_winners.sum() / max((target == 1).sum(), 1)
+            running_acc_1 += summary_winners_perc.sum()
+
+        validation_loss = running_vloss / (i + 1)
+        last_acc = running_acc / (i + 1)  # total accuracy per batch
+        last_acc_1 = running_acc_1 / (i + 1)  # summary sent accuracy per batch
+        print(
+            'Validation loss {} total accuracy: {} summary accuracy: {}'.format(validation_loss, last_acc, last_acc_1))
+        wandb.log({
+            "Validation Loss": validation_loss,
+            "Epoch": epoch + 1,
+            "Total Validation Accuracy": last_acc,
+            "Summary Validation Accuracy": last_acc_1,
+        })
+    return validation_loss
+
+
+def train_epochs(model, embedding_model, device, optimizer, train_dataloader, validation_dataloader, save_checkpoint,
+                 epochs: int = 60, seq_len: int = 100):
+    print('Starting model training')
     criterion = nn.CrossEntropyLoss()
     early_stopper = EarlyTrainingStop()
 
-    for epoch in tqdm(range(current_epoch, epochs)):
+    for epoch in tqdm(range(epochs)):
         print('EPOCH {}:'.format(epoch + 1))
-        # Training 1 Epoch
-        model.train(True)
         training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
-                                        epoch_index=epoch, writer=writer, criterion=criterion,
+                                        epoch=epoch, criterion=criterion,
                                         save_checkpoint=save_checkpoint, device=device,
                                         optimizer=optimizer, train_dataloader=train_dataloader)
         # Validation
-        model.eval()
-        with torch.no_grad():
-            running_vloss = 0.0
-            i = 0
-            for i, (v_sents, v_labels) in enumerate(validation_dataloader):
-                batch_sent_tensor = batch_str_to_batch_tensors(train_sents=v_sents, embedding_model=embedding_model,
-                                                               seq_len=seq_len).to(device)
-                train_labels = v_labels.long().to(device)
-
-                output_labels = model(batch_sent_tensor)
-                vloss = criterion(output_labels, train_labels)
-                running_vloss += vloss
-            validation_loss = running_vloss / (i + 1)
-            print('LOSS train {} valid {}'.format(training_loss, validation_loss))
-            # Log the running loss averaged per batch for both training and validation
-            writer.add_scalars('Training vs. Validation Loss',
-                               {'Training': training_loss, 'Validation': validation_loss}, epoch + 1)
-            writer.flush()
-            # Stop training if validation loss starts growing and save model parameters
-            if early_stopper.early_stop(validation_loss=validation_loss):
-                model.cpu()
-                torch.save({
-                    'model_state_dict': model.state_dict(),
-                    'epoch': epoch,
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'training_loss': training_loss,
-                    'validation_loss': validation_loss}, model.name)
-                model.cuda()
-                break
+        validation_loss = validate(model=model, embedding_model=embedding_model,
+                                   validation_dataloader=validation_dataloader,
+                                   criterion=criterion, seq_len=seq_len, device=device, epoch=epoch)
+        print('LOSS train {} valid {}'.format(training_loss, validation_loss))
+        # Stop training if validation loss starts growing and save model parameters
+        if early_stopper.early_stop(validation_loss=validation_loss):
+            model.cpu()
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'epoch': epoch,
+                'optimizer_state_dict': optimizer.state_dict(),
+                'training_loss': training_loss,
+                'validation_loss': validation_loss}, model.name)
+            model.cuda()
+            break
 
 
-def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-3):
-    input_size = 300
-    seq_len = 100
-    num_layers = 2
-    current_epoch = 0
+def run_training_experiment(embedding_model, train_dataloader, validation_dataloader, batch_size: int = 16,
+                            epochs: int = 60, lr: float = 1e-3, hidden_size: int = 256):
+    save_checkpoint = False
+    input_size = 300  # FastText word-embedding dimensions
+    seq_len = 100  # words per sentence
+    num_layers = 2  # layers of LSTM model
+    name = 'FNS-biLSTM-classification'
 
-    REGEN_VOCAB = False
-    LOAD_KEYED_VECTOR = False
-    LOAD_EXISTING_MODEL = False
-    existing_model_path = 'LSTM_bin_classifier-2023-02-11-02-09.pt'
-    save_checkpoint = True
+    wandb.init(project=name)  # WandB – Initialize a new run
+
+    # WandB – Config is a variable that holds and saves hyperparameters and inputs
+    config = wandb.config  # Initialize config
+    config.batch_size = batch_size  # input batch size for training (default: 64)
+    config.test_batch_size = batch_size  # input batch size for testing (default: 1000)
+    config.epochs = epochs  # number of epochs to train (default: 10)
+    config.lr = lr  # learning rate (default: 0.01)
+    config.seed = 42
+    torch.manual_seed(config.seed)  # pytorch random seed
 
     # Set device to CPU or CUDA
     cuda = torch.cuda.is_available()
@@ -256,67 +306,10 @@ def run(root: str = '..', batch_size: int = 16, EPOCHS: int = 3, lr: float = 1e-
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
     else:
         print('Computational device chosen: CPU')
-    embedding_model = None
 
-    print('Loading Training & Validation Data')
-    data_filename = 'training_corpus_2023-02-07 16-33.csv'
-    training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True)
-    validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=False)
-    train_dataloader = DataLoader(training_data, batch_size=batch_size, drop_last=True)
-    validation_dataloader = DataLoader(validation_data, batch_size=batch_size, drop_last=True)
-
-    if REGEN_VOCAB:
-        embedding_model_weights = get_embedding_model(root=root).wv
-        embedding_model = recalc_keyed_vector(root=root, train_dataloader=train_dataloader,
-                                              validation_dataloader=validation_dataloader,
-                                              embedding_weights=embedding_model_weights,
-                                              file_path=f'{root}/tmp/corpus_embeddings_CSF.pickle')
-
-    # Load Embeddings either by vocabulary keyed vector or FastText model
-    if LOAD_KEYED_VECTOR:
-        embedding_model = get_keyed_word_vectors_pickle(root=root, file_path=f'{root}/tmp/corpus_embeddings_CSF.pickle')
-    elif not REGEN_VOCAB:
-        embedding_model = get_embedding_model(root=root)
-    else:
-        pass
-    model = LSTM(input_size=input_size, num_layers=num_layers)
+    model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=hidden_size)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
-    writer = SummaryWriter('PyCharm-' + model.name)
-
-    print('Starting LSTM training')
-    if LOAD_EXISTING_MODEL:
-        checkpoint = torch.load(existing_model_path, map_location=torch.device('cpu'))
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        current_epoch = checkpoint['epoch']
 
     train_epochs(model=model, embedding_model=embedding_model, device=device,
                  train_dataloader=train_dataloader, validation_dataloader=validation_dataloader, optimizer=optimizer,
-                 current_epoch=current_epoch, epochs=EPOCHS, seq_len=seq_len, writer=writer, save_checkpoint=save_checkpoint)
-
-
-def experiment1(root: str = '..'):
-    lr = 1e-3
-    EPOCHS = 16
-    batch_size = 16
-    run(lr=lr, EPOCHS=EPOCHS, batch_size=batch_size, root=root)
-
-
-def experiment2(root: str = '..'):
-    # TODO: multiple learning rates, many epochs
-    pass
-
-
-def experiment3(root: str = '..'):
-    # TODO: Adaptive learning rate, many epochs
-    pass
-
-
-def main():
-    nltk.download('punkt')
-    root = '..'
-    experiment1(root=root)
-
-
-main()
+                 epochs=epochs, seq_len=seq_len, save_checkpoint=save_checkpoint)

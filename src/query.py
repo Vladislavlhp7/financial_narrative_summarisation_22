@@ -344,8 +344,8 @@ def get_keyed_word_vectors_pickle(embedding_weights=None, corpus_file_path: str 
 
 
 def get_embedding_model(root: str = '..'):
-    print('Loading Embedding Model')
     path = f'{root}/resources/FinText_FastText_CBOW/Word_Embedding_2000_2015'
+    print(f'Loading Embedding Model from {path}')
     embedding_model = FastText.load(path)
     return embedding_model
 
