@@ -43,7 +43,7 @@ class EarlyTrainingStop:
     Implement a class for early stopping of training when validation loss starts increasing
     """
 
-    def __init__(self, validation_loss: float = np.inf, delta: float = 0.04, counter: int = 0, patience: int = 3):
+    def __init__(self, validation_loss: float = np.inf, delta: float = 0.0, counter: int = 0, patience: int = 3):
         self.validation_loss = validation_loss
         self.delta = delta
         self.counter = counter
@@ -192,7 +192,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
             # Log training details on W&B
             wandb.log({
                 "Training Loss": last_loss,
-                "Epoch": epoch + 1,
+                "Epoch": epoch,
                 "Batch": i + 1,
                 "Total Training Accuracy": last_acc,
                 "Summary Training Accuracy": last_acc_1,
@@ -232,20 +232,24 @@ def validate(model, embedding_model, validation_dataloader, criterion, seq_len, 
             running_acc += accuracy
             summary_winners = ((winners == target) * (target == 1)).float()
             summary_winners_perc = summary_winners.sum() / max((target == 1).sum(), 1)
-            running_acc_1 += summary_winners_perc.sum()
 
-        validation_loss = running_vloss / (i + 1)
-        last_acc = running_acc / (i + 1)  # total accuracy per batch
-        last_acc_1 = running_acc_1 / (i + 1)  # summary sent accuracy per batch
-        print(
-            'Validation loss {} total accuracy: {} summary accuracy: {}'.format(validation_loss, last_acc, last_acc_1))
-        wandb.log({
-            "Validation Loss": validation_loss,
-            "Epoch": epoch + 1,
-            "Total Validation Accuracy": last_acc,
-            "Summary Validation Accuracy": last_acc_1,
-        })
-    return validation_loss
+            running_acc_1 += summary_winners_perc.sum()
+            if i % 1000 == 999:
+                last_loss = running_vloss / 1000  # loss per batch
+                last_acc = running_acc / 1000  # total accuracy per batch
+                last_acc_1 = running_acc_1 / 1000  # summary sent accuracy per batch
+                print('Validation loss {} total accuracy: {} summary accuracy: {}'.format(last_loss, last_acc,
+                                                                                          last_acc_1))
+                wandb.log({
+                    "Epoch": epoch,
+                    "Validation Loss": last_loss,
+                    "Total Validation Accuracy": last_acc,
+                    "Summary Validation Accuracy": last_acc_1,
+                })
+                running_vloss = 0.0
+                running_acc = 0.0
+                running_acc_1 = 0.0
+    return last_loss
 
 
 def train_epochs(model, embedding_model, device, optimizer, train_dataloader, validation_dataloader, save_checkpoint,
@@ -255,7 +259,7 @@ def train_epochs(model, embedding_model, device, optimizer, train_dataloader, va
     early_stopper = EarlyTrainingStop()
 
     for epoch in tqdm(range(epochs)):
-        print('EPOCH {}:'.format(epoch + 1))
+        print('EPOCH {}:'.format(epoch))
         training_loss = train_one_epoch(model=model, embedding_model=embedding_model, seq_len=seq_len,
                                         epoch=epoch, criterion=criterion,
                                         save_checkpoint=save_checkpoint, device=device,
@@ -307,7 +311,7 @@ def run_experiment(config=None, root: str = '..'):
         print('Loading Training Data')
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
         training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True,
-                                downsample_rate=0.9)  # aggressive downsample
+                                downsample_rate=0.3)  # aggressive downsample
         train_dataloader = DataLoader(training_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Validation Data')
         validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=False,
