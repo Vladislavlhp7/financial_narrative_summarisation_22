@@ -43,7 +43,7 @@ class EarlyTrainingStop:
     Implement a class for early stopping of training when validation loss starts increasing
     """
 
-    def __init__(self, validation_loss: float = np.inf, delta: float = 0.0, counter: int = 0, patience: int = 3):
+    def __init__(self, validation_loss: float = np.inf, delta: float = 0.0, counter: int = 0, patience: int = 1):
         self.validation_loss = validation_loss
         self.delta = delta
         self.counter = counter
@@ -232,7 +232,6 @@ def validate(model, embedding_model, validation_dataloader, criterion, seq_len, 
             running_acc += accuracy
             summary_winners = ((winners == target) * (target == 1)).float()
             summary_winners_perc = summary_winners.sum() / max((target == 1).sum(), 1)
-
             running_acc_1 += summary_winners_perc.sum()
             if i % 1000 == 999:
                 last_loss = running_vloss / 1000  # loss per batch
@@ -311,7 +310,7 @@ def run_experiment(config=None, root: str = '..'):
         print('Loading Training Data')
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
         training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True,
-                                downsample_rate=0.3)  # aggressive downsample
+                                downsample_rate=config.downsample_rate)  # aggressive downsample
         train_dataloader = DataLoader(training_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Validation Data')
         validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=False,

@@ -17,6 +17,9 @@ def experiment1(project: str = 'FNS-biLSTM-classification-sweep'):
         'hidden_size': {
             'values': [256, 128, 64, 32]
         },
+        'downsample_rate':{
+            'value': [0.9, 0.5]
+        },
         'epochs': {
             'value': 60
         },
