@@ -323,3 +323,4 @@ def run_experiment(config=None, root: str = '..'):
                      train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
                      optimizer=optimizer,
                      epochs=config.epochs, seq_len=seq_len, save_checkpoint=save_checkpoint)
+        wandb.save('model.h5')
