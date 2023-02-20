@@ -17,7 +17,7 @@ def experiment1(project: str = 'FNS-biLSTM-classification-sweep'):
         'hidden_size': {
             'values': [256, 128, 64, 32]
         },
-        'downsample_rate':{
+        'downsample_rate': {
             'values': [0.9, 0.5]
         },
         'epochs': {
@@ -28,7 +28,8 @@ def experiment1(project: str = 'FNS-biLSTM-classification-sweep'):
         }
     }
     sweep_config['parameters'] = parameters_dict
-    sweep_id = wandb.sweep(sweep_config, project=project)
+    # sweep_id = wandb.sweep(sweep_config, project=project)
+    sweep_id = f'{project}/nec6rpqq'
     wandb.agent(sweep_id, run_experiment)
 
 

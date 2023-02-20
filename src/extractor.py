@@ -302,7 +302,7 @@ def run_experiment(config=None, root: str = '..'):
     # Load Embeddings directly from FastText model
     embedding_model = get_embedding_model(root=root)
 
-    with wandb.init(project='FNS-biLSTM-classification-sweep', config=config):
+    with wandb.init(resume='allow', project='FNS-biLSTM-classification-sweep', config=config):
         config = wandb.config
         config.test_batch_size = config.batch_size
         torch.manual_seed(1)  # pytorch random seed
