@@ -9,7 +9,7 @@ def experiment1(project: str = 'FNS-biLSTM-classification-sweep'):
     }
     parameters_dict = {
         'lr': {
-            'values': [0.001, 0.005, 0.01]
+            'values': [0.001, 0.0005, 0.0001]
         },
         'batch_size': {
             'values': [32]
