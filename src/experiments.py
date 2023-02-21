@@ -2,7 +2,7 @@ import nltk
 from extractor import *
 
 
-def experiment1(project: str = 'FNS-biLSTM-classification-sweep'):
+def experiment1(project: str = 'FNS-biLSTM-classification-optimised'):
     # Define W&B hyperparameter sweep
     sweep_config = {
         'method': 'grid'
@@ -29,7 +29,6 @@ def experiment1(project: str = 'FNS-biLSTM-classification-sweep'):
     }
     sweep_config['parameters'] = parameters_dict
     sweep_id = wandb.sweep(sweep_config, project=project)
-    # sweep_id = f'{project}/nec6rpqq'
     wandb.agent(sweep_id, run_experiment)
 
 

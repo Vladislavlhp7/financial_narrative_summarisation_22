@@ -318,9 +318,18 @@ def run_experiment(config=None, root: str = '..'):
         validation_dataloader = DataLoader(validation_data, batch_size=config.batch_size, drop_last=True)
 
         model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=config.hidden_size)
+        model_name = f'model-{config.lr}-{config.hidden_size}-{config.downsample_rate}-{datetime.now().strftime("%Y-%m-%d-%H-%M")}.h5'
+        model.name = model_name
+
         optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
         train_epochs(model=model, embedding_model=embedding_model, device=device,
                      train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
                      optimizer=optimizer,
                      epochs=config.epochs, seq_len=seq_len, save_checkpoint=save_checkpoint)
-        wandb.save('model.h5')
+        wandb.save(model_name)
+        model.cpu()
+        torch.save({
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict()
+        }, model.name)
+        model.cuda()
