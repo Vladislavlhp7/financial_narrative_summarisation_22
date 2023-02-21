@@ -282,7 +282,7 @@ def train_epochs(model, embedding_model, device, optimizer, train_dataloader, va
 
 
 def run_experiment(config=None, root: str = '..'):
-    save_checkpoint = False
+    save_checkpoint = True
     input_size = 300  # FastText word-embedding dimensions
     seq_len = 100  # words per sentence
     num_layers = 2  # layers of LSTM model
