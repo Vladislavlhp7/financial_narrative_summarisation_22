@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import wandb
 from nltk import word_tokenize
+from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 from torch.utils.data import Dataset, DataLoader
@@ -217,6 +218,11 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
 def test(model, embedding_model, test_dataloader, seq_len, device):
     running_acc = 0.0  # Total accuracy for both classes
     running_acc_1 = 0.0  # Accuracy for summary class
+
+    # Initialize lists to store true labels and predicted labels
+    true_labels = []
+    pred_labels = []
+
     model.eval()
     with torch.no_grad():
         for i, (test_data, test_labels) in enumerate(test_dataloader):
@@ -232,9 +238,31 @@ def test(model, embedding_model, test_dataloader, seq_len, device):
             summary_winners = ((winners == target) * (target == 1)).float()
             summary_winners_perc = summary_winners.sum() / max((target == 1).sum(), 1)
             running_acc_1 += summary_winners_perc.sum()
-        last_acc = running_acc / (i + 1)  # total accuracy per batch
-        last_acc_1 = running_acc_1 / (i + 1)  # summary sent accuracy per batch
-        print('Training total accuracy: {} summary accuracy: {}'.format(last_acc, last_acc_1))
+            # Prepare data for confusion matrix split
+            true_labels += target.cpu().numpy().tolist()
+            pred_labels += winners.cpu().numpy().tolist()
+            # Find False Positives and True Negatives
+            cm = confusion_matrix(true_labels, pred_labels)
+            # Calculate the false positive rate (FPR)
+            fpr = cm[0][1] / (cm[0][1] + cm[1][1])
+            # Calculate the true negative rate (TNR)
+            tnr = cm[1][1] / (cm[1][0] + cm[1][1])
+            # Calculate the precision
+            precision = cm[0][0] / (cm[0][0] + cm[0][1])
+            # Calculate the recall
+            recall = cm[0][0] / (cm[0][0] + cm[1][0])
+
+            last_acc = running_acc / (i + 1)  # total accuracy per batch
+            last_acc_1 = running_acc_1 / (i + 1)  # summary sent accuracy per batch
+            print('Testing total accuracy: {} summary accuracy: {}'.format(last_acc, last_acc_1))
+            wandb.log({
+                "Total Testing Accuracy": last_acc,
+                "Summary Testing Accuracy": last_acc_1,
+                "Recall": recall,
+                "Precision": precision,
+                'False Positive Rate': fpr,
+                'True Negative Rate': tnr,
+            })
     return last_acc, last_acc_1
 
 
@@ -343,6 +371,12 @@ def run_experiment(config=None, root: str = '..'):
         validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation',
                                   downsample_rate=None)  # use all validation data
         validation_dataloader = DataLoader(validation_data, batch_size=config.batch_size, drop_last=True)
+        print('Loading Testing Data')
+        data_filename_test = 'validation_corpus_2023-02-07 16-33.csv'  # real validation data is used as test
+        test_data = FNS2021(file=f'{root}/tmp/{data_filename_test}', type_='testing',
+                            downsample_rate=None)  # use all validation data
+        empirical_test_report_size = 2_048
+        test_dataloader = DataLoader(test_data, batch_size=empirical_test_report_size, drop_last=True)
 
         model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=config.hidden_size)
         model_name = f'model-{config.lr}-{config.hidden_size}-{config.downsample_rate}-{datetime.now().strftime("%Y-%m-%d-%H-%M")}.h5'
@@ -353,6 +387,8 @@ def run_experiment(config=None, root: str = '..'):
                      train_dataloader=train_dataloader, validation_dataloader=validation_dataloader,
                      optimizer=optimizer,
                      epochs=config.epochs, seq_len=seq_len, save_checkpoint=save_checkpoint)
+        test(model=model, embedding_model=embedding_model, device=device, seq_len=seq_len,
+             test_dataloader=test_dataloader)
         wandb.save(model_name)
         model.cpu()
         torch.save({
