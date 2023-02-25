@@ -357,7 +357,7 @@ def run_experiment(config=None, root: str = '..'):
     # Load Embeddings directly from FastText model
     embedding_model = get_embedding_model(root=root)
 
-    with wandb.init(resume='allow', project='FNS-biLSTM-classification-sweep', config=config):
+    with wandb.init(resume='allow', project='FNS-biLSTM-classification-testing', config=config):
         config = wandb.config
         config.test_batch_size = config.batch_size
         torch.manual_seed(1)  # pytorch random seed
@@ -373,8 +373,7 @@ def run_experiment(config=None, root: str = '..'):
         validation_dataloader = DataLoader(validation_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Testing Data')
         data_filename_test = 'validation_corpus_2023-02-07 16-33.csv'  # real validation data is used as test
-        test_data = FNS2021(file=f'{root}/tmp/{data_filename_test}', type_='testing',
-                            downsample_rate=None)  # use all validation data
+        test_data = FNS2021(file=f'{root}/tmp/{data_filename_test}', type_='testing')  # use all validation data
         empirical_test_report_size = 2_048
         test_dataloader = DataLoader(test_data, batch_size=empirical_test_report_size, drop_last=True)
 
