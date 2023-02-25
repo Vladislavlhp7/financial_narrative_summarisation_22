@@ -114,7 +114,7 @@ class LSTM(nn.Module):
 
 
 class FNS2021(Dataset):
-    def __init__(self, file: str, training: bool = True, train_ratio: float = 0.9, random_state: int = 1,
+    def __init__(self, file: str, type_: str = 'training', train_ratio: float = 0.9, random_state: int = 1,
                  downsample_rate: float = None):
         """
         Custom class for FNS 2021 Competition to load training and validation data. \
@@ -123,14 +123,17 @@ class FNS2021(Dataset):
         self.total_data_df = pd.read_csv(file).drop(columns=['Unnamed: 0'], errors='ignore')
         self.total_data_df.index.name = 'sent_index'
         self.total_data_df.reset_index(inplace=True)
-        train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
-                                                   random_state=random_state, stratify=self.total_data_df.label)
-        if training:
-            if downsample_rate is not None:
-                train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
-            self.sent_labels_df = train_df
+        if type_ == 'testing':
+            self.sent_labels_df = self.total_data_df
         else:
-            self.sent_labels_df = validation_df
+            train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
+                                                       random_state=random_state, stratify=self.total_data_df.label)
+            if type_ == "training":
+                if downsample_rate is not None:
+                    train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
+                self.sent_labels_df = train_df
+            elif type_ == "validation":
+                self.sent_labels_df = validation_df
         self.sent_labels_df.reset_index(drop=True, inplace=True)
 
     @staticmethod
@@ -209,6 +212,30 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
                     'loss': last_loss}, model.name)
                 model.cuda()
     return last_loss
+
+
+def test(model, embedding_model, test_dataloader, seq_len, device):
+    running_acc = 0.0  # Total accuracy for both classes
+    running_acc_1 = 0.0  # Accuracy for summary class
+    model.eval()
+    with torch.no_grad():
+        for i, (test_data, test_labels) in enumerate(test_dataloader):
+            batch_sent_tensor = batch_str_to_batch_tensors(sentence_list=test_data, embedding_model=embedding_model,
+                                                           seq_len=seq_len).to(device)
+            target = test_labels.long().to(device)
+            predicted = model(batch_sent_tensor)
+            # Calculate and record per-batch accuracy
+            winners = predicted.argmax(dim=1)  # each sentence has p0 and p1 probabilities with p0 + p1 = 1
+            corrects = (winners == target)  # match predicted output labels with observed labels
+            accuracy = corrects.sum().float() / float(target.size(0))
+            running_acc += accuracy
+            summary_winners = ((winners == target) * (target == 1)).float()
+            summary_winners_perc = summary_winners.sum() / max((target == 1).sum(), 1)
+            running_acc_1 += summary_winners_perc.sum()
+        last_acc = running_acc / (i + 1)  # total accuracy per batch
+        last_acc_1 = running_acc_1 / (i + 1)  # summary sent accuracy per batch
+        print('Training total accuracy: {} summary accuracy: {}'.format(last_acc, last_acc_1))
+    return last_acc, last_acc_1
 
 
 def validate(model, embedding_model, validation_dataloader, criterion, seq_len, device, epoch):
@@ -309,11 +336,11 @@ def run_experiment(config=None, root: str = '..'):
 
         print('Loading Training Data')
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
-        training_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=True,
+        training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training',
                                 downsample_rate=config.downsample_rate)  # aggressive downsample
         train_dataloader = DataLoader(training_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Validation Data')
-        validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', training=False,
+        validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation',
                                   downsample_rate=None)  # use all validation data
         validation_dataloader = DataLoader(validation_data, batch_size=config.batch_size, drop_last=True)
 
