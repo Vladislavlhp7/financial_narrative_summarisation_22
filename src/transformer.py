@@ -42,6 +42,7 @@ def run_experiment(config=None, root: str = '..'):
     dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root)
 
     model = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-pretrain', num_labels=2)
+    model_name = 'finbert-sentiment-epoch-1/'
 
     args = TrainingArguments(
         output_dir='../tmp/',
@@ -50,7 +51,7 @@ def run_experiment(config=None, root: str = '..'):
         learning_rate=2e-5,
         per_device_train_batch_size=32,
         per_device_eval_batch_size=32,
-        num_train_epochs=5,
+        num_train_epochs=1,
         weight_decay=0.01,
         load_best_model_at_end=True,
         metric_for_best_model='accuracy',
@@ -71,4 +72,11 @@ def run_experiment(config=None, root: str = '..'):
     metrics = trainer.predict(dataset_test).metrics
     print(metrics)
 
-    trainer.save_model('finbert-sentiment/')
+    trainer.save_model(model_name)
+
+
+def main():
+    run_experiment()
+
+
+main()
