@@ -1,5 +1,5 @@
-import gc
 from datetime import datetime
+
 import numpy as np
 import pandas as pd
 import torch
@@ -7,12 +7,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import wandb
 from nltk import word_tokenize
-from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
+from metrics import binary_classification_metrics
 from query import get_embedding_model
 
 
@@ -166,6 +166,10 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
     running_acc = 0.0  # Total accuracy for both classes
     running_acc_1 = 0.0  # Accuracy for summary class
 
+    # Initialize lists to store true labels and predicted labels
+    true_labels = []
+    pred_labels = []
+
     for i, (data, labels) in enumerate(train_dataloader):
         batch_sent_tensor = batch_str_to_batch_tensors(sentence_list=data, embedding_model=embedding_model,
                                                        seq_len=seq_len).to(device)
@@ -187,6 +191,10 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
 
         # Increment per-batch loss
         running_loss += loss.item()
+
+        true_labels += target.cpu().numpy().tolist()
+        pred_labels += winners.cpu().numpy().tolist()
+
         if i % 1000 == 999:
             last_loss = running_loss / 1000  # loss per batch
             last_acc = running_acc / 1000  # total accuracy per batch
@@ -194,13 +202,14 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
             print('  batch {} loss: {} total accuracy: {} summary accuracy: {}, '.format(i + 1, last_loss, last_acc,
                                                                                          last_acc_1))
             # Log training details on W&B
-            wandb.log({
-                "Training Loss": last_loss,
-                "Epoch": epoch,
-                "Batch": i + 1,
-                "Total Training Accuracy": last_acc,
-                "Summary Training Accuracy": last_acc_1,
-            })
+            metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
+            metrics["Running Training Loss"] = last_loss
+            metrics["Running Total Training Accuracy"] = last_acc
+            metrics["Running Summary Training Accuracy"] = last_acc_1
+            metrics["Epoch"] = epoch
+            metrics["Batch"] = i + 1
+            wandb.log(metrics)
+
             running_loss = 0.0
             running_acc = 0.0
             running_acc_1 = 0.0
@@ -241,28 +250,14 @@ def test(model, embedding_model, test_dataloader, seq_len, device):
             # Prepare data for confusion matrix split
             true_labels += target.cpu().numpy().tolist()
             pred_labels += winners.cpu().numpy().tolist()
-            # Find False Positives and True Negatives
-            cm = confusion_matrix(true_labels, pred_labels)
-            # Calculate the false positive rate (FPR)
-            fpr = cm[0][1] / (cm[0][1] + cm[1][1])
-            # Calculate the true negative rate (TNR)
-            tnr = cm[1][1] / (cm[1][0] + cm[1][1])
-            # Calculate the precision
-            precision = cm[0][0] / (cm[0][0] + cm[0][1])
-            # Calculate the recall
-            recall = cm[0][0] / (cm[0][0] + cm[1][0])
+            metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
 
             last_acc = running_acc / (i + 1)  # total accuracy per batch
             last_acc_1 = running_acc_1 / (i + 1)  # summary sent accuracy per batch
             print('Testing total accuracy: {} summary accuracy: {}'.format(last_acc, last_acc_1))
-            wandb.log({
-                "Total Testing Accuracy": last_acc,
-                "Summary Testing Accuracy": last_acc_1,
-                "Recall": recall,
-                "Precision": precision,
-                'False Positive Rate': fpr,
-                'True Negative Rate': tnr,
-            })
+            metrics["Running Total Testing Accuracy"] = last_acc
+            metrics["Running Summary Testing Accuracy"] = last_acc_1
+            wandb.log(metrics)
     return last_acc, last_acc_1
 
 
@@ -270,6 +265,11 @@ def validate(model, embedding_model, validation_dataloader, criterion, seq_len, 
     running_vloss = 0.0
     running_acc = 0.0  # Total accuracy for both classes
     running_acc_1 = 0.0  # Accuracy for summary class
+
+    # Initialize lists to store true labels and predicted labels
+    true_labels = []
+    pred_labels = []
+
     model.eval()
     with torch.no_grad():
         for i, (v_data, v_labels) in enumerate(validation_dataloader):
@@ -288,18 +288,25 @@ def validate(model, embedding_model, validation_dataloader, criterion, seq_len, 
             summary_winners = ((winners == target) * (target == 1)).float()
             summary_winners_perc = summary_winners.sum() / max((target == 1).sum(), 1)
             running_acc_1 += summary_winners_perc.sum()
+
+            true_labels += target.cpu().numpy().tolist()
+            pred_labels += winners.cpu().numpy().tolist()
+
             if i % 1000 == 999:
                 last_loss = running_vloss / 1000  # loss per batch
                 last_acc = running_acc / 1000  # total accuracy per batch
                 last_acc_1 = running_acc_1 / 1000  # summary sent accuracy per batch
                 print('Validation loss {} total accuracy: {} summary accuracy: {}'.format(last_loss, last_acc,
                                                                                           last_acc_1))
-                wandb.log({
-                    "Epoch": epoch,
-                    "Validation Loss": last_loss,
-                    "Total Validation Accuracy": last_acc,
-                    "Summary Validation Accuracy": last_acc_1,
-                })
+                # Log training details on W&B
+                metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
+                metrics["Running Validation Loss"] = last_loss
+                metrics["Running Total Validation Accuracy"] = last_acc
+                metrics["Running Summary Validation Accuracy"] = last_acc_1
+                metrics["Epoch"] = epoch
+                metrics["Batch"] = i + 1
+                wandb.log(metrics)
+
                 running_vloss = 0.0
                 running_acc = 0.0
                 running_acc_1 = 0.0
@@ -348,8 +355,8 @@ def run_experiment(config=None, root: str = '..'):
     if cuda:
         print('Computational device chosen: CUDA')
         # Empty CUDA cache
-        gc.collect()
-        torch.cuda.empty_cache()
+        # gc.collect()
+        # torch.cuda.empty_cache()
         torch.set_default_tensor_type('torch.cuda.FloatTensor')  # Set data types to default CUDA standard
     else:
         print('Computational device chosen: CPU')
@@ -357,7 +364,7 @@ def run_experiment(config=None, root: str = '..'):
     # Load Embeddings directly from FastText model
     embedding_model = get_embedding_model(root=root)
 
-    with wandb.init(resume='allow', project='FNS-biLSTM-classification-testing', config=config):
+    with wandb.init(resume='auto', project='FNS-biLSTM-classification-testing', config=config):
         config = wandb.config
         config.test_batch_size = config.batch_size
         torch.manual_seed(1)  # pytorch random seed
