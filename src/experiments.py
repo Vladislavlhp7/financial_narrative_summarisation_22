@@ -2,20 +2,20 @@ import nltk
 from extractor import *
 
 
-def experiment1(project: str = 'FNS-biLSTM-classification-testing'):
+def experiment1(project: str = 'extractive_summarisation'):
     # Define W&B hyperparameter sweep
     sweep_config = {
         'method': 'grid'
     }
     parameters_dict = {
         'lr': {
-            'values': [0.001]
+            'values': [1e-3]
         },
         'batch_size': {
             'values': [32]
         },
         'hidden_size': {
-            'values': [256, 128, 64]
+            'values': [256]
         },
         'downsample_rate': {
             'values': [0.9]
