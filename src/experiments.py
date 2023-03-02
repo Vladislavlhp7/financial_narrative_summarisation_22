@@ -23,6 +23,9 @@ def experiment1(project: str = 'extractive_summarisation'):
         'dropout': {
           'values': [0, 0.25, 0.5]
         },
+        'rnn_type':{
+          'values': ['lstm', 'gru']
+        },
         'epochs': {
             'value': 60
         },

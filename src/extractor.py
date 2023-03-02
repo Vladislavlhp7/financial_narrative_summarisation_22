@@ -90,25 +90,38 @@ def batch_str_to_batch_tensors(sentence_list, embedding_model, seq_len: int = 10
     return batch_sent_tensor
 
 
-class LSTM(nn.Module):
+class FinRNN(nn.Module):
+    # https://danijar.com/tips-for-training-recurrent-neural-networks/
+    # GRU vs LSTM ✅
+    # Early stopping ✅
+    # Dropout is applied ✅
+    # Adaptive learning rate ✅
+    # Feed-forward layers first ✅
+    # Hidden states initialised by default to zeroes ✅
     def __init__(self, input_size=300, hidden_size=256, num_layers=2, label_size=2, bidirectional=True,
-                 batch_first=True, dropout=0.0):
-        super(LSTM, self).__init__()
+                 batch_first=True, dropout=0.0, rnn_type='lstm'):
+        super(FinRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = True
         dt = datetime.now().strftime("%Y-%m-%d-%H-%M")
-        self.name = f'LSTM_bin_classifier-{dt}.pt'
-        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers,
-                            bidirectional=bidirectional, batch_first=batch_first, dropout=dropout)
-        if bidirectional:
-            self.D = 2
+        self.rnn_type = rnn_type
+        self.name = f'{rnn_type}_bin_classifier-{dt}.pt'
+        self.fully_connected = nn.Linear(in_features=input_size, out_features=hidden_size)
+        if rnn_type == 'lstm':
+            rnn = nn.LSTM
+        elif rnn_type == 'gru':
+            rnn = nn.GRU
         else:
-            self.D = 1
+            raise ValueError('Wrong `rnn_type` variable. Must be either `lstm` or `gru`.')
+        self.rnn = rnn(input_size=hidden_size, hidden_size=hidden_size, num_layers=num_layers,
+                       bidirectional=bidirectional, batch_first=batch_first, dropout=dropout)
+        self.D = 2 if bidirectional else 1
         self.hidden2label = nn.Linear(in_features=self.D * hidden_size, out_features=label_size)
 
     def forward(self, sent):
-        out, _ = self.lstm(sent)
+        out = self.fully_connected(sent)
+        out, _ = self.rnn(out)
         out = out[:, -1, :]
         out = self.hidden2label(out)
         return F.softmax(out, dim=1)
@@ -384,7 +397,8 @@ def run_experiment(config=None, root: str = '..'):
         empirical_test_report_size = 2_048
         test_dataloader = DataLoader(test_data, batch_size=empirical_test_report_size, drop_last=True)
 
-        model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=config.hidden_size, dropout=config.dropout)
+        model = FinRNN(input_size=input_size, num_layers=num_layers,
+                       hidden_size=config.hidden_size, dropout=config.dropout, rnn_type=config.rnn_type)
         model_name = f'model-{config.lr}-{config.hidden_size}-{config.downsample_rate}-{datetime.now().strftime("%Y-%m-%d-%H-%M")}.h5'
         model.name = model_name
 
