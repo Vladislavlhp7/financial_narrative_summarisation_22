@@ -92,7 +92,7 @@ def batch_str_to_batch_tensors(sentence_list, embedding_model, seq_len: int = 10
 
 class LSTM(nn.Module):
     def __init__(self, input_size=300, hidden_size=256, num_layers=2, label_size=2, bidirectional=True,
-                 batch_first=True):
+                 batch_first=True, dropout=0.0):
         super(LSTM, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -100,7 +100,7 @@ class LSTM(nn.Module):
         dt = datetime.now().strftime("%Y-%m-%d-%H-%M")
         self.name = f'LSTM_bin_classifier-{dt}.pt'
         self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers,
-                            bidirectional=bidirectional, batch_first=batch_first)
+                            bidirectional=bidirectional, batch_first=batch_first, dropout=dropout)
         if bidirectional:
             self.D = 2
         else:
@@ -384,7 +384,7 @@ def run_experiment(config=None, root: str = '..'):
         empirical_test_report_size = 2_048
         test_dataloader = DataLoader(test_data, batch_size=empirical_test_report_size, drop_last=True)
 
-        model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=config.hidden_size)
+        model = LSTM(input_size=input_size, num_layers=num_layers, hidden_size=config.hidden_size, dropout=config.dropout)
         model_name = f'model-{config.lr}-{config.hidden_size}-{config.downsample_rate}-{datetime.now().strftime("%Y-%m-%d-%H-%M")}.h5'
         model.name = model_name
 

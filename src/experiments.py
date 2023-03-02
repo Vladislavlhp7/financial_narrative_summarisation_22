@@ -20,6 +20,9 @@ def experiment1(project: str = 'extractive_summarisation'):
         'downsample_rate': {
             'values': [0.9]
         },
+        'dropout': {
+          'values': [0, 0.25, 0.5]
+        },
         'epochs': {
             'value': 60
         },
