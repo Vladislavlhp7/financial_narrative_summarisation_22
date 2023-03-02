@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
 import torch
+import wandb
 from datasets import Dataset
-from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer, Trainer, BertForSequenceClassification, TrainingArguments
+from metrics import binary_classification_metrics
 
 
 def load_data(tokenizer, root: str = '..'):
@@ -30,9 +31,9 @@ def load_data(tokenizer, root: str = '..'):
 
 
 def compute_metrics(eval_pred):
-    predictions, labels = eval_pred
-    predictions = np.argmax(predictions, axis=1)
-    return {'accuracy': accuracy_score(predictions, labels)}
+    pred_labels, true_labels = eval_pred
+    pred_labels = np.argmax(pred_labels, axis=1)
+    return binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
 
 
 def run_experiment(config=None, root: str = '..'):
@@ -42,7 +43,8 @@ def run_experiment(config=None, root: str = '..'):
     dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root)
 
     model = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-pretrain', num_labels=2)
-    model_name = 'finbert-sentiment-epoch-1/'
+    run_name = 'extractive_summarisation'
+    model_name = 'finbert-sentiment-epoch-3/'
 
     args = TrainingArguments(
         output_dir='../tmp/',
@@ -55,6 +57,7 @@ def run_experiment(config=None, root: str = '..'):
         weight_decay=0.01,
         load_best_model_at_end=True,
         metric_for_best_model='accuracy',
+        run_name=run_name,
     )
 
     trainer = Trainer(
@@ -68,11 +71,11 @@ def run_experiment(config=None, root: str = '..'):
     trainer.train()
 
     model.eval()
-
-    metrics = trainer.predict(dataset_test).metrics
-    print(metrics)
-
-
+    with torch.no_grad():
+        prediction_obj = trainer.predict(dataset_test)
+        metrics = prediction_obj.metrics
+        print(metrics)
+        wandb.log(metrics)
     trainer.save_model(model_name)
 
 
