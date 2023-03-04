@@ -99,7 +99,7 @@ class FinRNN(nn.Module):
     # Feed-forward layers first ✅
     # Hidden states initialised by default to zeroes ✅
     def __init__(self, input_size=300, hidden_size=256, num_layers=2, label_size=2, bidirectional=True,
-                 batch_first=True, dropout=0.0, rnn_type='lstm'):
+                 batch_first=True, dropout=0.0, rnn_type='gru'):
         super(FinRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
