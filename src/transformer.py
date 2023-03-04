@@ -3,14 +3,21 @@ import pandas as pd
 import torch
 import wandb
 from datasets import Dataset
-from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer, Trainer, BertForSequenceClassification, TrainingArguments
+
+from extractor import FNS2021
 from metrics import binary_classification_metrics
 
 
-def load_data(tokenizer, root: str = '..'):
-    df = pd.read_csv(f'{root}/tmp/training_corpus_2023-02-07 16-33.csv')
-    df_train, df_val = train_test_split(df, stratify=df['label'], test_size=0.1, random_state=42)
+def load_data(tokenizer, root: str = '..', training_downsample_rate: float = 0.9):
+    print('Loading Training Data')
+    data_filename = 'training_corpus_2023-02-07 16-33.csv'
+    training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training',
+                            downsample_rate=training_downsample_rate)  # aggressive downsample
+    validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation',
+                              downsample_rate=None)  # use all validation data
+    df_train, df_val = training_data.sent_labels_df, validation_data.sent_labels_df
+
     df_test = pd.read_csv(f'{root}/tmp/validation_corpus_2023-02-07 16-33.csv')
 
     dataset_train = Dataset.from_pandas(df_train)
@@ -36,7 +43,7 @@ def compute_metrics(eval_pred):
     return binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
 
 
-def run_experiment(config=None, root: str = '..'):
+def run_experiment(root: str = '..'):
     torch.cuda.is_available()
 
     tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
