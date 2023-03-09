@@ -9,12 +9,12 @@ from extractor import FNS2021
 from metrics import binary_classification_metrics
 
 
-def load_data(tokenizer, root: str = '..', training_downsample_rate: float = 0.9):
+def load_data(tokenizer, root: str = '..', seed: int = 42, training_downsample_rate: float = 0.9):
     print('Loading Training Data')
     data_filename = 'training_corpus_2023-02-07 16-33.csv'
-    training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training',
+    training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training', random_state=seed,
                             downsample_rate=training_downsample_rate)  # aggressive downsample
-    validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation',
+    validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation', random_state=seed,
                               downsample_rate=None)  # use all validation data
     df_train, df_val = training_data.sent_labels_df, validation_data.sent_labels_df
 
@@ -43,11 +43,11 @@ def compute_metrics(eval_pred):
     return binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
 
 
-def run_experiment(root: str = '..'):
+def run_experiment(root: str = '..', seed: int = 42):
     torch.cuda.is_available()
 
     tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
-    dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root)
+    dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root, seed=seed)
 
     model = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-pretrain', num_labels=2)
     run_name = 'extractive_summarisation'
@@ -87,7 +87,8 @@ def run_experiment(root: str = '..'):
 
 
 def main():
-    run_experiment()
+    seed = 42
+    run_experiment(seed=seed)
 
 
 main()

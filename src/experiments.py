@@ -8,6 +8,9 @@ def experiment1(project: str = 'extractive_summarisation'):
         'method': 'grid'
     }
     parameters_dict = {
+        'seed': {
+            'values': [42]
+        },
         'lr': {
             'values': [1e-3]
         },

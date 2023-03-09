@@ -1,4 +1,7 @@
+import os
 from datetime import datetime
+from random import random
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -90,6 +93,21 @@ def batch_str_to_batch_tensors(sentence_list, embedding_model, seq_len: int = 10
     return batch_sent_tensor
 
 
+
+class AdditiveAttention(nn.Module):
+    def __init__(self, hidden_dim: int) -> None:
+        super(AdditiveAttention, self).__init__()
+        self.query_proj = nn.Linear(hidden_dim, hidden_dim, bias=False)
+        self.key_proj = nn.Linear(hidden_dim, hidden_dim, bias=False)
+        self.bias = nn.Parameter(torch.rand(hidden_dim).uniform_(-0.1, 0.1))
+        self.score_proj = nn.Linear(hidden_dim, 1)
+
+    def forward(self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        score = self.score_proj(torch.tanh(self.key_proj(key) + self.query_proj(query) + self.bias)).squeeze(-1)
+        attn = F.softmax(score, dim=-1)
+        context = torch.bmm(attn.unsqueeze(1), value)
+        return context, attn
+
 class FinRNN(nn.Module):
     # https://danijar.com/tips-for-training-recurrent-neural-networks/
     # GRU vs LSTM ✅
@@ -99,11 +117,12 @@ class FinRNN(nn.Module):
     # Feed-forward layers first ✅
     # Hidden states initialised by default to zeroes ✅
     def __init__(self, input_size=300, hidden_size=256, num_layers=2, label_size=2, bidirectional=True,
-                 batch_first=True, dropout=0.0, rnn_type='gru'):
+                 batch_first=True, dropout=0.0, rnn_type='gru', attention_type=None):
         super(FinRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.bidirectional = True
+        self.attention_type = attention_type
         dt = datetime.now().strftime("%Y-%m-%d-%H-%M")
         self.rnn_type = rnn_type
         self.name = f'{rnn_type}_bin_classifier-{dt}.pt'
@@ -117,13 +136,21 @@ class FinRNN(nn.Module):
         self.rnn = rnn(input_size=hidden_size, hidden_size=hidden_size, num_layers=num_layers,
                        bidirectional=bidirectional, batch_first=batch_first, dropout=dropout)
         self.D = 2 if bidirectional else 1
+        if attention_type is not None:
+            self.attention = AdditiveAttention(self.D * hidden_size)
         self.hidden2label = nn.Linear(in_features=self.D * hidden_size, out_features=label_size)
 
     def forward(self, sent):
         out = self.fully_connected(sent)
         out, _ = self.rnn(out)
-        out = out[:, -1, :]
-        out = self.hidden2label(out)
+        query = out[:, -1, :]
+        if self.attention_type is not None:
+            key = out
+            value = out
+            attended_output, attention_weights = self.attention(query, key, value)
+        else:
+            attended_output = query
+        out = self.hidden2label(attended_output)
         return F.softmax(out, dim=1)
 
 
@@ -356,6 +383,19 @@ def train_epochs(model, embedding_model, device, optimizer, train_dataloader, va
             break
 
 
+def set_seed(seed: int = 42) -> None:
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    # When running on the CuDNN backend, two further options must be set
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    # Set a fixed value for the hash seed
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    print(f"Random seed set as {seed}")
+
+
 def run_experiment(config=None, root: str = '..'):
     save_checkpoint = True
     input_size = 300  # FastText word-embedding dimensions
@@ -380,20 +420,21 @@ def run_experiment(config=None, root: str = '..'):
     with wandb.init(resume='auto', project='extractive_summarisation', config=config):
         config = wandb.config
         config.test_batch_size = config.batch_size
-        torch.manual_seed(1)  # pytorch random seed
+        set_seed(config.seed)
 
         print('Loading Training Data')
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
-        training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training',
+        training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training', random_state=config.seed,
                                 downsample_rate=config.downsample_rate)  # aggressive downsample
         train_dataloader = DataLoader(training_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Validation Data')
-        validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation',
+        validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation', random_state=config.seed,
                                   downsample_rate=None)  # use all validation data
         validation_dataloader = DataLoader(validation_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Testing Data')
         data_filename_test = 'validation_corpus_2023-02-07 16-33.csv'  # real validation data is used as test
-        test_data = FNS2021(file=f'{root}/tmp/{data_filename_test}', type_='testing')  # use all validation data
+        test_data = FNS2021(file=f'{root}/tmp/{data_filename_test}', type_='testing',
+                            random_state=config.seed)  # use all validation data
         empirical_test_report_size = 2_048
         test_dataloader = DataLoader(test_data, batch_size=empirical_test_report_size, drop_last=True)
 
