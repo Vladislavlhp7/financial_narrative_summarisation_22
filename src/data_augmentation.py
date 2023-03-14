@@ -2,6 +2,7 @@ from transformers import MarianMTModel, MarianTokenizer
 import pandas as pd
 from preprocessing import preprocess
 import os
+from tqdm import tqdm
 
 
 def format_french_model(lang, sents):
@@ -28,7 +29,7 @@ def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, batch_
     new_sents = []
     if save and os.path.exists(file_path):
         os.remove(file_path)
-    for i in range(0, len(sents), batch_size):
+    for i in tqdm(range(0, len(sents), batch_size)):
         batch_sents = sents[i:i + batch_size]
         batch_pass1 = perform_translation_single_pass_fr(batch_sents, model1, model1_tkn, lang=lang_tmp)
         batch_pass2 = perform_translation_single_pass_fr(batch_pass1, model2, model2_tkn, lang=lang_original)
