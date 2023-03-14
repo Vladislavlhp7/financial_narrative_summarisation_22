@@ -36,7 +36,7 @@ def backtranslate(sents, lang_original, lang_tmp, save: bool = True):
     # ensure text quality is consistent
     new_sents = [preprocess(s)[0] for s in new_sents]
     if save:
-        with open(f'back_translated_summary_{lang_original}_{lang_tmp}.txt', 'w') as f:
+        with open(f'../tmp/back_translated_summary_{lang_original}_{lang_tmp}.txt', 'w') as f:
             for s in new_sents:
                 f.write(s)
     return new_sents
