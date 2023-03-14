@@ -1,6 +1,7 @@
 from transformers import MarianMTModel, MarianTokenizer
 import pandas as pd
 from preprocessing import preprocess
+import os
 
 
 def format_french_model(lang, sents):
@@ -15,7 +16,7 @@ def perform_translation_single_pass_fr(sents, model, tokenizer, lang="fr"):
     return txt_translated_decoded
 
 
-def perform_backtranslation_fr(sents, lang_original, lang_tmp):
+def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, batch_size: int = 64, save: bool = True):
     model1_name = 'Helsinki-NLP/opus-mt-en-fr'
     model1_tkn = MarianTokenizer.from_pretrained(model1_name)
     model1 = MarianMTModel.from_pretrained(model1_name)
@@ -24,21 +25,28 @@ def perform_backtranslation_fr(sents, lang_original, lang_tmp):
     model2_tkn = MarianTokenizer.from_pretrained(model2_name)
     model2 = MarianMTModel.from_pretrained(model2_name)
 
-    pass1 = perform_translation_single_pass_fr(sents, model1, model1_tkn, lang=lang_tmp)
-    pass2 = perform_translation_single_pass_fr(pass1, model2, model2_tkn, lang=lang_original)
-    return pass2
+    new_sents = []
+    if save and os.path.exists(file_path):
+        os.remove(file_path)
+    for i in range(0, len(sents), batch_size):
+        batch_sents = sents[i:i + batch_size]
+        batch_pass1 = perform_translation_single_pass_fr(batch_sents, model1, model1_tkn, lang=lang_tmp)
+        batch_pass2 = perform_translation_single_pass_fr(batch_pass1, model2, model2_tkn, lang=lang_original)
+        new_sents.extend(batch_pass2)
+    # ensure text quality is consistent
+    new_sents = [preprocess(s)[0] for s in new_sents]
+    if save:
+        with open(file_path, 'a') as f:
+            for s in new_sents:
+                f.write(s + '\n')
+    return new_sents
 
 
 def backtranslate(sents, lang_original, lang_tmp, save: bool = True):
     new_sents = []
+    file_path = f'../tmp/back_translated_summary_{lang_original}_{lang_tmp}.txt'
     if lang_tmp == 'fr':
-        new_sents = perform_backtranslation_fr(sents, lang_original, lang_tmp)
-    # ensure text quality is consistent
-    new_sents = [preprocess(s)[0] for s in new_sents]
-    if save:
-        with open(f'../tmp/back_translated_summary_{lang_original}_{lang_tmp}.txt', 'w') as f:
-            for s in new_sents:
-                f.write(s)
+        new_sents = perform_backtranslation_fr(sents, lang_original, lang_tmp, save=save, file_path=file_path)
     return new_sents
 
 
