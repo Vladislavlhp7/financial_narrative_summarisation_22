@@ -21,12 +21,12 @@ def perform_translation_single_pass_fr(sents, model, tokenizer, device: str = 'c
 def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, device: str = 'cpu', batch_size: int = 64,
                                save: bool = True):
     model1_name = 'Helsinki-NLP/opus-mt-en-fr'
-    model1_tkn = MarianTokenizer.from_pretrained(model1_name).to(device)
     model1 = MarianMTModel.from_pretrained(model1_name).to(device)
+    model1_tkn = MarianTokenizer.from_pretrained(model1_name)
 
     model2_name = 'Helsinki-NLP/opus-mt-fr-en'
+    model2 = MarianMTModel.from_pretrained(model2_name).to(device)
     model2_tkn = MarianTokenizer.from_pretrained(model2_name)
-    model2 = MarianMTModel.from_pretrained(model2_name)
 
     new_sents = []
     if save and os.path.exists(file_path):
