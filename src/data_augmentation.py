@@ -18,8 +18,15 @@ def perform_translation_single_pass_fr(sents, model, tokenizer, device: str = 'c
     return txt_translated_decoded
 
 
+def save_to_file(new_sents, file_path):
+    with open(file_path, 'a') as f:
+        for s in new_sents:
+            f.write(s + '\n')
+
+
 def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, device: str = 'cpu', batch_size: int = 64,
                                save: bool = True):
+    # https://huggingface.co/Helsinki-NLP/opus-mt-fr-en
     model1_name = 'Helsinki-NLP/opus-mt-en-fr'
     model1 = MarianMTModel.from_pretrained(model1_name).to(device)
     model1_tkn = MarianTokenizer.from_pretrained(model1_name)
@@ -37,12 +44,15 @@ def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, device
         batch_pass2 = perform_translation_single_pass_fr(batch_pass1, model2, model2_tkn, device=device,
                                                          lang=lang_original)
         new_sents.extend(batch_pass2)
-    # ensure text quality is consistent
-    new_sents = [preprocess(s)[0] for s in new_sents]
+        if save and i % 999 == 0:
+            # ensure text quality is consistent
+            new_sents = [preprocess(s)[0] for s in new_sents]
+            save_to_file(new_sents=new_sents, file_path=file_path)
+            new_sents = []
     if save:
-        with open(file_path, 'a') as f:
-            for s in new_sents:
-                f.write(s + '\n')
+        # ensure text quality is consistent
+        new_sents = [preprocess(s)[0] for s in new_sents]
+        save_to_file(new_sents=new_sents, file_path=file_path)
     return new_sents
 
 
