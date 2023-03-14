@@ -13,7 +13,8 @@ def format_french_model(lang, sents):
 
 def perform_translation_single_pass_fr(sents, model, tokenizer, device: str = 'cpu', lang="fr"):
     txt_formatted = format_french_model(lang, sents)
-    txt_translated_encoded = model.generate(**tokenizer(txt_formatted, return_tensors="pt", padding=True).to(device))
+    txt_translated_encoded = model.generate(**tokenizer(txt_formatted, return_tensors="pt", padding=True,
+                                                        truncation=True, max_length=512).to(device))
     txt_translated_decoded = [tokenizer.decode(t, skip_special_tokens=True) for t in txt_translated_encoded]
     return txt_translated_decoded
 
