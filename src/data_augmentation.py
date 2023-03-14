@@ -21,17 +21,17 @@ def perform_translation_single_pass_fr(sents, model, tokenizer, device: str = 'c
 def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, device: str = 'cpu', batch_size: int = 64,
                                save: bool = True):
     model1_name = 'Helsinki-NLP/opus-mt-en-fr'
-    model1_tkn = MarianTokenizer.from_pretrained(model1_name)
-    model1 = MarianMTModel.from_pretrained(model1_name)
+    model1_tkn = MarianTokenizer.from_pretrained(model1_name).to(device)
+    model1 = MarianMTModel.from_pretrained(model1_name).to(device)
 
     model2_name = 'Helsinki-NLP/opus-mt-fr-en'
-    model2_tkn = MarianTokenizer.from_pretrained(model2_name).to(device)
-    model2 = MarianMTModel.from_pretrained(model2_name).to(device)
+    model2_tkn = MarianTokenizer.from_pretrained(model2_name)
+    model2 = MarianMTModel.from_pretrained(model2_name)
 
     new_sents = []
     if save and os.path.exists(file_path):
         os.remove(file_path)
-    for i in tqdm(range(0, len(sents), batch_size)):
+    for i in tqdm(range(0, len(sents), batch_size), desc=f'Back-translating {lang_original}-{lang_tmp}'):
         batch_sents = sents[i:i + batch_size]
         batch_pass1 = perform_translation_single_pass_fr(batch_sents, model1, model1_tkn, device=device, lang=lang_tmp)
         batch_pass2 = perform_translation_single_pass_fr(batch_pass1, model2, model2_tkn, device=device,
