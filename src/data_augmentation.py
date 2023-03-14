@@ -1,5 +1,6 @@
 from transformers import MarianMTModel, MarianTokenizer
 import pandas as pd
+from preprocessing import preprocess
 
 
 def format_french_model(lang, sents):
@@ -32,6 +33,8 @@ def backtranslate(sents, lang_original, lang_tmp, save: bool = True):
     new_sents = []
     if lang_tmp == 'fr':
         new_sents = perform_backtranslation_fr(sents, lang_original, lang_tmp)
+    # ensure text quality is consistent
+    new_sents = [preprocess(s)[0] for s in new_sents]
     if save:
         with open(f'back_translated_summary_{lang_original}_{lang_tmp}.txt', 'w') as f:
             for s in new_sents:
