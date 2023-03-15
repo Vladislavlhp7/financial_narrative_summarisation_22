@@ -1,3 +1,4 @@
+import gc
 import os
 from datetime import datetime
 from random import random
@@ -93,7 +94,6 @@ def batch_str_to_batch_tensors(sentence_list, embedding_model, seq_len: int = 10
     return batch_sent_tensor
 
 
-
 class AdditiveAttention(nn.Module):
     def __init__(self, hidden_dim: int) -> None:
         super(AdditiveAttention, self).__init__()
@@ -107,6 +107,7 @@ class AdditiveAttention(nn.Module):
         attn = F.softmax(score, dim=-1)
         context = torch.bmm(attn.unsqueeze(1), value)
         return context, attn
+
 
 class FinRNN(nn.Module):
     # https://danijar.com/tips-for-training-recurrent-neural-networks/
@@ -154,9 +155,17 @@ class FinRNN(nn.Module):
         return F.softmax(out, dim=1)
 
 
+def retrieve_augmented_data_df(filename: str = '../tmp/back_translated_summary_en_fr.txt'):
+    with open(filename, 'r') as f:
+        a = f.read().splitlines()
+    df_tmp = pd.DataFrame(a, columns=['sent'])
+    df_tmp['label'] = 1
+    return df_tmp
+
+
 class FNS2021(Dataset):
     def __init__(self, file: str, type_: str = 'training', train_ratio: float = 0.9, random_state: int = 1,
-                 downsample_rate: float = None):
+                 downsample_rate: float = None, data_augmentation: str = None):
         """
         Custom class for FNS 2021 Competition to load training and validation data. \
         Original validation data is used as testing
@@ -172,6 +181,10 @@ class FNS2021(Dataset):
             if type_ == "training":
                 if downsample_rate is not None:
                     train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
+                if data_augmentation is not None:
+                    if data_augmentation == 'fr':
+                        augmented_df = retrieve_augmented_data_df()
+                        train_df = pd.concat([train_df, augmented_df]).fillna(-1)
                 self.sent_labels_df = train_df
             elif type_ == "validation":
                 self.sent_labels_df = validation_df
@@ -408,8 +421,8 @@ def run_experiment(config=None, root: str = '..'):
     if cuda:
         print('Computational device chosen: CUDA')
         # Empty CUDA cache
-        # gc.collect()
-        # torch.cuda.empty_cache()
+        gc.collect()
+        torch.cuda.empty_cache()
         torch.set_default_tensor_type('torch.cuda.FloatTensor')  # Set data types to default CUDA standard
     else:
         print('Computational device chosen: CPU')
@@ -425,7 +438,8 @@ def run_experiment(config=None, root: str = '..'):
         print('Loading Training Data')
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
         training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training', random_state=config.seed,
-                                downsample_rate=config.downsample_rate)  # aggressive downsample
+                                downsample_rate=config.downsample_rate,
+                                data_augmentation=config.data_augmentation)  # aggressive downsample
         train_dataloader = DataLoader(training_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Validation Data')
         validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation', random_state=config.seed,

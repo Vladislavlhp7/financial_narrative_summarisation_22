@@ -9,7 +9,7 @@ def experiment1(project: str = 'extractive_summarisation'):
     }
     parameters_dict = {
         'seed': {
-            'values': [42]
+            'values': [42, 41]
         },
         'lr': {
             'values': [1e-3]
@@ -18,16 +18,16 @@ def experiment1(project: str = 'extractive_summarisation'):
             'values': [32]
         },
         'hidden_size': {
-            'values': [256]
+            'values': [64, 256]
         },
         'downsample_rate': {
-            'values': [0.9]
+            'values': [0.5, 0.75, 0.9]
         },
         'dropout': {
-          'values': [0, 0.25, 0.5]
+            'values': [0, 0.25]
         },
-        'rnn_type':{
-          'values': ['lstm', 'gru']
+        'rnn_type': {
+            'values': ['gru']
         },
         'epochs': {
             'value': 60
