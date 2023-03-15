@@ -2,7 +2,7 @@ import nltk
 from extractor import *
 
 
-def experiment1(project: str = 'extractive_summarisation'):
+def experiment1(project: str = 'extractive_summarisation-data-augmentation'):
     # Define W&B hyperparameter sweep
     sweep_config = {
         'method': 'grid'
@@ -10,6 +10,9 @@ def experiment1(project: str = 'extractive_summarisation'):
     parameters_dict = {
         'seed': {
             'values': [42, 41]
+        },
+        'data_augmentation': {
+          'values': ['fr', None]
         },
         'lr': {
             'values': [1e-3]
