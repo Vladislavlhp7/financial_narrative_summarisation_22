@@ -1,7 +1,7 @@
 import gc
 import os
 from datetime import datetime
-from random import random, seed
+from random import seed
 from typing import Tuple
 
 import numpy as np
@@ -185,6 +185,8 @@ class FNS2021(Dataset):
                     if data_augmentation == 'fr':
                         augmented_df = retrieve_augmented_data_df()
                         train_df = pd.concat([train_df, augmented_df]).fillna(-1)
+                        # ensure data is once again shuffled and the augmented data is properly mixed with the rest
+                        train_df = train_df.sample(frac=1)
                 self.sent_labels_df = train_df
             elif type_ == "validation":
                 self.sent_labels_df = validation_df
