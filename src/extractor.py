@@ -432,7 +432,7 @@ def run_experiment(config=None, root: str = '..'):
     # Load Embeddings directly from FastText model
     embedding_model = get_embedding_model(root=root)
 
-    with wandb.init(resume='auto', project='extractive_summarisation-data-augmentation', config=config, entity='yotkovv'):
+    with wandb.init(resume=False, project='extractive_summarisation-data-augmentation', config=config, entity='yotkovv'):
         config = wandb.config
         config.test_batch_size = config.batch_size
         set_seed(config.seed)

@@ -5,7 +5,7 @@ import wandb
 from datasets import Dataset
 from transformers import BertTokenizer, Trainer, BertForSequenceClassification, TrainingArguments
 
-from extractor import FNS2021
+from extractor import FNS2021, set_seed
 from metrics import binary_classification_metrics
 
 
@@ -44,22 +44,27 @@ def compute_metrics(eval_pred):
     return binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
 
 
-def run_experiment(root: str = '..', seed: int = 42, data_augmentation='fr'):
+def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr'):
     torch.cuda.is_available()
 
+    training_downsample_rate = 0.75
+    lr = 2e-5
+    set_seed(seed_v)
+
     tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
-    dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root, seed=seed,
-                                                         data_augmentation=data_augmentation)
+    dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root, seed=seed_v,
+                                                         data_augmentation=data_augmentation,
+                                                         training_downsample_rate=training_downsample_rate)
 
     model = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-pretrain', num_labels=2)
     run_name = 'extractive_summarisation'
-    model_name = 'finbert-sentiment-epoch-3/'
+    model_name = f'finbert-sentiment-seed-{seed_v}-dataaugm-{data_augmentation}-lr-{lr}-downsample-{training_downsample_rate}'
 
     args = TrainingArguments(
         output_dir='../tmp/',
         evaluation_strategy='epoch',
         save_strategy='epoch',
-        learning_rate=2e-5,
+        learning_rate=lr,
         per_device_train_batch_size=32,
         per_device_eval_batch_size=32,
         num_train_epochs=3,
@@ -89,9 +94,9 @@ def run_experiment(root: str = '..', seed: int = 42, data_augmentation='fr'):
 
 
 def main():
-    seed = 42
+    seed = 41
     data_augmentation = 'fr'
-    run_experiment(seed=seed, data_augmentation=data_augmentation)
+    run_experiment(seed_v=seed, data_augmentation=data_augmentation)
 
 
 main()
