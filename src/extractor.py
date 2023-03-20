@@ -95,21 +95,6 @@ def batch_str_to_batch_tensors(sentence_list, embedding_model, seq_len: int = 10
     return batch_sent_tensor
 
 
-class AdditiveAttention(nn.Module):
-    def __init__(self, hidden_dim: int) -> None:
-        super(AdditiveAttention, self).__init__()
-        self.query_proj = nn.Linear(hidden_dim, hidden_dim, bias=False)
-        self.key_proj = nn.Linear(hidden_dim, hidden_dim, bias=False)
-        self.bias = nn.Parameter(torch.rand(hidden_dim).uniform_(-0.1, 0.1))
-        self.score_proj = nn.Linear(hidden_dim, 1)
-
-    def forward(self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        score = self.score_proj(torch.tanh(self.key_proj(key) + self.query_proj(query) + self.bias)).squeeze(-1)
-        attn = F.softmax(score, dim=-1)
-        context = torch.bmm(attn.unsqueeze(1), value)
-        return context, attn
-
-
 class FinRNN(nn.Module):
     # https://danijar.com/tips-for-training-recurrent-neural-networks/
     # GRU vs LSTM ✅
@@ -139,7 +124,7 @@ class FinRNN(nn.Module):
                        bidirectional=bidirectional, batch_first=batch_first, dropout=dropout)
         self.D = 2 if bidirectional else 1
         if attention_type is not None:
-            self.attention = AdditiveAttention(self.D * hidden_size)
+            self.attention = nn.Linear(hidden_size * self.D, 1)
         self.hidden2label = nn.Linear(in_features=self.D * hidden_size, out_features=label_size)
 
     def forward(self, sent):
@@ -147,11 +132,13 @@ class FinRNN(nn.Module):
         out, _ = self.rnn(out)
         query = out[:, -1, :]
         if self.attention_type is not None:
-            key = out
-            value = out
-            attended_output, attention_weights = self.attention(query, key, value)
+            # Apply attention
+            attn_weights = torch.tanh(self.attention(out))
+            attn_weights = F.softmax(attn_weights, dim=1)
+            attended_output = torch.bmm(attn_weights.transpose(1, 2), out).squeeze(1)
         else:
             attended_output = query
+        # Apply linear layer to get final output
         out = self.hidden2label(attended_output)
         return F.softmax(out, dim=1)
 
@@ -458,7 +445,7 @@ def run_experiment(config=None, root: str = '..'):
         empirical_test_report_size = 2_048
         test_dataloader = DataLoader(test_data, batch_size=empirical_test_report_size, drop_last=True)
 
-        model = FinRNN(input_size=input_size, num_layers=num_layers,
+        model = FinRNN(input_size=input_size, num_layers=num_layers, attention_type=config.attention_type,
                        hidden_size=config.hidden_size, dropout=config.dropout, rnn_type=config.rnn_type)
         model_name = f'model-{config.lr}-{config.hidden_size}-{config.downsample_rate}-{datetime.now().strftime("%Y-%m-%d-%H-%M")}.h5'
         model.name = model_name

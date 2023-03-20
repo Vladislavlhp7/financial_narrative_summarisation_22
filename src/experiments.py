@@ -11,6 +11,9 @@ def experiment1(project: str = 'extractive_summarisation-data-augmentation-'):
         'seed': {
             'values': [42, 41]
         },
+        'attention_type': {
+            'values': ['dot']
+        },
         'data_augmentation': {
           'values': ['fr', None]
         },
