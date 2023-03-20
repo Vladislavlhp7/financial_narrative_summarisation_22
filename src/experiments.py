@@ -40,6 +40,7 @@ def experiment1(project: str = 'extractive_summarisation-data-augmentation-'):
         }
     }
     sweep_config['parameters'] = parameters_dict
+    wandb.login(key='d688e4b0d6cc6faf80068f7320efc3f0d135e36d')
     sweep_id = wandb.sweep(sweep_config, project=project)
     wandb.agent(sweep_id, run_experiment)
 

@@ -91,6 +91,10 @@ class TestPreprocessing(unittest.TestCase):
         doc_preprocessed_str, _ = preprocess(doc, is_lower=False)
         self.assertEqual(doc_preprocessed_str, "Next sentence will be removed.")
 
+    def test_new_line(self):
+        doc = '\n'
+        self.assertEqual('', clean(doc))
+
     def test_single_words_per_line(self):
         doc = "Sentence to stay.\nTOBEREMOVED\n"
         doc_preprocessed_str, _ = preprocess(doc, is_lower=False)

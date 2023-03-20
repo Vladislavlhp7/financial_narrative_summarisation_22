@@ -18,6 +18,7 @@ from tqdm import tqdm
 
 from metrics import binary_classification_metrics
 from query import get_embedding_model
+from preprocessing import clean
 
 
 def get_word_embedding(model, word: str):
@@ -159,6 +160,8 @@ def retrieve_augmented_data_df(filename: str = '../tmp/back_translated_summary_e
     with open(filename, 'r') as f:
         a = f.read().splitlines()
     df_tmp = pd.DataFrame(a, columns=['sent'])
+    df_tmp['sent'] = df_tmp['sent'].apply(lambda x: clean(str(x)))
+    df_tmp = df_tmp.loc[df_tmp['sent'] != '']
     df_tmp['label'] = 1
     return df_tmp
 
@@ -230,6 +233,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
                                                        seq_len=seq_len).to(device)
         target = labels.long().to(device)  # 1-dimensional integer tensor of size d
         predicted = model(batch_sent_tensor)  # (d,2) float probability tensor
+
         loss = criterion(predicted, target)
         loss.backward()
         optimizer.step()
