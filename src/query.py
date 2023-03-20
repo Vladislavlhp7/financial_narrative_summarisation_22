@@ -14,11 +14,15 @@ from preprocessing import clean_company_name, preprocess
 
 def get_file_handles(training: bool = True, gold: bool = False, root: str = '..') -> Dict[str, str]:
     """
-        Retrieve file handles for training and validation reports and gold summaries
-    :param training: bool
-    :param gold: bool
-    :param root: str
-    :return: dict of file paths
+    Returns a dictionary of file paths for either the training or validation dataset and either the annual reports or gold summaries.
+
+    Args:
+        training (bool): A boolean to indicate whether the training data is being used.
+        gold (bool): A boolean to indicate whether the gold summaries are being used.
+        root (str): The root directory of the data files.
+
+    Returns:
+        Dict[str, str]: A dictionary with keys as the report IDs and values as the file paths for each file in the directory.
     """
     path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
@@ -38,11 +42,15 @@ def get_file_handles(training: bool = True, gold: bool = False, root: str = '..'
 
 def get_gold_summaries_file_handles(file_id, training: bool = True, root: str = '..') -> Dict[str, str]:
     """
-        There are a few gold summaries per report, and they are enumerated as <report>_<#summary>.txt
-    :param file_id: str/int
-    :param training: bool
-    :param root: str
-    :return: list of file paths
+    Returns a dictionary of file paths for each summary of a given report.
+
+    Args:
+        file_id: The ID of the report to find the summaries for.
+        training (bool): A boolean to indicate whether the training data is being used.
+        root (str): The root directory of the data files.
+
+    Returns:
+        Dict[str, str]: A dictionary with keys as the summary IDs and values as the file paths for each summary in the directory.
     """
     path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
@@ -62,6 +70,17 @@ def get_gold_summaries_file_handles(file_id, training: bool = True, root: str = 
 
 
 def get_company_from_id(file_id, training: bool = True, root: str = '..') -> Union[str, None]:
+    """
+        Given a report ID, returns the name of the company that the report is from.
+
+        Args:
+            file_id: The ID of the report to find the company name for.
+            training (bool): A boolean to indicate whether the training data is being used.
+            root (str): The root directory of the data files.
+
+        Returns:
+            Union[str, None]: The name of the company or None if it could not be found.
+    """
     path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
@@ -80,9 +99,13 @@ def get_company_from_id(file_id, training: bool = True, root: str = '..') -> Uni
 
 def get_id_to_company_mapping(training: bool = True) -> Dict[str, str]:
     """
-        Many-to-one relationship, as reports are issued per year for a company
-    :param training:
-    :return:
+    Returns a dictionary with keys as report IDs and values as the corresponding company names.
+
+    Args:
+        training (bool): A boolean to indicate whether the training data is being used.
+
+    Returns:
+        Dict[str, str]: A dictionary with keys as report IDs and values as the corresponding company names.
     """
     path = 'data/'
     data_type = 'training/' if training else 'validation/'
@@ -96,6 +119,17 @@ def get_id_to_company_mapping(training: bool = True) -> Dict[str, str]:
 
 
 def get_report(file_id, training: bool = True, root: str = '..') -> str:
+    """
+        Given a report ID, returns the full text of the report.
+
+        Args:
+            file_id: The ID of the report to retrieve.
+            training (bool): A boolean to indicate whether the training data is being used.
+            root (str): The root directory of the data files.
+
+        Returns:
+            str: The full text of the report.
+    """
     path = f'{root}/data/'
     data_type = 'training/' if training else 'validation/'
     path += data_type
@@ -107,12 +141,16 @@ def get_report(file_id, training: bool = True, root: str = '..') -> str:
 
 def get_summary(file_id, summary_id=None, training: bool = True, root: str = '..') -> str:
     """
-        Return a specific (or random) summary for a specific report
-    :param file_id:
-    :param summary_id:
-    :param training:
-    :param root: str
-    :return:
+    Given a report ID and a summary ID (or None), returns the text of the corresponding summary.
+
+    Args:
+        file_id: The ID of the report to find the summary for.
+        summary_id: The ID of the summary to retrieve or None to select a random summary.
+        training (bool): A boolean to indicate whether the training data is being used.
+        root (str): The root directory of the data files.
+
+    Returns:
+        str: The text of the summary.
     """
     file_handles = get_gold_summaries_file_handles(file_id, training, root=root)
     if summary_id:
@@ -127,11 +165,15 @@ def get_summary(file_id, summary_id=None, training: bool = True, root: str = '..
 
 def get_all_summaries(file_id, training: bool = True, root: str = '..') -> Dict[str, str]:
     """
-        Return all summaries (str) for a report
-    :param file_id:
-    :param training:
-    :param root: str
-    :return:
+    Given a report ID, returns a dictionary containing all summaries for the report.
+
+    Args:
+        file_id (str): The ID of the report to find the summaries for.
+        training (bool, optional): A boolean to indicate whether the training data is being used. Defaults to True.
+        root (str, optional): The root directory of the data files. Defaults to '..'.
+
+    Returns:
+        dict: A dictionary with keys as the summary IDs and values as the file paths for each summary in the directory.
     """
     file_handles = get_gold_summaries_file_handles(file_id, training, root=root)
     summaries = {}
@@ -319,6 +361,19 @@ def get_corpus_vocabulary(training: bool = True, validation: bool = True, save_f
 
 def get_keyed_word_vectors_pickle(embedding_weights=None, corpus_file_path: str = None, save_file: bool = True,
                                   root: str = '..', file_path: str = None):
+    """
+        Given a corpus, generates an embedding dictionary with token as the key and embedding as value.
+
+        Args:
+        - embedding_weights: a dict containing the embeddings for the vocabulary.
+        - corpus_file_path: str, path to the corpus file.
+        - save_file: bool, whether to save the embedding dictionary as a pickle file.
+        - root: str, the root directory to look for the corpus file and save the embedding dictionary.
+        - file_path: str, the path to save the embedding dictionary pickle file.
+
+        Returns:
+        - token2embedding: a dictionary containing the embeddings for the vocabulary, with token as key.
+    """
     # Try directly loading existing embedding dict from pickle file
     default_file_path = f'{root}/tmp/corpus_embeddings.pickle'
     if file_path is None:
@@ -352,6 +407,21 @@ def get_embedding_model(root: str = '..'):
 
 def recalc_keyed_vector(embedding_weights, train_dataloader, validation_dataloader, file_path: str = None,
                         save_file: bool = True, root: str = '..'):
+    """
+        Recalculates keyed word vectors and saves them to a pickle file.
+        If the pickle file already exists, it loads the keyed word vectors from the file.
+
+        Args:
+            embedding_weights: A dictionary containing embeddings for the vocabulary of the original embedding.
+            train_dataloader: A PyTorch DataLoader object containing training data.
+            validation_dataloader: A PyTorch DataLoader object containing validation data.
+            file_path: The file path to save the keyed word vectors pickle file. Default is {root}/tmp/corpus_embeddings_CSF.pickle.
+            save_file: If True, saves the keyed word vectors to a pickle file. Default is True.
+            root: The root directory. Default is '..'.
+
+        Returns:
+            token2embedding: A dictionary containing keyed word vectors.
+    """
     # Try directly loading existing embedding dict from pickle file
     default_file_path = f'{root}/tmp/corpus_embeddings_CSF.pickle'
     if file_path is None:
@@ -397,15 +467,3 @@ def binary_classification_data_preparation(root: str = '..'):
     embedding_model = get_embedding_model(root=root)
     embedding_weights = embedding_model.wv
     get_keyed_word_vectors_pickle(embedding_weights=embedding_weights, root=root)
-
-
-# def get_latest_data_csv(training: bool = True) -> pd.DataFrame:
-#     pass
-
-
-def main():
-    # binary_classification_data_preparation(root='.')
-    pass
-
-
-main()

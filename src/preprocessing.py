@@ -105,9 +105,22 @@ def clean(doc: str):
 
 class Tokenize:
     def __init__(self, doc):
+        """
+           Initializes the Tokenize class with the given document `doc` and tokenizes it into sentences using the
+           sent_tokenize method from the nltk library.
+
+           Args:
+               doc (str): The text document to be tokenized.
+           """
         self.sentences = sent_tokenize(doc)
 
     def remove_short_sentences(self, num_words: int = 3):
+        """
+        Removes the sentences that have less than `num_words` number of words.
+
+        Args:
+            num_words (int, optional): The minimum number of words required for a sentence to be kept. Defaults to 3.
+        """
         self.sentences = [s for s in self.sentences if len(re.findall(r'\w+', s)) >= num_words]
 
     def lowercase_sentences(self):
@@ -136,10 +149,3 @@ def preprocess(doc: str, is_lower: bool = True) -> Tuple[str, Tokenize]:
     # Remove super short sentences with less than 3 words
     doc_tokenized.remove_short_sentences(num_words=3)
     return str(doc_tokenized), doc_tokenized
-
-
-def main():
-    pass
-
-
-main()

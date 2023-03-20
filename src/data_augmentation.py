@@ -7,11 +7,36 @@ import torch
 
 
 def format_french_model(lang, sents):
+    """
+        This function takes a language and a list of sentences as input and returns a list of formatted sentences
+        with the language tag and a special token.
+
+        Args:
+        lang (str): The language code, e.g. "fr" for French.
+        sents (list of str): A list of sentences to format.
+
+        Returns:
+        list of str: A list of formatted sentences.
+    """
     txt_formatted = [">>{}<< {}".format(lang, s) for s in sents]
     return txt_formatted
 
 
 def perform_translation_single_pass_fr(sents, model, tokenizer, device: str = 'cpu', lang="fr"):
+    """
+        This function takes a list of sentences, a translation model, a tokenizer, a device to run the model on, and a language
+        code and returns a list of translated sentences.
+
+        Args:
+        sents (list of str): A list of sentences to translate.
+        model: A translation model.
+        tokenizer: A tokenizer to encode the input sentences.
+        device (str): The device to run the model on. Default is 'cpu'.
+        lang (str): The language code, e.g. "fr" for French. Default is "fr".
+
+        Returns:
+        list of str: A list of translated sentences.
+    """
     txt_formatted = format_french_model(lang, sents)
     txt_translated_encoded = model.generate(**tokenizer(txt_formatted, return_tensors="pt", padding=True,
                                                         truncation=True, max_length=512).to(device))
@@ -20,6 +45,13 @@ def perform_translation_single_pass_fr(sents, model, tokenizer, device: str = 'c
 
 
 def save_to_file(new_sents, file_path):
+    """
+        This function takes a list of strings and a file path and appends each string to the file with a newline character.
+
+        Args:
+        new_sents (list of str): A list of strings to save to file.
+        file_path (str): The file path to save the strings to.
+    """
     with open(file_path, 'a') as f:
         for s in new_sents:
             f.write(s + '\n')
@@ -46,12 +78,13 @@ def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, device
                                                          lang=lang_original)
         new_sents.extend(batch_pass2)
         if save and i % 999 == 0:
-            # ensure text quality is consistent
+            # Ensure text quality is consistent
             new_sents = [preprocess(s)[0] for s in new_sents]
+            # Save the back-translated sentences to file in case of unexpected errors
             save_to_file(new_sents=new_sents, file_path=file_path)
             new_sents = []
     if save:
-        # ensure text quality is consistent
+        # Save the final batch of back-translated sentences to file
         new_sents = [preprocess(s)[0] for s in new_sents]
         save_to_file(new_sents=new_sents, file_path=file_path)
     return new_sents

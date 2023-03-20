@@ -5,6 +5,18 @@ from sklearn.metrics import confusion_matrix, recall_score, accuracy_score, prec
 
 
 def calc_rouge(txt1: str, txt2: str, stats=None, verbose: bool = True):
+    """
+        Calculates ROUGE (Recall-Oriented Understudy for Gisting Evaluation) scores between two input texts.
+
+        Args:
+        - txt1 (str): the first text for comparison
+        - txt2 (str): the second text for comparison
+        - stats (list): a list of metrics to calculate. It can be one or more of these: ['f', 'p', 'r'] (default: ['f'])
+        - verbose (bool): if True, the function prints out the ROUGE scores (default: True)
+
+        Returns:
+        - scores (dict): a dictionary containing the ROUGE scores
+    """
     if stats is None:
         stats = list("f")
     if stats:
