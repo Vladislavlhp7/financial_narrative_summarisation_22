@@ -90,9 +90,9 @@ def perform_backtranslation_fr(sents, lang_original, lang_tmp, file_path, device
     return new_sents
 
 
-def backtranslate(sents, lang_original, lang_tmp, device: str = 'cpu', save: bool = True):
+def backtranslate(sents, lang_original, lang_tmp, device: str = 'cpu', save: bool = True, downsample_rate: float = 0.75, random_state: int = 42):
     new_sents = []
-    file_path = f'../tmp/back_translated_summary_{lang_original}_{lang_tmp}.txt'
+    file_path = f'../tmp/back_translated_summary_{lang_original}_{lang_tmp}_{downsample_rate}_{random_state}.txt'
     if lang_tmp == 'fr':
         new_sents = perform_backtranslation_fr(sents, lang_original, lang_tmp, save=save, device=device,
                                                file_path=file_path)
@@ -100,13 +100,16 @@ def backtranslate(sents, lang_original, lang_tmp, device: str = 'cpu', save: boo
 
 
 def main():
-    lang_original = 'en'
-    lang_tmp = 'fr'
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    print(device)
-    df = pd.read_csv('../tmp/training_corpus_2023-02-07 16-33.csv')
-    sents = df.loc[df.label == 1].sent.tolist()
-    new_sents = backtranslate(sents, lang_original, lang_tmp, device)
+    for downsample_rate in [0.75]:
+        for random_state in [42, 43]:
+            lang_original = 'en'
+            lang_tmp = 'fr'
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            print(device)
+            # df = pd.read_csv('../tmp/training_corpus_2023-02-07 16-33.csv')
+            df = "../tmp/train_downsample_{0}_random_{1}.csv".format(downsample_rate, random_state)
+            sents = df.loc[df.label == 1].sent.tolist()
+            new_sents = backtranslate(sents, lang_original, lang_tmp, device, downsample_rate=downsample_rate, random_state=random_state)
     return new_sents
 
 
