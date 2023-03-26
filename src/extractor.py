@@ -2,23 +2,22 @@ import gc
 import os
 from datetime import datetime
 from random import seed
-from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import wandb
 from nltk import word_tokenize
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
+import wandb
 from metrics import binary_classification_metrics
-from query import get_embedding_model
 from preprocessing import clean
+from query import get_embedding_model
 
 
 def get_word_embedding(model, word: str):
@@ -143,7 +142,8 @@ class FinRNN(nn.Module):
         return F.softmax(out, dim=1)
 
 
-def retrieve_augmented_data_df(lang_original: str='en', lang_tmp: str='fr', downsample_rate: float = 0.75, random_state: int = 42):
+def retrieve_augmented_data_df(lang_original: str = 'en', lang_tmp: str = 'fr', downsample_rate: float = 0.75,
+                               random_state: int = 42):
     filename = f'../tmp/back_translated_summary_{lang_original}_{lang_tmp}_{downsample_rate}_{random_state}.txt'
     with open(filename, 'r') as f:
         a = f.read().splitlines()
@@ -261,7 +261,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
             print('  batch {} loss: {} total accuracy: {} summary accuracy: {}, '.format(i + 1, last_loss, last_acc,
                                                                                          last_acc_1))
             # Log training details on W&B
-            metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
+            metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels, prefix="train:")
             metrics["Running Training Loss"] = last_loss
             metrics["Running Total Training Accuracy"] = last_acc
             metrics["Running Summary Training Accuracy"] = last_acc_1
@@ -309,7 +309,7 @@ def test(model, embedding_model, test_dataloader, seq_len, device):
             # Prepare data for confusion matrix split
             true_labels += target.cpu().numpy().tolist()
             pred_labels += winners.cpu().numpy().tolist()
-            metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
+            metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels, prefix="test:")
 
             last_acc = running_acc / (i + 1)  # total accuracy per batch
             last_acc_1 = running_acc_1 / (i + 1)  # summary sent accuracy per batch
@@ -358,7 +358,7 @@ def validate(model, embedding_model, validation_dataloader, criterion, seq_len, 
                 print('Validation loss {} total accuracy: {} summary accuracy: {}'.format(last_loss, last_acc,
                                                                                           last_acc_1))
                 # Log training details on W&B
-                metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
+                metrics = binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels, prefix="val:")
                 metrics["Running Validation Loss"] = last_loss
                 metrics["Running Total Validation Accuracy"] = last_acc
                 metrics["Running Summary Validation Accuracy"] = last_acc_1

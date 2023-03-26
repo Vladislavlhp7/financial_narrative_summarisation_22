@@ -59,7 +59,7 @@ def calc_rouge_agg(summary: str, summaries_gold, stats=None, verbose: bool = Tru
     return scores_df.mean()
 
 
-def binary_classification_metrics(true_labels, pred_labels):
+def binary_classification_metrics(true_labels, pred_labels, prefix=""):
     # Find False Positives and True Negatives
     cm = confusion_matrix(true_labels, pred_labels)
     tn, fp, fn, tp = cm.ravel()
@@ -80,7 +80,7 @@ def binary_classification_metrics(true_labels, pred_labels):
     # Cohen Kappa Score
     cohen_kappa_score_ = cohen_kappa_score(true_labels, pred_labels)
 
-    return {
+    d = {
         "accuracy": accuracy,
         "recall": recall,
         "precision": precision,
@@ -90,3 +90,5 @@ def binary_classification_metrics(true_labels, pred_labels):
         "true negative rate": tnr,
         "false negative rate": fnr
     }
+    d = {prefix + k: v for k, v in d.items()}
+    return d
