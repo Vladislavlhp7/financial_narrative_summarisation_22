@@ -155,7 +155,7 @@ def retrieve_augmented_data_df(filename: str = '../tmp/back_translated_summary_e
 
 class FNS2021(Dataset):
     def __init__(self, file: str, type_: str = 'training', train_ratio: float = 0.9, random_state: int = 1,
-                 downsample_rate: float = None, data_augmentation: str = None):
+                 downsample_rate: float = None, data_augmentation: str = None, type_load_directly: bool = False):
         """
         Custom class for FNS 2021 Competition to load training and validation data. \
         Original validation data is used as testing
@@ -166,20 +166,30 @@ class FNS2021(Dataset):
         if type_ == 'testing':
             self.sent_labels_df = self.total_data_df
         else:
-            train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
-                                                       random_state=random_state, stratify=self.total_data_df.label)
-            if type_ == "training":
-                if downsample_rate is not None:
-                    train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
-                if data_augmentation is not None:
-                    if data_augmentation == 'fr':
-                        augmented_df = retrieve_augmented_data_df()
-                        train_df = pd.concat([train_df, augmented_df]).fillna(-1)
-                        # ensure data is once again shuffled and the augmented data is properly mixed with the rest
-                        train_df = train_df.sample(frac=1)
-                self.sent_labels_df = train_df
-            elif type_ == "validation":
-                self.sent_labels_df = validation_df
+            if not type_load_directly:
+                train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
+                                                           random_state=random_state, stratify=self.total_data_df.label)
+                if type_ == "training":
+                    if downsample_rate is not None:
+                        train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
+                    if data_augmentation is not None:
+                        if data_augmentation == 'fr':
+                            augmented_df = retrieve_augmented_data_df()
+                            train_df = pd.concat([train_df, augmented_df]).fillna(-1)
+                            # ensure data is once again shuffled and the augmented data is properly mixed with the rest
+                            train_df = train_df.sample(frac=1)
+                    self.sent_labels_df = train_df
+                elif type_ == "validation":
+                    self.sent_labels_df = validation_df
+            # Load directly from files if type_load_directly is True
+            else:
+                if type_ == "training":
+                    filename = "../tmp/train_downsample_{0}_random_{1}.csv".format(downsample_rate, random_state)
+                    self.sent_labels_df = pd.read_csv(filename)
+                elif type_ == 'validation':
+                    filename = "../tmp/validation_downsample_{0}_random_{1}.csv".format(downsample_rate,
+                                                                                        random_state)
+                    self.sent_labels_df = pd.read_csv(filename)
         self.sent_labels_df.reset_index(drop=True, inplace=True)
 
     @staticmethod
@@ -423,7 +433,8 @@ def run_experiment(config=None, root: str = '..'):
     # Load Embeddings directly from FastText model
     embedding_model = get_embedding_model(root=root)
 
-    with wandb.init(resume=False, project='extractive_summarisation-data-augmentation-', config=config, entity='yotkovv'):
+    with wandb.init(resume=False, project='extractive_summarisation-data-augmentation-unified', config=config,
+                    entity='yotkovv'):
         config = wandb.config
         config.test_batch_size = config.batch_size
         set_seed(config.seed)
@@ -432,11 +443,13 @@ def run_experiment(config=None, root: str = '..'):
         data_filename = 'training_corpus_2023-02-07 16-33.csv'
         training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training', random_state=config.seed,
                                 downsample_rate=config.downsample_rate,
-                                data_augmentation=config.data_augmentation)  # aggressive downsample
+                                data_augmentation=config.data_augmentation,
+                                type_load_directly=True)  # aggressive downsample
         train_dataloader = DataLoader(training_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Validation Data')
         validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation', random_state=config.seed,
-                                  downsample_rate=None)  # use all validation data
+                                  downsample_rate=config.downsample_rate,
+                                  type_load_directly=True)  # use all validation data
         validation_dataloader = DataLoader(validation_data, batch_size=config.batch_size, drop_last=True)
         print('Loading Testing Data')
         data_filename_test = 'validation_corpus_2023-02-07 16-33.csv'  # real validation data is used as test
