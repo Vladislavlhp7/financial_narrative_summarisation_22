@@ -9,14 +9,17 @@ from extractor import FNS2021, set_seed
 from metrics import binary_classification_metrics
 
 
-def load_data(tokenizer, root: str = '..', seed: int = 42, training_downsample_rate: float = 0.9, data_augmentation='fr'):
+def load_data(tokenizer, root: str = '..', v_seed: int = 42, training_downsample_rate: float = 0.9,
+              data_augmentation='fr', type_load_directly: bool = True):
     print('Loading Training Data')
     data_filename = 'training_corpus_2023-02-07 16-33.csv'
-    training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training', random_state=seed,
+    training_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='training', random_state=v_seed,
                             downsample_rate=training_downsample_rate,
-                            data_augmentation=data_augmentation)  # aggressive downsample
-    validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation', random_state=seed,
-                              downsample_rate=None)  # use all validation data
+                            data_augmentation=data_augmentation,
+                            type_load_directly=type_load_directly)  # aggressive downsample
+    validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation', random_state=v_seed,
+                              downsample_rate=None,
+                              type_load_directly=type_load_directly)  # use all validation data
     df_train, df_val = training_data.sent_labels_df, validation_data.sent_labels_df
 
     df_test = pd.read_csv(f'{root}/tmp/validation_corpus_2023-02-07 16-33.csv')
@@ -44,21 +47,25 @@ def compute_metrics(eval_pred):
     return binary_classification_metrics(true_labels=true_labels, pred_labels=pred_labels)
 
 
-def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr'):
+def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr', training_downsample_rate=0.75, lr=2e-5,
+                   type_load_directly=True):
     torch.cuda.is_available()
+    torch.cuda.empty_cache()
 
-    training_downsample_rate = 0.75
-    lr = 2e-5
     set_seed(seed_v)
 
     tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
-    dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root, seed=seed_v,
+    dataset_train, dataset_val, dataset_test = load_data(tokenizer=tokenizer, root=root, v_seed=seed_v,
                                                          data_augmentation=data_augmentation,
-                                                         training_downsample_rate=training_downsample_rate)
+                                                         training_downsample_rate=training_downsample_rate,
+                                                         type_load_directly=type_load_directly)
 
     model = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-pretrain', num_labels=2)
-    run_name = 'extractive_summarisation'
+    # run_name = 'extractive_summarisation'
     model_name = f'finbert-sentiment-seed-{seed_v}-dataaugm-{data_augmentation}-lr-{lr}-downsample-{training_downsample_rate}'
+
+    wandb.login(key='d688e4b0d6cc6faf80068f7320efc3f0d135e36d')
+    wandb.init(project='extractive_summarisation-data-augmentation-unified', entity='yotkovv')
 
     args = TrainingArguments(
         output_dir='../tmp/',
@@ -71,7 +78,7 @@ def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr'):
         weight_decay=0.01,
         load_best_model_at_end=True,
         metric_for_best_model='accuracy',
-        run_name=run_name,
+        run_name=model_name,
     )
 
     trainer = Trainer(
@@ -79,7 +86,7 @@ def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr'):
         args=args,
         train_dataset=dataset_train,
         eval_dataset=dataset_val,
-        compute_metrics=compute_metrics
+        compute_metrics=compute_metrics,
     )
 
     trainer.train()
@@ -88,15 +95,20 @@ def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr'):
     with torch.no_grad():
         prediction_obj = trainer.predict(dataset_test)
         metrics = prediction_obj.metrics
+        metrics = {f'test:{k}': v for k, v in metrics.items()}
         print(metrics)
         wandb.log(metrics)
     trainer.save_model(model_name)
 
 
 def main():
-    seed = 41
-    data_augmentation = 'fr'
-    run_experiment(seed_v=seed, data_augmentation=data_augmentation)
+    seed = 42
+    training_downsample_rate = 0.9
+    data_augmentation = None
+    lr = 2e-5
+    type_load_directly = True
+    run_experiment(seed_v=seed, data_augmentation=data_augmentation, type_load_directly=type_load_directly,
+                   lr=lr, training_downsample_rate=training_downsample_rate)
 
 
 main()
