@@ -143,7 +143,8 @@ class FinRNN(nn.Module):
         return F.softmax(out, dim=1)
 
 
-def retrieve_augmented_data_df(filename: str = '../tmp/back_translated_summary_en_fr.txt'):
+def retrieve_augmented_data_df(lang_original: str='en', lang_tmp: str='fr', downsample_rate: float = 0.75, random_state: int = 42):
+    filename = f'../tmp/back_translated_summary_{lang_original}_{lang_tmp}_{downsample_rate}_{random_state}.txt'
     with open(filename, 'r') as f:
         a = f.read().splitlines()
     df_tmp = pd.DataFrame(a, columns=['sent'])
@@ -184,7 +185,8 @@ class FNS2021(Dataset):
                 if data_augmentation is not None:
                     if data_augmentation == 'fr':
                         print('Augmenting data with French back-translation')
-                        augmented_df = retrieve_augmented_data_df()
+                        augmented_df = retrieve_augmented_data_df(downsample_rate=downsample_rate,
+                                                                  random_state=random_state)
                         train_df = pd.concat([train_df, augmented_df]).fillna(-1)
                         # ensure data is once again shuffled and the augmented data is properly mixed with the rest
                         train_df = train_df.sample(frac=1)
