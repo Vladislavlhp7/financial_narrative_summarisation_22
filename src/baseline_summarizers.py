@@ -5,7 +5,7 @@ from sumy.summarizers.lsa import LsaSummarizer
 from sumy.summarizers.luhn import LuhnSummarizer
 
 from metrics import calc_rouge
-from query import get_report, get_summary, calc_rouge_agg_from_gold_summaries
+from query import get_report, get_summary
 
 baseline_summarizers = {
     'lex': LexRankSummarizer,
@@ -41,4 +41,4 @@ def main():
     print(rouge_df)
 
 
-main()
+# main()
