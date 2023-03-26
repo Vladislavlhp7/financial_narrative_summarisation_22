@@ -166,30 +166,31 @@ class FNS2021(Dataset):
         if type_ == 'testing':
             self.sent_labels_df = self.total_data_df
         else:
-            if not type_load_directly:
+            if type_load_directly:
+                print('Loading data directly from file')
+                tr_filename = "../tmp/train_downsample_{0}_random_{1}.csv".format(downsample_rate, random_state)
+                valid_filename = "../tmp/validation_downsample_{0}_random_{1}.csv".format(downsample_rate,
+                                                                                          random_state)
+                train_df = pd.read_csv(tr_filename)
+                validation_df = pd.read_csv(valid_filename)
+            else:
+                print('Splitting data from file')
                 train_df, validation_df = train_test_split(self.total_data_df, test_size=1 - train_ratio,
                                                            random_state=random_state, stratify=self.total_data_df.label)
-                if type_ == "training":
-                    if downsample_rate is not None:
-                        train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
-                    if data_augmentation is not None:
-                        if data_augmentation == 'fr':
-                            augmented_df = retrieve_augmented_data_df()
-                            train_df = pd.concat([train_df, augmented_df]).fillna(-1)
-                            # ensure data is once again shuffled and the augmented data is properly mixed with the rest
-                            train_df = train_df.sample(frac=1)
-                    self.sent_labels_df = train_df
-                elif type_ == "validation":
-                    self.sent_labels_df = validation_df
-            # Load directly from files if type_load_directly is True
-            else:
-                if type_ == "training":
-                    filename = "../tmp/train_downsample_{0}_random_{1}.csv".format(downsample_rate, random_state)
-                    self.sent_labels_df = pd.read_csv(filename)
-                elif type_ == 'validation':
-                    filename = "../tmp/validation_downsample_{0}_random_{1}.csv".format(downsample_rate,
-                                                                                        random_state)
-                    self.sent_labels_df = pd.read_csv(filename)
+            if type_ == "training":
+                if downsample_rate is not None and not type_load_directly:
+                    print('Downsampling data')
+                    train_df = self.downsample(df=train_df, rate=downsample_rate, random_state=random_state)
+                if data_augmentation is not None:
+                    if data_augmentation == 'fr':
+                        print('Augmenting data with French back-translation')
+                        augmented_df = retrieve_augmented_data_df()
+                        train_df = pd.concat([train_df, augmented_df]).fillna(-1)
+                        # ensure data is once again shuffled and the augmented data is properly mixed with the rest
+                        train_df = train_df.sample(frac=1)
+                self.sent_labels_df = train_df
+            elif type_ == "validation":
+                self.sent_labels_df = validation_df
         self.sent_labels_df.reset_index(drop=True, inplace=True)
 
     @staticmethod
