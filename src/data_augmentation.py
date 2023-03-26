@@ -107,7 +107,7 @@ def main():
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
             print(device)
             # df = pd.read_csv('../tmp/training_corpus_2023-02-07 16-33.csv')
-            df = "../tmp/train_downsample_{0}_random_{1}.csv".format(downsample_rate, random_state)
+            df = pd.read_csv("../tmp/train_downsample_{0}_random_{1}.csv".format(downsample_rate, random_state))
             sents = df.loc[df.label == 1].sent.tolist()
             new_sents = backtranslate(sents, lang_original, lang_tmp, device, downsample_rate=downsample_rate, random_state=random_state)
     return new_sents
