@@ -3,24 +3,24 @@ import torch
 from datasets import Dataset
 from scipy.special import softmax
 from tqdm import tqdm
-from transformers import BertTokenizer, Trainer, TrainingArguments
+from transformers import BertTokenizer, Trainer, BertForSequenceClassification, BertConfig, TrainingArguments
 
-from extractor import batch_str_to_batch_tensors
+from extractor import batch_str_to_batch_tensors, FinRNN
 from metrics import calc_rouge
 from preprocessing import clean
-from query import get_all_summaries
+from query import get_all_summaries, get_embedding_model
 
 args = TrainingArguments(
-        output_dir='../tmp/',
-        evaluation_strategy='epoch',
-        save_strategy='epoch',
-        learning_rate=2e-5,
-        per_device_train_batch_size=32,
-        per_device_eval_batch_size=32,
-        num_train_epochs=1,
-        weight_decay=0.01,
-        load_best_model_at_end=True,
-        metric_for_best_model='accuracy',
+    output_dir='../tmp/',
+    evaluation_strategy='epoch',
+    save_strategy='epoch',
+    learning_rate=2e-5,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
+    num_train_epochs=1,
+    weight_decay=0.01,
+    load_best_model_at_end=True,
+    metric_for_best_model='accuracy',
 )
 
 
@@ -64,7 +64,8 @@ def select_summary_sents(probabilities, sentences, max_sents=25):
 
 def load_data_transformer(tokenizer, df_test):
     dataset_test = Dataset.from_pandas(df_test)
-    dataset_test = dataset_test.map(lambda e: tokenizer(e['sent'], truncation=True, padding='max_length', max_length=128), batched=True)
+    dataset_test = dataset_test.map(
+        lambda e: tokenizer(e['sent'], truncation=True, padding='max_length', max_length=128), batched=True)
     dataset_test.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'label'])
     return dataset_test
 
@@ -113,6 +114,18 @@ def get_max_rouge_l_score(data):
     return max_dict
 
 
+def load_model_transformer(model_dir):
+    output_model_file = f"{model_dir}/pytorch_model.bin"
+    output_config_file = f"{model_dir}/config.json"
+
+    config = BertConfig.from_json_file(output_config_file)
+    model_transformer = BertForSequenceClassification(config)
+
+    state_dict = torch.load(output_model_file, map_location=torch.device('cpu'))
+    model_transformer.load_state_dict(state_dict, )
+    return model_transformer
+
+
 def evaluate_model(model, config, embedding_model=None):
     """
         Evaluates the model on the test set. The model is evaluated using the ROUGE evaluation metric.
@@ -157,3 +170,82 @@ def evaluate_model(model, config, embedding_model=None):
         # Append the max ROUGE-L score to the list of scores for all reports
         rouge_scores.append(max_rouge_l_score)
     return rouge_scores
+
+
+def unpack_rouge_metric(d, key='f'):
+    """
+        Unpacks the 'f' key from the ROUGE dictionary.
+
+        Args:
+        - d: a dictionary containing ROUGE scores
+        - key: the key to unpack, default is 'f'
+
+        Returns:
+        - a dictionary with the 'f' key unpacked
+    """
+    d_new = {k: v[key] for k, v in d.items() if key in v}
+    return d_new
+
+
+def rouge_dict_to_df(data):
+    """
+        Converts a list of ROUGE dictionaries into a pandas DataFrame.
+
+        Args:
+        - data: a list of dictionaries containing ROUGE scores
+
+        Returns:
+        - a pandas DataFrame with ROUGE scores as columns and each row corresponding to a single document
+    """
+    data_ = []
+    for i, d in enumerate(data):
+        d_new = unpack_rouge_metric(d)
+        data_.append(d_new)
+    df = pd.DataFrame(data_)
+    return df
+
+
+def evaluate_models(configs, embedding_model=None):
+    for c in tqdm(configs, desc='Evaluating models'):
+        print(f"{c['model_type']}")
+        if c['model_type'] == 'transformer':
+            model_transformer = load_model_transformer(c['model_dir'])
+            rouge_scores = evaluate_model(c, model_transformer, embedding_model=None)
+        elif c['model_type'] == 'gru':
+            model_rnn = FinRNN(hidden_size=c['hidden_size'])
+            model_rnn.load_state_dict(torch.load(c['model_path'], map_location=torch.device('cpu')), strict=False)
+            rouge_scores = evaluate_model(c, model_rnn, embedding_model=embedding_model)
+        df = rouge_dict_to_df(rouge_scores)
+        df.to_csv(f"{c['model_name']}_rouge_scores.csv")
+
+
+def main():
+    embedding_model = get_embedding_model()
+
+    configs = []
+
+    # Transformer model
+    config = {
+        'seed_v': 42,
+        'data_augmentation': 'fr',
+        'lr': 2e-5,
+        'training_downsample_rate': 0.75,
+        'model_type': 'transformer',
+        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+    }
+    config[
+        'model_name'] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
+    config['model_dir'] = config['model_name']
+    configs.append(config)
+
+    # GRU model
+    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
+              'model_name': 'model-0.001-256-0.75-2023-03-27-12-25.h5'}
+    config['model_path'] = config['model_name']
+    configs.append(config)
+
+    evaluate_models(configs=configs, embedding_model=embedding_model)
+
+
+if __name__ == '__main__':
+    main()
