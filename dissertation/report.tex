@@ -3,6 +3,7 @@
 
 \documentclass[12pt]{third-rep}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{csquotes}
 
 
 %% Any characters from a % to the end of line are comments.
@@ -73,7 +74,7 @@
 
 %% The following line sets up the use of PostScript fonts rather
 %% than the standard bitmapped fonts.
-\usepackage{pslatex}
+%\usepackage{pslatex}
 
 %% Uncomment the following line if you want to change the name of the
 %% Bibliography to References
@@ -82,8 +83,6 @@
 \usepackage{listings}
 
 \usepackage{graphicx} % Required for inserting images
-%\usepackage[style=apa]{biblatex}
-%\addbibresource{ThesisReferences.bib} %Import the bibliography file
 \usepackage{hyperref}
 
 %% End of preamble, the actual document starts here
@@ -95,9 +94,9 @@
 \dotitleandabstract
 
 %% Generate contents etc
-%\tableofcontents
-%\listoffigures
-%\listoftables
+\tableofcontents
+\listoffigures
+\listoftables
 
 %% These include the actual text
 \include{chapter1}

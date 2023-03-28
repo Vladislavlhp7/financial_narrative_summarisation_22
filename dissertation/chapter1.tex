@@ -1,37 +1,85 @@
 \section{Introduction}\label{sec:introduction}
 
-\subsection{Financial Reports}\label{subsec:financial-reports}
+\subsection{Financial Reports} \label{subsec:financial_reports}
 Due to international regulations, companies are obliged to report their periodic performance (annual, bi-annual, quarterly) to various regulatory authorities\footnote{Regulation authorities worldwide:
-\begin{itemize}
-    \item Securities and Exchange Commission (SEC) in the USA
-    \item European Securities and Markets Authority (ESMA) in Europe
-    \item Financial Reporting Council (FRC) in the UK
-    \item International Financial Reporting Standards (IFRS) in 167 jurisdictions worldwide
-\end{itemize}
-} and other users (e.g., corporate stakeholders, investors, customers, suppliers, etc.).
-These reports contain essential information about the operations and finances of a business and are crucial for making informed decisions (from user perspective), but differ in regulatory forms.
-For example,
+    \begin{itemize}
+        \item Securities and Exchange Commission (SEC) in the USA
+        \item European Securities and Markets Authority (ESMA) in Europe
+        \item Financial Reporting Council (FRC) in the UK
+        \item International Financial Reporting Standards (IFRS) in 167 jurisdictions worldwide
+    \end{itemize}
+    } and other users (e.g., corporate stakeholders, investors, customers, suppliers, etc.).
+    These reports contain essential information about the operations and finances of a business and are crucial for making informed decisions (from user perspective), but differ in regulatory forms.
+    For example,
 \begin{enumerate}
-    \item 10-K reports filed to the SEC\footnote{\url{https://www.sec.gov}} and accessible through their Electronic Data Gathering, Analysis, and Retrieval\footnote{\url{https://www.sec.gov/edgar}} (EDGAR) system (only for US registrants).
+    \item 10-K reports filed to the SEC\footnote{\url{https://www.sec.gov}} and accessible through their Electronic Data Gathering, Analysis, and Retrieval\footnote{\url{https://www.sec.gov/edgar}} (EDGAR) system are only for US registered businesses.
     They follow a standardised template and are plain text, which makes them particularly easy for automated large-scale research (\cite{el-haj2019retrieving}).
-    Also, the contents of these reports is quite strict, requiring solely the five information sections:
-\begin{enumerate*}
-    \item Business Overview
-    \item Risk Factors
-    \item Management's Discussion and Analysis of Financial Condition and Results of Operations (MD\&A)
-    \item Financial Statements
-    \item Supplementary Disclosures
-\end{enumerate*}.
-    \item UK annual reports, the regulation of which is overseen by the Financial Reporting Council (FRC).
+    Also, the contents of these reports is quite strict, requiring solely five information sections\footnote{
+    \begin{enumerate*}
+        \item Business Overview
+        \item Risk Factors
+        \item Management's Discussion and Analysis of Financial Condition and Results of Operations (MD\&A)
+        \item Financial Statements
+        \item Supplementary Disclosures
+    \end{enumerate*}
+    }.
+    \item UK annual reports, the regulation of which is overseen by UK's Financial Reporting Council (FRC) are typically the main annual reporting method (also provided as PDF files).
     Unlike the 10-K, they are glossy and more stakeholder-oriented, and enjoy unlimited discretion over non-mandated content (\cite{el-haj2019retrieving}) (e.g., photography and company brand material, non-mandatory narrative sections, etc.).
-    These are more challenging for automated processing, due to their variable section structure, formatting and rich visual representations (e.g., infographics).
+    However, these are more challenging for automated processing, due to their variable section structure, formatting and rich visual representations.
 \end{enumerate}
+
+\subsection{UK annual reports}\label{subsec:uk-annual-reports}
+The annual report is a key corporate disclosure, which is legally required for publicly companies by regulatory authorities.
+While it \emph{does not have a rigid document structure} like the 10-K, it typically has a \emph{narrative component}\footnote{The narrative component of a UK annual report typically consists of
+\begin{enumerate*}
+    \item Management's Commentary
+    \item Letter to Shareholders
+    \item Corporate Governance Statement
+    \item Auditor's Report
+    \item Remuneration Report
+    \item Business Review
+    \item Environmental, Social, and Governance (ESG) Report
+    \item Risk Management Report
+\end{enumerate*}
+} and the financial statements (at the rear).
+
+As we outlined in the Section~\ref{subsec:financial_reports}, UK annual reports have the following inconvenient properties with regards to large-scale text understanding.
+\begin{itemize}
+    \item They are very long documents.
+    Throughout the years, their average length has been increasing significantly with the number of pages rising 57\% for the median report from 2003 to 2016 (47 to 74 pages, respectively) (\cite{lewis_young_2019}), due to additional regulations between 2006 and 2008 (\cite{el-haj2019retrieving}.
+    \item They have variable nomenclature.
+    From firm to firm, naming conventions vary \enquote{dramatically}, with more than 20 unique titles for various sections (e.g., Chair's letter to shareholders, Management Commentary) (\cite{lewis_young_2019}).
+    \item They incorporate embedded info-graphics.
+    While domain experts hail the integration of highly interactive elements into corporate reporting (\cite{kriz2016future}), the compilation to PDF makes the task of analysing such unstructured documents automatically even harder (\cite{lewis_young_2019}).
+\end{itemize}
+
+These challenges motivate the work of~\cite{elhaj2019multilingual} who \begin{enumerate*}[label=(\alph*)]
+    \item established a set of 8 generic section headers\footnote{
+        \begin{enumerate*}
+            \item Chairman Statement
+            \item CEO Review
+            \item Corporate Governance Report
+            \item Directors Remuneration Report
+            \item Business Review
+            \item Financial Review
+            \item Operating Review
+            \item Highlights
+        \end{enumerate*}
+    } and
+    \item built the CFIE-FRSE\footnote{
+        The CFIE-FRSE stands for Corporate Financial Information Environment - Final Report Structure Extractor
+        It is publicly available at \url{https://github.com/drelhaj/CFIE-FRSE}.
+    } extraction tool for annual reports in three languages: English, Spanish and Portuguese.
+\end{enumerate*}
+
+
+
 As outlined in~\cite{elliott1998accounting}, investors’ trust in the accountability of businesses would be based no longer as much on just the financial statements, but also on more descriptive narratives that define strategy and planning of resource use.
 
 
 \subsection{NLP in Accounting and Finance}\label{subsec:nlp-in-accounting-and-finance}
-The relevance of this project should also be understood from the perspective of the development of Natural Language Processing (NLP) in the Accounting and Finance (AF) domain~\cite{el-haj2019meaning}.
-report that this industry is doubtful and cynical about the application of Computational Linguistic (CL) methods in analysing financial market disclosures.
-Furthermore, they also observe that AF researchers rely extensively on bag-of-words models, which are \emph{not sufficient to encode complex contextual and semantic meaning} (especially in a domain with such \emph{specialized language}).
+The relevance of this project should also be understood from the perspective of the development of Natural Language Processing (NLP) in the Accounting and Finance (AF) domain.
+While some recognise the importance of understanding in-domain textual information (\cite{li2010textual}), others like~\cite{el-haj2019meaning} report that the industry is still doubtful and cynical about the NLP applications in the analysis of financial market disclosures.
+Furthermore, the latter also observe that AF researchers rely extensively on bag-of-words models, which are \emph{not sufficient to encode complex contextual and semantic meaning} (especially in a domain with such \emph{specialized language}).
 As for ATS~\cite{hollander-white-af}, is said to be the single AF study into disclosure summarisation and it demonstrates that machine-generated summaries are less likely to positively bias investors' decisions compared to managerial ones.
-This only confirms that there is a wide gap in NLP applications in Accounting research, and this further motivates our work.
+This only confirms that there is a wide gap of NLP applications in Accounting research, and this further motivates our work.
