@@ -67,19 +67,51 @@ These challenges motivate the work of~\cite{elhaj2019multilingual} who \begin{en
         \end{enumerate*}
     } and
     \item built the CFIE-FRSE\footnote{
-        The CFIE-FRSE stands for Corporate Financial Information Environment - Final Report Structure Extractor
-        It is publicly available at \url{https://github.com/drelhaj/CFIE-FRSE}.
-    } extraction tool for annual reports in three languages: English, Spanish and Portuguese.
+        The CFIE-FRSE stands for Corporate Financial Information Environment - Final Report Structure Extractor.
+        It is publicly available at \url{https://github.com/drelhaj/CFIE-FRSE} and it can be used to convert English, Spanish and Portuguese annual reports.
+    } extraction tool that converts a text-based PDF annual report to simple text.
 \end{enumerate*}
-
-
-
-As outlined in~\cite{elliott1998accounting}, investors’ trust in the accountability of businesses would be based no longer as much on just the financial statements, but also on more descriptive narratives that define strategy and planning of resource use.
-
 
 \subsection{NLP in Accounting and Finance}\label{subsec:nlp-in-accounting-and-finance}
 The relevance of this project should also be understood from the perspective of the development of Natural Language Processing (NLP) in the Accounting and Finance (AF) domain.
+As outlined in~\cite{elliott1998accounting}, investors’ trust in the accountability of businesses would be based no longer as much on just the financial statements, but also on more descriptive narratives that define strategy and planning of resource use.
 While some recognise the importance of understanding in-domain textual information (\cite{li2010textual}), others like~\cite{el-haj2019meaning} report that the industry is still doubtful and cynical about the NLP applications in the analysis of financial market disclosures.
 Furthermore, the latter also observe that AF researchers rely extensively on bag-of-words models, which are \emph{not sufficient to encode complex contextual and semantic meaning} (especially in a domain with such \emph{specialized language}).
 As for ATS~\cite{hollander-white-af}, is said to be the single AF study into disclosure summarisation and it demonstrates that machine-generated summaries are less likely to positively bias investors' decisions compared to managerial ones.
 This only confirms that there is a wide gap of NLP applications in Accounting research, and this further motivates our work.
+
+\subsection{Financial Narrative Summarisation 2021 (FNS21) Task} \label{subsec:fns}
+The FNS Task is part of the annual Financial Narrative Processing (FNP) Workshop~\footnote{\url{https://wp.lancs.ac.uk/cfie/}} organised by Lancaster University since 2018, which aims to:
+\begin{itemize}
+    \item encourage the advancement of financial text mining \& narrative processing
+    \item examine methods of structured content retrieval from financial reports
+    \item explore causes and consequences of corporate disclosure
+\end{itemize} as stated in their inaugural proceedings~\footnote{\url{https://wp.lancs.ac.uk/cfie/fnp2018/}}.
+
+For that purpose, they produce datasets of extracted narratives (with the help of the CFIE-FRSE tool) from annual reports of UK companies listed on the London Stock Exchange (LSE).
+
+In their FNS21 Task, there were $3,863$ such reports (Table~\ref{tab:fns21-data}), while the average length was reported at 80 pages, and the maximum of more than 250 pages (\cite{litvak-vanetik-2021-summarization}).
+
+Additionally, for every report there were at least 2 gold summaries, which are situated in the annual report itself~\footnote{
+    The gold summaries being already in the annual report is not problematic, because these reports are already written by domain-experts who know how to summarise the financial state of a company.
+    Hence, there could be multiple sections/paragraphs that achieve this thoroughly, and the organisers have identified \& extracted them manually with the help of the professional writers of the individual reports.
+    At this moment, one can begin to doubt the point of applying ATS techniques, but due to the \emph{lack of rigid document structure}, \emph{it is not trivial to automatically find these text excerpts with heuristic methods}.
+    Furthermore, one point of this challenge could be formulated as to finding the latent features of a summarising (i.e., \enquote{to-be-in-the-summary}) sentence, which is highlighted as one of the fundamental advantages of NLP in AF research (\cite{lewis_young_2019}, \cite{el-haj2019meaning}).
+}
+The goal of the workshop was to build ATS systems that generate a single summary for an annual report, no longer than $1,000$ words (almost just as long as the gold summaries on average).
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lrrr r}
+        \hline
+        Data Type & Training & Validation & Testing & Total \\
+        \midrule
+        Report full text & 3,000 & 363 & 500 & 3,863 \\
+        Gold summaries & 9,873 & 1,250 & 1,673 & 12,796 \\
+        \bottomrule
+    \end{tabular}
+    \caption{FNS21 Data Split}
+    \label{tab:fns21-data}
+\end{table}
+
+We must acknowledge that due to the scarcity of publicly available financial data this third-year project could not have been possible without the kind permission of the FNP organisers to use the training and validation datasets from their FNS21 Task (\cite{fnp-2021-financial}).

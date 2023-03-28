@@ -84,6 +84,14 @@
 
 \usepackage{graphicx} % Required for inserting images
 \usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage[acronym]{glossaries}
+
+
+\makeglossaries
+\newacronym{html}{HTML}{Hypertext Markup Language}
+\newacronym{css}{CSS}{Cascading Style Sheets}
+\newacronym{js}{JS}{JavaScript}
 
 %% End of preamble, the actual document starts here
 %%
@@ -95,6 +103,13 @@
 
 %% Generate contents etc
 \tableofcontents
+
+%% Generate Acronym list
+%\clearpage
+%\printglossary[type=\acronymtype]
+%\printglossary
+
+
 \listoffigures
 \listoftables
 
