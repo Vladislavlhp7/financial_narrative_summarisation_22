@@ -114,14 +114,14 @@ def get_max_rouge_l_score(data):
     return max_dict
 
 
-def load_model_transformer(model_dir):
+def load_model_transformer(model_dir, device='cpu'):
     output_model_file = f"{model_dir}/pytorch_model.bin"
     output_config_file = f"{model_dir}/config.json"
 
     config = BertConfig.from_json_file(output_config_file)
     model_transformer = BertForSequenceClassification(config)
 
-    state_dict = torch.load(output_model_file, map_location=torch.device('cpu'))
+    state_dict = torch.load(output_model_file, map_location=torch.device(device))
     model_transformer.load_state_dict(state_dict, )
     return model_transformer
 
@@ -205,15 +205,16 @@ def rouge_dict_to_df(data):
     return df
 
 
-def evaluate_models(configs, embedding_model=None):
+def evaluate_models(configs, embedding_model=None, device='cpu'):
     for c in tqdm(configs, desc='Evaluating models'):
         print(f"{c['model_type']}")
+        rouge_scores = None
         if c['model_type'] == 'transformer':
-            model_transformer = load_model_transformer(c['model_dir'])
+            model_transformer = load_model_transformer(c['model_dir'], device=device)
             rouge_scores = evaluate_model(c, model_transformer, embedding_model=None)
         elif c['model_type'] == 'gru':
             model_rnn = FinRNN(hidden_size=c['hidden_size'])
-            model_rnn.load_state_dict(torch.load(c['model_path'], map_location=torch.device('cpu')), strict=False)
+            model_rnn.load_state_dict(torch.load(c['model_path'], map_location=torch.device(device)), strict=False)
             rouge_scores = evaluate_model(c, model_rnn, embedding_model=embedding_model)
         df = rouge_dict_to_df(rouge_scores)
         df.to_csv(f"{c['model_name']}_rouge_scores.csv")
@@ -221,6 +222,9 @@ def evaluate_models(configs, embedding_model=None):
 
 def main():
     embedding_model = get_embedding_model()
+    # Set device to CPU or CUDA
+    torch.cuda.is_available()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     configs = []
 
@@ -244,7 +248,7 @@ def main():
     config['model_path'] = config['model_name']
     configs.append(config)
 
-    evaluate_models(configs=configs, embedding_model=embedding_model)
+    evaluate_models(configs=configs, embedding_model=embedding_model, device=device)
 
 
 if __name__ == '__main__':
