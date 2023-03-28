@@ -211,11 +211,11 @@ def evaluate_models(configs, embedding_model=None, device='cpu'):
         rouge_scores = None
         if c['model_type'] == 'transformer':
             model_transformer = load_model_transformer(c['model_dir'], device=device)
-            rouge_scores = evaluate_model(c, model_transformer, embedding_model=None)
+            rouge_scores = evaluate_model(config=c, model=model_transformer, embedding_model=None)
         elif c['model_type'] == 'gru':
             model_rnn = FinRNN(hidden_size=c['hidden_size'])
             model_rnn.load_state_dict(torch.load(c['model_path'], map_location=torch.device(device)), strict=False)
-            rouge_scores = evaluate_model(c, model_rnn, embedding_model=embedding_model)
+            rouge_scores = evaluate_model(config=c, model=model_rnn, embedding_model=embedding_model)
         df = rouge_dict_to_df(rouge_scores)
         df.to_csv(f"{c['model_name']}_rouge_scores.csv")
 
