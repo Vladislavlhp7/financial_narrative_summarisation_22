@@ -8,7 +8,8 @@ from transformers import BertTokenizer, Trainer, BertForSequenceClassification, 
 from extractor import batch_str_to_batch_tensors, FinRNN
 from metrics import calc_rouge
 from preprocessing import clean
-from query import get_all_summaries, get_embedding_model
+from query import get_all_summaries, get_embedding_model, get_report
+from baseline_summarizers import get_baseline_summary
 
 args = TrainingArguments(
     output_dir='../tmp/',
@@ -170,6 +171,35 @@ def evaluate_model(model, config, embedding_model=None):
         # Append the max ROUGE-L score to the list of scores for all reports
         rouge_scores.append(max_rouge_l_score)
     return rouge_scores
+
+
+def evaluate_baseline(config, max_sent=25):
+    df_test = pd.read_csv(f'{config["df_test_path"]}')
+    reports = df_test['report'].unique()
+    rouge_scores = []
+    for report_id in tqdm(reports):
+        report = get_report(report_id, training=False)
+        generated_summary = get_baseline_summary(text=clean(report), max_sent=max_sent)
+
+        # Calculate ROUGE scores for each summary compared to the generated summary
+        rouge_scores_per_summary = []
+        gold_summaries_dict = get_all_summaries(file_id=report, training=False)
+        for _, gold_summary in gold_summaries_dict.items():
+            rouge_score = calc_rouge(generated_summary, clean(gold_summary).lower())
+            rouge_scores_per_summary.append(rouge_score)
+        # Get the maximum ROUGE-L score from the list of scores per summary
+        max_rouge_l_score = get_max_rouge_l_score(rouge_scores_per_summary)
+
+        # Append the max ROUGE-L score to the list of scores for all reports
+        rouge_scores.append(max_rouge_l_score)
+    return rouge_scores
+
+
+def evaluate_baselines(configs, max_sent=25):
+    for c in tqdm(configs):
+        rouge_scores = evaluate_baseline(config=c, max_sent=max_sent)
+        df = rouge_dict_to_df(rouge_scores)
+        df.to_csv(f"{c['model_name']}_rouge_scores.csv")
 
 
 def unpack_rouge_metric(d, key='f'):
