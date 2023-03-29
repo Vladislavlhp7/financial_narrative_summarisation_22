@@ -1,33 +1,51 @@
-\section{Design \& Development}\label{sec:design-and-development}
+\section{Background}\label{sec:background}
 
-\subsection{Methodology}\label{subsec:methodology}
-We approach the annual report summarisation problem from a supervised perspective - we cast the task of Extractive Text Summarisation (ETS) as a binary classification problem defined on the sentence level.
-More formally, we can describe the annual report as $d=\{s_{1}, s_{2}, \dots, s_{n}\}$, where $d$ is a document, represented in terms of sentences $s_{i}, \  1 \leq i \leq n$ (\cite{liu2019finetuningbert}).
+\subsection{Supervised Learning}\label{subsec:supervised-learning}
 
-Then, a candidate summary can be $c=\{s_{1}, s_{2}, \dots, s_{k} | s_{i} \in d \}, \ 0 \leq k \leq n$.
+\subsection{TFIDF}\label{subsec:tfidf}
 
-We further need to define the provided \emph{gold summary}, $c^{*}$ for a document $d$.
+\subsection{Word Embeddings}\label{subsec:word-embeddings}
 
-In the case of the FNS21 task, there are at least two summaries per report, hence we will use the following notation for the set of all gold summaries for each document $C^{*} = \{c^{*}_{1}, c^{*}_{2}, \dots, c^{*}_{p}\}$.
-Furthermore, the supervised learning labels are $y_{i} \in \{1,0\}$ for each sentence $s_{i}$ in $d$ if the sentence is or is not in \textbf{\emph{any}}\footnote{
-    To increase the positive samples (i.e., the summarizing sentences) we do not restrict ourselves to just one gold summary in the training process unlike~\cite{orzhenovskii-2021-t5}.
-    Our goal is to achieve better latent feature extraction of summaries through the employment of all existing data.
-    However, we are aware that this approach is more likely to encounter standard ETS issues, specifically - extracted summary sentences could be retrieved from unrelated paragraphs in the report.
-    This causes the \enquote{dangling anaphora} phenomenon, i.e. decontextualised extracts are stitched together and could mislead the reader due to out-of-context references as specified in~\cite{lin2009summarization}.
-} of the gold summaries $c^{*}_{j}$ for that document.
+\subsection{Attention}\label{subsec:attention}
 
-In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$ based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-$F_{1}$\footnote{
-    We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
-    It can be accessed at: \url{https://github.com/pltrdy/rouge}
-    } metric(\cite{lin2004rouge}).
+\subsection{RNN}\label{subsec:rnn}
 
-For the FNS21 task due to the extractive nature of our approach we will evaluate our models based on the ROUGE-maximising $c^{*}_{i}$ gold summary, i.e.,
+\subsection{Transformers}\label{subsec:transformers}
 
-\begin{figure}[h]
-    \centering
-    \begin{equation}\label{eq:rouge_max}
-        r = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} R(c, c^{*}_{i})
-    \end{equation}
-    \caption{Candidate summary evaluation as a gold summary ROUGE-maximisation}
-    \label{fig:rouge_max}
-\end{figure}
+\subsection{Text Summarisation}\label{subsec:text-summarisation}
+Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
+There are two overarching categories: extractive and abstractive text summarisation.
+The former formulates the problem as a subset selection problem by returning only the most salient text excerpts from the original document (\cite{zhong-etal-2020-extractive}), while the latter aims to generate content anew, similar to how humans would do.
+In this work we will be solely exploring the extractive method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
+
+
+\subsection{LexRank}\label{subsec:lexrank}
+LexRank (\cite{Erkan2004LexRankGC}) is an unsupervised extractive summarisation method consistently used as a baseline in the FNS21 and previous challenges.
+It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
+To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes (\cite{Shearing2020AutomatedTS}).
+The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:idf},\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
+
+\begin{equation}
+    \text{idf}(t, D) = \log \frac{|D|}{|\{d \in D : t \in d\}|} \label{eq:idf}
+\end{equation}
+
+\begin{equation}
+    \text{tf-idf}(t, d, D) = \text{tf}(t, d) \cdot \text{idf}(t, D)
+    \label{eq:tfidf}
+\end{equation}
+
+\begin{equation}
+    \text{tf\_idf\_cosine\_similarity}(s_1, s_2) = \frac{\sum_{t \in T} \text{tf-idf}(t, s_1, D) \cdot \text{tf-idf}(t, s_2, D)}{ \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_1, D)^2} \cdot \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_2, D)^2}}
+    \label{eq:cosinesimtfidf}
+\end{equation}
+
+where $t$ is a term, $d$ is a document within a collection of documents/sentences $D$.
+
+Also, $s_1$ and $s_2$ are two sentences and $T$ represents the set of all terms in both of them while $tf(t, d)$ denotes the term frequency of $t$ in $d$, and $idf(t, D)$ is the inverse document frequency of $t$ in the collection $D$.
+
+The authors further propose finding the most important sentences by \begin{enumerate*}
+    \item applying a threshold for the creation of edges with Eq.\ref{eq:cosinesimtfidf},
+    \item building an adjacency matrix and normalizing it to produce \emph{transition probabilities},
+    \item computing in an iterative fashion the \emph{eigenvector centrality} until convergence, and finally
+    \item ranking sentences based on their \emph{lexical} PageRank (\cite{page1998anatomy}) score.
+\end{enumerate*}
