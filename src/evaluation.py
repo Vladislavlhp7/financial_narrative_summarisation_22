@@ -18,10 +18,10 @@ args = TrainingArguments(
     learning_rate=2e-5,
     per_device_train_batch_size=32,
     per_device_eval_batch_size=32,
-    num_train_epochs=1,
+    num_train_epochs=3,
     weight_decay=0.01,
     load_best_model_at_end=True,
-    metric_for_best_model='accuracy',
+    metric_for_best_model='accuracy'
 )
 
 
@@ -131,40 +131,44 @@ def evaluate_model(model, config, embedding_model=None):
     """
         Evaluates the model on the test set. The model is evaluated using the ROUGE evaluation metric.
     """
-    model.eval()
+    trainer = None
+    tokenizer = None
+    predictions = None
+    sentences = None
+    if config['model_type'] == 'transformer':
+        trainer = Trainer(model=model, args=args)
 
     df_test = pd.read_csv(f'{config["df_test_path"]}')
     reports = df_test['report'].unique()
     rouge_scores = []
     for report in tqdm(reports):
-        df_test_report = df_test[df_test['report'] == report]
-        sentences = df_test_report['sent'].tolist()
+        df_test_report = df_test.loc[df_test.report.isin([int(report), str(report)])]
         # labels = df_test_report['label'].tolist()
-        inputs_embedded = None
         if config['model_type'] == 'gru':
+            sentences = df_test_report['sent'].tolist()
             inputs_embedded = batch_str_to_batch_tensors(sentence_list=sentences, embedding_model=embedding_model)
+            model.eval()
+            with torch.no_grad():
+                outputs = model(inputs_embedded)
+            predictions = outputs.numpy()
         elif config['model_type'] == 'transformer':
             tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
             inputs_embedded = load_data_transformer(tokenizer=tokenizer, df_test=df_test_report)
-
-        with torch.no_grad():
-            if config['model_type'] == 'gru':
-                outputs = model(inputs_embedded)
-                predictions = outputs.numpy()
-            elif config['model_type'] == 'transformer':
-                trainer = Trainer(
-                    model=model,
-                    args=args
-                )
-                outputs = trainer.predict(inputs_embedded)
-                predictions = softmax(outputs.predictions, axis=1)
+            model.eval()
+            outputs = trainer.predict(inputs_embedded)
+            print(outputs)
+            predictions = softmax(outputs.predictions, axis=1)
+            print(predictions)
         generated_summary = select_summary_sents(predictions, sentences)
 
         # Calculate ROUGE scores for each summary compared to the generated summary
         rouge_scores_per_summary = []
         gold_summaries_dict = get_all_summaries(file_id=report, training=False)
         for _, gold_summary in gold_summaries_dict.items():
-            rouge_score = calc_rouge(generated_summary, clean(gold_summary).lower())
+            try:
+                rouge_score = calc_rouge(generated_summary, clean(gold_summary).lower())
+            except ValueError:
+                rouge_score = {'rouge-l': {'f': 0}, 'rouge-1': {'f': 0}, 'rouge-2': {'f': 0}}
             rouge_scores_per_summary.append(rouge_score)
         # Get the maximum ROUGE-L score from the list of scores per summary
         max_rouge_l_score = get_max_rouge_l_score(rouge_scores_per_summary)
@@ -246,6 +250,7 @@ def evaluate_models(configs, embedding_model=None, device='cpu'):
             model_rnn = FinRNN(hidden_size=c['hidden_size'])
             model_rnn.load_state_dict(torch.load(c['model_path'], map_location=torch.device(device)), strict=False)
             rouge_scores = evaluate_model(config=c, model=model_rnn, embedding_model=embedding_model)
+        print(rouge_scores)
         df = rouge_dict_to_df(rouge_scores)
         df.to_csv(f"{c['model_name']}_rouge_scores.csv")
 
@@ -256,7 +261,7 @@ def main():
     torch.cuda.is_available()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # configs = []
+    configs = []
     #
     # # Transformer model
     # config = {
@@ -272,23 +277,23 @@ def main():
     # config['model_dir'] = config['model_name']
     # configs.append(config)
     #
-    # # GRU model
-    # config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-    #           'model_name': 'model-0.001-256-0.75-2023-03-27-12-25.h5'}
-    # config['model_path'] = config['model_name']
-    # configs.append(config)
-    #
-    # evaluate_models(configs=configs, embedding_model=embedding_model, device=device)
-
-    configs = []
-
-    config = {
-        'model_name': 'LexRank',
-        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
-    }
+    # GRU model
+    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 256,
+              'model_name': 'model-0.001-256-0.75-2023-03-27-12-25.h5'}
+    config['model_path'] = config['model_name']
     configs.append(config)
 
-    evaluate_baselines(configs)
+    evaluate_models(configs=configs, embedding_model=embedding_model, device=device)
+
+    # configs = []
+    #
+    # config = {
+    #     'model_name': 'LexRank',
+    #     'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+    # }
+    # configs.append(config)
+    #
+    # evaluate_baselines(configs)
 
 
 if __name__ == '__main__':
