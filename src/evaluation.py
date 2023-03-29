@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 import torch
 from datasets import Dataset
@@ -200,10 +202,16 @@ def evaluate_baseline(config, max_sent=25):
 
 
 def evaluate_baselines(configs, max_sent=25):
+    rouge_scores_list = []
     for c in tqdm(configs):
         rouge_scores = evaluate_baseline(config=c, max_sent=max_sent)
+        print(rouge_scores)
+        rouge_scores_list.append(rouge_scores)
         df = rouge_dict_to_df(rouge_scores)
         df.to_csv(f"{c['model_name']}_rouge_scores.csv")
+    # Save the list of dictionaries to a file
+    with open(f"{c['model_name']}_rouge_scores.json", "w") as outfile:
+        json.dump(rouge_scores_list, outfile)
 
 
 def unpack_rouge_metric(d, key='f'):
@@ -240,6 +248,7 @@ def rouge_dict_to_df(data):
 
 
 def evaluate_models(configs, embedding_model=None, device='cpu'):
+    rouge_scores_list = []
     for c in tqdm(configs, desc='Evaluating models'):
         print(f"{c['model_type']}")
         rouge_scores = None
@@ -251,8 +260,12 @@ def evaluate_models(configs, embedding_model=None, device='cpu'):
             model_rnn.load_state_dict(torch.load(c['model_path'], map_location=torch.device(device)), strict=False)
             rouge_scores = evaluate_model(config=c, model=model_rnn, embedding_model=embedding_model)
         print(rouge_scores)
+        rouge_scores_list.append(rouge_scores)
         df = rouge_dict_to_df(rouge_scores)
         df.to_csv(f"{c['model_name']}_rouge_scores.csv")
+        # Save the list of dictionaries to a file
+        with open(f"{c['model_name']}_rouge_scores.json", "w") as outfile:
+            json.dump(rouge_scores_list, outfile)
 
 
 def main():
