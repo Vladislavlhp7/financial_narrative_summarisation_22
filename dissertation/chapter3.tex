@@ -32,6 +32,14 @@ For the FNS21 task due to the extractive nature of our approach we will evaluate
     \label{fig:rouge_max}
 \end{figure}
 
+
+While some authors (\cite{zmandar-etal-2021-joint}) follow the greedy ROUGE-maximisation method of matching summary sentences to document sentences (established in~\cite{nallapati2017summarunner}), we approach the problem in a more practical and faster fashion.
+After manual observation of the reports against their gold summaries, it became clear that for almost all sentences of $c^{*}_{i}$, there was an exact match with a sentence in the whole annual report $d$.
+
+This hypothesis was proven correct by one of the FNS21 contestants (\cite{orzhenovskii-2021-t5}) who reported that 99.4\% of the summaries were included in the
+report as whole subsequences.
+Hence, after having pre-processed the text documents we iteratively match the sentences and generate the binary classification labels ($\{1,0\}$ representing \emph{summary} and \emph{non-summary}, respectively) for both the training and testing datasets.
+
 \begin{figure}[ht]
     \begin{subfigure}{0.49\textwidth}
         \centering        \includegraphics[width=1\columnwidth]{../charts/longest_summary_word_count}
