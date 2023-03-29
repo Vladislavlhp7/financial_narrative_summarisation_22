@@ -274,38 +274,38 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     configs = []
-    #
-    # # Transformer model
-    # config = {
-    #     'seed_v': 42,
-    #     'data_augmentation': 'fr',
-    #     'lr': 2e-5,
-    #     'training_downsample_rate': 0.75,
-    #     'model_type': 'transformer',
-    #     'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
-    # }
-    # config[
-    #     'model_name'] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
-    # config['model_dir'] = config['model_name']
-    # configs.append(config)
-    #
+
     # GRU model
     config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 256,
               'model_name': 'model-0.001-256-0.75-2023-03-27-12-25.h5'}
     config['model_path'] = config['model_name']
     configs.append(config)
 
+    # Transformer model
+    config = {
+        'seed_v': 42,
+        'data_augmentation': 'fr',
+        'lr': 2e-5,
+        'training_downsample_rate': 0.75,
+        'model_type': 'transformer',
+        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+    }
+    config[
+        'model_name'] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
+    config['model_dir'] = config['model_name']
+    configs.append(config)
+
     evaluate_models(configs=configs, embedding_model=embedding_model, device=device)
 
-    # configs = []
-    #
-    # config = {
-    #     'model_name': 'LexRank',
-    #     'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
-    # }
-    # configs.append(config)
-    #
-    # evaluate_baselines(configs)
+    configs = []
+
+    config = {
+        'model_name': 'LexRank',
+        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+    }
+    configs.append(config)
+
+    evaluate_baselines(configs)
 
 
 if __name__ == '__main__':
