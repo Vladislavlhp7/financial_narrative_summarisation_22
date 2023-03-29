@@ -140,23 +140,22 @@ def evaluate_model(model, config, embedding_model=None):
     if config['model_type'] == 'transformer':
         trainer = Trainer(model=model, args=args)
 
+    model.eval()
     df_test = pd.read_csv(f'{config["df_test_path"]}')
-    reports = df_test['report'].unique()
+    report_ids = df_test['report'].unique()
     rouge_scores = []
-    for report in tqdm(reports):
-        df_test_report = df_test.loc[df_test.report.isin([int(report), str(report)])]
+    for report_id in tqdm(report_ids):
+        df_test_report = df_test.loc[df_test.report.isin([int(report_id), str(report_id)])]
+        sentences = df_test_report['sent'].tolist()
         # labels = df_test_report['label'].tolist()
         if config['model_type'] == 'gru':
-            sentences = df_test_report['sent'].tolist()
             inputs_embedded = batch_str_to_batch_tensors(sentence_list=sentences, embedding_model=embedding_model)
-            model.eval()
             with torch.no_grad():
                 outputs = model(inputs_embedded)
             predictions = outputs.numpy()
         elif config['model_type'] == 'transformer':
             tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
             inputs_embedded = load_data_transformer(tokenizer=tokenizer, df_test=df_test_report)
-            model.eval()
             outputs = trainer.predict(inputs_embedded)
             print(outputs)
             predictions = softmax(outputs.predictions, axis=1)
@@ -165,7 +164,7 @@ def evaluate_model(model, config, embedding_model=None):
 
         # Calculate ROUGE scores for each summary compared to the generated summary
         rouge_scores_per_summary = []
-        gold_summaries_dict = get_all_summaries(file_id=report, training=False)
+        gold_summaries_dict = get_all_summaries(file_id=report_id, training=False)
         for _, gold_summary in gold_summaries_dict.items():
             try:
                 rouge_score = calc_rouge(generated_summary, clean(gold_summary).lower())
@@ -189,7 +188,7 @@ def evaluate_baseline(config, max_sent=25):
 
         # Calculate ROUGE scores for each summary compared to the generated summary
         rouge_scores_per_summary = []
-        gold_summaries_dict = get_all_summaries(file_id=report, training=False)
+        gold_summaries_dict = get_all_summaries(file_id=report_id, training=False)
         for _, gold_summary in gold_summaries_dict.items():
             rouge_score = calc_rouge(generated_summary, clean(gold_summary).lower())
             rouge_scores_per_summary.append(rouge_score)
