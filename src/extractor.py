@@ -256,7 +256,7 @@ def train_one_epoch(model, train_dataloader, embedding_model, seq_len, epoch, cr
         batch_sent_tensor = batch_str_to_batch_tensors(sentence_list=data, embedding_model=embedding_model,
                                                        seq_len=seq_len).to(device)
         target = labels.long().to(device)  # 1-dimensional integer tensor of size d
-        predicted = model(batch_sent_tensor)  # (d,2) float probability tensor
+        predicted, _ = model(batch_sent_tensor)  # (d,2) float probability tensor
 
         loss = criterion(predicted, target)
         loss.backward()

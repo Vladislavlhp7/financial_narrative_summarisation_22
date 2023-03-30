@@ -2,22 +2,22 @@ import nltk
 from extractor import *
 
 
-def experiment_comparison(project: str = 'extractive_summarisation-data-augmentation-unified'):
-    trainining_data = '../tmp/train_downsample_0.75_random_42.csv'
-    validation_data = '../tmp/validation_downsample_0.75_random_42.csv'
+def experiment_comparison(project: str = 'extractive_summarisation-data-augmentation-unified', seed: int = 42):
+    trainining_data = f'../tmp/train_downsample_0.75_random_{seed}.csv'
+    validation_data = f'../tmp/validation_downsample_0.75_random_{seed}.csv'
     # Define W&B hyperparameter sweep
     sweep_config = {
         'method': 'grid'
     }
     parameters_dict = {
         'seed': {
-            'values': [42]
+            'values': [seed]
         },
         'attention_type': {
             'values': ['dot', None]
         },
         'data_augmentation': {
-          'values': ['fr', None]
+            'values': ['fr']
         },
         'lr': {
             'values': [1e-3]
@@ -26,10 +26,10 @@ def experiment_comparison(project: str = 'extractive_summarisation-data-augmenta
             'values': [32]
         },
         'hidden_size': {
-            'values': [64, 256]
+            'values': [256, 64]
         },
         'downsample_rate': {
-            'values': [0.75] # [0.5, 0.75, 0.9]
+            'values': [0.75]  # [0.5, 0.75, 0.9]
         },
         'dropout': {
             'values': [0]
@@ -57,8 +57,8 @@ def experiment_comparison(project: str = 'extractive_summarisation-data-augmenta
 
 
 def experiment_downsample90(project: str = 'extractive_summarisation-data-augmentation-unified', seed: int = 42):
-    trainining_data = f'../tmp/train_downsample_0.75_random_{seed}.csv'
-    validation_data = f'../tmp/validation_downsample_0.75_random_{seed}.csv'
+    trainining_data = f'../tmp/train_downsample_0.9_random_{seed}.csv'
+    validation_data = f'../tmp/validation_downsample_0.9_random_{seed}.csv'
     # Define W&B hyperparameter sweep
     sweep_config = {
         'method': 'grid'
@@ -68,10 +68,10 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [seed]
         },
         'attention_type': {
-            'values': ['dot']
+            'values': ['dot', None]
         },
         'data_augmentation': {
-          'values': [None, 'fr']
+            'values': [None]
         },
         'lr': {
             'values': [1e-3]
@@ -83,7 +83,7 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [64, 256]
         },
         'downsample_rate': {
-            'values': [0.75] # [0.5, 0.75, 0.9]
+            'values': [0.9]  # [0.5, 0.75, 0.9]
         },
         'dropout': {
             'values': [0]
@@ -113,7 +113,7 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
 def main():
     nltk.download('punkt')
     # root = '..'
-    experiment_downsample90(seed=42)
+    experiment_comparison(seed=42)
     # experiment_downsample90(seed=43)
 
 
