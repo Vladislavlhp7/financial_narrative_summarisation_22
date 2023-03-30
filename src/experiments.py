@@ -57,8 +57,8 @@ def experiment_comparison(project: str = 'extractive_summarisation-data-augmenta
 
 
 def experiment_downsample90(project: str = 'extractive_summarisation-data-augmentation-unified', seed: int = 42):
-    trainining_data = f'../tmp/train_downsample_0.9_random_{seed}.csv'
-    validation_data = f'../tmp/validation_downsample_0.9_random_{seed}.csv'
+    trainining_data = f'../tmp/train_downsample_0.75_random_{seed}.csv'
+    validation_data = f'../tmp/validation_downsample_0.75_random_{seed}.csv'
     # Define W&B hyperparameter sweep
     sweep_config = {
         'method': 'grid'
@@ -68,10 +68,10 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [seed]
         },
         'attention_type': {
-            'values': ['dot', None]
+            'values': ['dot']
         },
         'data_augmentation': {
-          'values': [None]
+          'values': [None, 'fr']
         },
         'lr': {
             'values': [1e-3]
@@ -83,7 +83,7 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [64, 256]
         },
         'downsample_rate': {
-            'values': [0.9] # [0.5, 0.75, 0.9]
+            'values': [0.75] # [0.5, 0.75, 0.9]
         },
         'dropout': {
             'values': [0]
