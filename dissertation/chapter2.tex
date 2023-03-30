@@ -16,6 +16,30 @@
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
 There are two overarching categories: extractive and abstractive text summarisation.
 The former formulates the problem as a subset selection problem by returning only the most salient text excerpts from the original document (\cite{zhong-etal-2020-extractive}), while the latter aims to generate content anew, similar to how humans would do.
+
+We will outline some key models that inspired our work below:
+\begin{itemize}
+    \item \textbf{Gokhan}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT (\cite{reimers2019sentence}).
+    However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
+
+    \item \textbf{AMUSE} (\cite{litvak-vanetik-2021-summarization}): The authors design an ETS system comprised of the following steps \begin{enumerate*}
+        \item shortening of report with an existing Genetic Algorithm~\cite{litvak-last-2013-multilingual},
+        \item encoding sentences with BERT vectors, and
+        \item performing binary classification with LSTMs for salient sentence extraction
+    \end{enumerate*}.
+    They suggest that further work should incorporate \begin{enumerate*}
+        \item efficient preliminary sentence removal, and
+        \item additional neural modelling stages for the representation and detection of relevant input text parts.
+    \end{enumerate*}
+
+    \item \textbf{Hybrid model with RL} (\cite{zmandar-etal-2021-joint}): The authors train a joint extractive-abstractive summarisation model with reinforcement learning optimised for the ROUGE-2 F1 metric.
+    Their networks are based on attentive LSTMs augmented with an additional copy mechanism (\cite{vinyals2015pointer}) achieving the second highest F1 score in the FNS21 competition.
+
+    \item \textbf{T5} Hybrid (\cite{orzhenovskii-2021-t5}): The author used T5 (\cite{rayson2019t5}) for a hybrid model fine-tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report’s full text.
+    This is the best performing algorithm in the FNS21 competition but also the first to consider transformer models from an abstractive summarisation perspective in the FNP workshops so far.
+
+\end{itemize}
+
 In this work we will be solely exploring the extractive method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
 
 
