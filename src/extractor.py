@@ -1,4 +1,5 @@
 import gc
+import math
 import os
 from datetime import datetime
 from random import seed
@@ -94,6 +95,23 @@ def batch_str_to_batch_tensors(sentence_list, embedding_model, seq_len: int = 10
     return batch_sent_tensor
 
 
+class Attention(nn.Module):
+    # batch_first=True
+  def __init__(self, query_dim):
+    super(Attention, self).__init__()
+    self.scale = 1. / math.sqrt(query_dim)
+
+  def forward(self, query, keys, values):
+    query = query.unsqueeze(1)  # [BxQ] -> [Bx1xQ]
+    keys = keys.transpose(1, 2)  # [TxBxK] -> [BxKxT]
+    energy = torch.bmm(query, keys)  # [Bx1xQ]x[BxKxT] -> [Bx1xT]
+    energy = F.softmax(energy.mul_(self.scale), dim=2)  # scale, normalize
+
+    # values = values.transpose(0, 1)  # [TxBxV] -> [BxTxV]
+    linear_combination = torch.bmm(energy, values).squeeze(1)  # [Bx1xT]x[BxTxV] -> [BxV]
+    return energy, linear_combination
+
+
 class FinRNN(nn.Module):
     # https://danijar.com/tips-for-training-recurrent-neural-networks/
     # GRU vs LSTM ✅
@@ -123,23 +141,29 @@ class FinRNN(nn.Module):
                        bidirectional=bidirectional, batch_first=batch_first, dropout=dropout)
         self.D = 2 if bidirectional else 1
         if attention_type is not None:
-            self.attention = nn.Linear(hidden_size * self.D, 1)
+            self.attention = Attention(query_dim=self.D * hidden_size)
         self.hidden2label = nn.Linear(in_features=self.D * hidden_size, out_features=label_size)
 
     def forward(self, sent):
         out = self.fully_connected(sent)
-        out, _ = self.rnn(out)
-        query = out[:, -1, :]
+        out, hidden = self.rnn(out)
+        if isinstance(hidden, tuple):
+            hidden = hidden[1]
+        if self.bidirectional:
+            hidden = torch.cat([hidden[-1], hidden[-2]], dim=1)
+        else:
+            hidden = hidden[-1]
+        energy = None
         if self.attention_type is not None:
             # Apply attention
-            attn_weights = torch.tanh(self.attention(out))
-            attn_weights = F.softmax(attn_weights, dim=1)
-            attended_output = torch.bmm(attn_weights.transpose(1, 2), out).squeeze(1)
+            energy, linear_combination = self.attention(hidden, out, out)
         else:
-            attended_output = query
+            # attended_output = query
+            linear_combination = out[:, -1, :]
         # Apply linear layer to get final output
-        out = self.hidden2label(attended_output)
-        return F.softmax(out, dim=1)
+        logits = self.hidden2label(linear_combination)
+        logits = F.softmax(logits, dim=1)
+        return logits, energy
 
 
 def retrieve_augmented_data_df(lang_original: str = 'en', lang_tmp: str = 'fr', downsample_rate: float = 0.75,
