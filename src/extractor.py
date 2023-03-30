@@ -321,7 +321,7 @@ def test(model, embedding_model, test_dataloader, seq_len, device):
             batch_sent_tensor = batch_str_to_batch_tensors(sentence_list=test_data, embedding_model=embedding_model,
                                                            seq_len=seq_len).to(device)
             target = test_labels.long().to(device)
-            predicted = model(batch_sent_tensor)
+            predicted, _ = model(batch_sent_tensor)
             # Calculate and record per-batch accuracy
             winners = predicted.argmax(dim=1)  # each sentence has p0 and p1 probabilities with p0 + p1 = 1
             corrects = (winners == target)  # match predicted output labels with observed labels
@@ -359,7 +359,7 @@ def validate(model, embedding_model, validation_dataloader, criterion, seq_len, 
             batch_sent_tensor = batch_str_to_batch_tensors(sentence_list=v_data, embedding_model=embedding_model,
                                                            seq_len=seq_len).to(device)
             target = v_labels.long().to(device)
-            predicted = model(batch_sent_tensor)
+            predicted, _ = model(batch_sent_tensor)
             vloss = criterion(predicted, target)
             # Record accuracy & loss
             running_vloss += vloss
