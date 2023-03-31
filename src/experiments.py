@@ -80,7 +80,7 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [32]
         },
         'hidden_size': {
-            'values': [64, 256]
+            'values': [64]
         },
         'downsample_rate': {
             'values': [0.9]  # [0.5, 0.75, 0.9]
@@ -113,8 +113,8 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
 def main():
     nltk.download('punkt')
     # root = '..'
-    experiment_comparison(seed=42)
-    # experiment_downsample90(seed=43)
+    # experiment_comparison(seed=42)
+    experiment_downsample90(seed=43)
 
 
 main()
