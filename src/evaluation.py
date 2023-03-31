@@ -152,6 +152,8 @@ def evaluate_model(model, config, embedding_model=None):
             inputs_embedded = batch_str_to_batch_tensors(sentence_list=sentences, embedding_model=embedding_model)
             with torch.no_grad():
                 outputs = model(inputs_embedded)
+                if isinstance(outputs, tuple):
+                    outputs = outputs[0]
             predictions = outputs.numpy()
         elif config['model_type'] == 'transformer':
             tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
