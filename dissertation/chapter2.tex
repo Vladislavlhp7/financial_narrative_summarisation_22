@@ -12,6 +12,92 @@
 
 \subsection{Transformers}\label{subsec:transformers}
 
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[
+  input/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=red!20},
+  token/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=blue!20},
+  seg_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=orange!20},
+  pos_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=green!20},
+  input_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=purple!20},
+  plus/.style={}
+]
+
+    % Tokens
+    \node[input] (i1) {[CLS]};
+    \node[input, right=0.5cm of i1] (i2) {It};
+    \node[input, right=0.5cm of i2] (i3) {is};
+    \node[input, right=0.5cm of i3] (i4) {sunny};
+    \node[input, right=0.5cm of i4] (i5) {[SEP]};
+    \node[input, right=0.5cm of i5] (i6) {But};
+    \node[input, right=0.5cm of i6] (i7) {also};
+    \node[input, right=0.5cm of i7] (i8) {cold};
+    \node[input, right=0.5cm of i8] (i9) {[SEP]};
+
+        % Tokens
+    \node[token, below=1cm of i1] (t1) {$E_{[CLS]}$};
+    \node[token, below=1cm of i2] (t2) {$E_{It}$};
+    \node[token, below=1cm of i3] (t3) {$E_{is}$};
+    \node[token, below=1cm of i4] (t4) {$E_{sunny}$};
+    \node[token, below=1cm of i5] (t5) {$E_{[SEP]}$};
+    \node[token, below=1cm of i6] (t6) {$E_{But}$};
+    \node[token, below=1cm of i7] (t7) {$E_{also}$};
+    \node[token, below=1cm of i8] (t8) {$E_{cold}$};
+    \node[token, below=1cm of i9] (t9) {$E_{[SEP]}$};
+
+    % Add plus nodes between inputs
+    \draw ($(i1.south west) + (0,-0.3)$) -- ($(i9.south east) + (0,-0.3)$);
+
+        % Segmentation embeddings
+    \node[seg_embed, below=1cm of t1] (s1) {$E_{A}$};
+    \node[seg_embed, below=1cm of t2] (s2) {$E_{A}$};
+    \node[seg_embed, below=1cm of t3] (s3) {$E_{A}$};
+    \node[seg_embed, below=1cm of t4] (s4) {$E_{A}$};
+    \node[seg_embed, below=1cm of t5] (s5) {$E_{A}$};
+    \node[seg_embed, below=1cm of t6] (s6) {$E_{B}$};
+    \node[seg_embed, below=1cm of t7] (s7) {$E_{B}$};
+    \node[seg_embed, below=1cm of t8] (s8) {$E_{B}$};
+    \node[seg_embed, below=1cm of t9] (s9) {$E_{B}$};
+
+    % Position embeddings
+    \node[pos_embed, below=1cm of s1] (p1) {$E_{0}$};
+    \node[pos_embed, below=1cm of s2] (p2) {$E_{1}$};
+    \node[pos_embed, below=1cm of s3] (p3) {$E_{2}$};
+    \node[pos_embed, below=1cm of s4] (p4) {$E_{3}$};
+    \node[pos_embed, below=1cm of s5] (p5) {$E_{4}$};
+    \node[pos_embed, below=1cm of s6] (p6) {$E_{5}$};
+    \node[pos_embed, below=1cm of s7] (p7) {$E_{6}$};
+    \node[pos_embed, below=1cm of s8] (p8) {$E_{7}$};
+    \node[pos_embed, below=1cm of s9] (p9) {$E_{8}$};
+
+    % Pluses at 0.25 between each (s, t) pair
+    \node[above=0.25cm of $(s1)!.25!(t1)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s2)!.25!(t2)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s3)!.25!(t3)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s4)!.25!(t4)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s5)!.25!(t5)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s6)!.25!(t6)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s7)!.25!(t7)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s8)!.25!(t8)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s9)!.25!(t9)$, font=\large] {$+$};
+
+
+    % Pluses at 0.25 between each (p, s) pair
+    \node[above=0.25cm of $(p1)!.25!(s1)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p2)!.25!(s2)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p3)!.25!(s3)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p4)!.25!(s4)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p5)!.25!(s5)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p6)!.25!(s6)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p7)!.25!(s7)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p8)!.25!(s8)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p9)!.25!(s9)$, font=\large] {$+$};
+
+\end{tikzpicture}
+    \caption{BERT: Input Embeddings}
+    \label{fig:bert_input}
+\end{figure}
+
 \subsection{Text Summarisation}\label{subsec:text-summarisation}
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
 There are two overarching categories: extractive and abstractive text summarisation.
