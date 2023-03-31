@@ -278,20 +278,20 @@ def main():
     configs = []
     # GRU models
     # 64-0.9-None-dot
-    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-              'model_name': 'model-0.001-64-0.9-2023-03-26-19-08.h5'}
-    config['model_path'] = config['model_name']
-    configs.append(config)
+    # config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
+    #           'model_name': 'model-0.001-64-0.9-2023-03-26-19-08.h5'}
+    # config['model_path'] = config['model_name']
+    # configs.append(config)
+    #
+    # # 64-0.9-None-dot
+    # config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
+    #           'model_name': 'model-0.001-64-0.9-2023-03-26-22-26.h5'}
+    # config['model_path'] = config['model_name']
+    # configs.append(config)
 
-    # 64-0.9-None-dot
+    # 64-0.8-fr-dot
     config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-              'model_name': 'model-0.001-64-0.9-2023-03-26-22-26.h5'}
-    config['model_path'] = config['model_name']
-    configs.append(config)
-
-    # 64-0.9-None-dot
-    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-              'model_name': 'model-0.001-64-0.9-2023-03-11-06.h5'}
+              'model_name': 'model-0.001-64-0.8-2023-03-31-11-08.h5'}
     config['model_path'] = config['model_name']
     configs.append(config)
 
