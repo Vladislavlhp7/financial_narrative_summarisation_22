@@ -62,7 +62,7 @@ def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr', t
 
     model = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-pretrain', num_labels=2)
     # run_name = 'extractive_summarisation'
-    model_name = f'finbert-sentiment-seed-{seed_v}-dataaugm-{data_augmentation}-lr-{lr}-downsample-{training_downsample_rate}'
+    model_name = f'finbert-seed-{seed_v}-dataaugm-{data_augmentation}-lr-{lr}-downsample-{training_downsample_rate}'
 
     wandb.login(key='d688e4b0d6cc6faf80068f7320efc3f0d135e36d')
     wandb.init(project='extractive_summarisation-data-augmentation-unified', entity='yotkovv')
@@ -102,13 +102,20 @@ def run_experiment(root: str = '..', seed_v: int = 42, data_augmentation='fr', t
 
 
 def main():
-    seed = 42
     training_downsample_rate = 0.9
     data_augmentation = None
     lr = 2e-5
+    seed = 42
     type_load_directly = True
-    run_experiment(seed_v=seed, data_augmentation=data_augmentation, type_load_directly=type_load_directly,
-                   lr=lr, training_downsample_rate=training_downsample_rate)
+
+    for training_downsample_rate in [0.9, 0.8]:
+        for lr in [2e-5, 3e-5, 5e-5].reverse():
+            if training_downsample_rate == 0.8:
+                data_augmentation = 'fr'
+            else:
+                data_augmentation = None
+            run_experiment(seed_v=seed, data_augmentation=data_augmentation, type_load_directly=type_load_directly,
+                           lr=lr, training_downsample_rate=training_downsample_rate)
 
 
 main()

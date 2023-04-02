@@ -68,13 +68,13 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [seed]
         },
         'attention_type': {
-            'values': ['dot', None]
+            'values': ['dot']
         },
         'data_augmentation': {
             'values': [None]
         },
         'lr': {
-            'values': [1e-3]
+            'values': [1e-3, 5e-4, 1e-4]
         },
         'batch_size': {
             'values': [32]
@@ -86,7 +86,7 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [0.9]  # [0.5, 0.75, 0.9]
         },
         'dropout': {
-            'values': [0]
+            'values': [0, 0.25, 0.5]
         },
         'rnn_type': {
             'values': ['gru']
@@ -114,7 +114,7 @@ def main():
     nltk.download('punkt')
     # root = '..'
     # experiment_comparison(seed=42)
-    experiment_downsample90(seed=43)
+    experiment_downsample90(seed=42)
 
 
 main()
