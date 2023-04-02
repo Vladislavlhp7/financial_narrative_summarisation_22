@@ -18,7 +18,7 @@ def load_data(tokenizer, root: str = '..', v_seed: int = 42, training_downsample
                             data_augmentation=data_augmentation,
                             type_load_directly=type_load_directly)  # aggressive downsample
     validation_data = FNS2021(file=f'{root}/tmp/{data_filename}', type_='validation', random_state=v_seed,
-                              downsample_rate=None,
+                              downsample_rate=training_downsample_rate,
                               type_load_directly=type_load_directly)  # use all validation data
     df_train, df_val = training_data.sent_labels_df, validation_data.sent_labels_df
 
