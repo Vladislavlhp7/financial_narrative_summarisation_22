@@ -109,7 +109,7 @@ def main():
     type_load_directly = True
 
     for training_downsample_rate in [0.9, 0.8]:
-        for lr in [2e-5, 3e-5, 5e-5].reverse():
+        for lr in [2e-5, 3e-5, 5e-5]:
             if training_downsample_rate == 0.8:
                 data_augmentation = 'fr'
             else:
