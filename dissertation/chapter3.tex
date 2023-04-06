@@ -4,7 +4,9 @@
 We approach the annual report summarisation problem from a supervised perspective - we cast the task of Extractive Text Summarisation (ETS) as a binary classification problem defined on the sentence level.
 More formally, we can describe the annual report as $d=\{s_{1}, s_{2}, \dots, s_{n}\}$, where $d$ is a document, represented in terms of sentences $s_{i}, \  1 \leq i \leq n$ (\cite{liu2019finetuningbert}).
 
-Then, a candidate summary can be $c=\{s_{1}, s_{2}, \dots, s_{k} | s_{i} \in d \}, \ 0 \leq k \leq n$.
+Then, a candidate summary\footnote{
+    A candidate summary is generated from a model $m_{i}$ but it is not yet a \emph{best summary}.
+} can be $c=\{s_{1}, s_{2}, \dots, s_{k} | s_{i} \in d \}, \ 0 \leq k \leq n$.
 
 We further need to define the \emph{gold summary}, $c^{*}$ for a document $d$.
 
@@ -21,7 +23,12 @@ In general, to assess the quality of a candidate summary $c$, we measure its sim
     It can be accessed at: \url{https://github.com/pltrdy/rouge}
     } metric(\cite{lin2004rouge}).
 
-For the FNS21 task due to the extractive nature of our approach we will evaluate our models based on the ROUGE-maximising $c^{*}_{i}$ gold summary, i.e.,
+For the FNS21 task due to the extractive nature of our approach we will evaluate our models based on the ROUGE-maximising $c^{*}_{i}$ gold summary\footnote{
+    The intuition is that by extracting multiple sentences from the report, our generated candidate summary can retain sentences from \emph{any} of the gold summaries. 
+    Hence, there must be at least one such gold summary where the overlap is maximal.
+    The practical implications are that two models, $m_{1}$ and $m_{2}$ can produce two different candidate summaries $c_{1}$ and $c_{2}$, respectively.
+    Their individual evaluation is based on gold summaries $c^{*}_{1}$ and $c^{*}_{2}$ (which can be the same when the candidates $c_{1}$ and $c_{2}$ are identical).
+}, i.e.,
 
 \begin{figure}[h]
     \centering

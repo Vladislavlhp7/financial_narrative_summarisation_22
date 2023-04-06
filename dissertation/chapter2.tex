@@ -8,9 +8,35 @@
 
 \subsection{Attention}\label{subsec:attention}
 
-\subsection{RNN}\label{subsec:rnn}
+\begin{figure}
+    \begin{equation}
+        \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+    \end{equation}
+    \caption{Attention calculation (Query, Key, Value)}
+    \label{eq:attention}
+\end{figure}
+
+\subsection{Recurrent Neural Networks (RNNs)}\label{subsec:rnn}
+The vanilla RNN is a basic type of RNN architecture designed for processing sequential data.
+It learns temporal patterns from the initial data by looping over the hidden layers which allow information to persist (i.e., they serve as a network memory) (\cite{olah2015understandingLSTM}).
+The key component is the recurrent hidden state updated at each time step using input data and the previous hidden state. 
+This allows the RNN to capture contextual information and temporal dependencies in the sequence.
+However, due to the inherent vanishing and exploding gradient problems with the vanilla RNNs, they have limited ability to learn long-term dependencies (\cite{bengio1994learning}).
+To resolve these issues more advanced RNN architectures like LSTMs and GRUs have been developed. \\
+
+The Long Short-Term Memory (LSTM) recurrent neural network has become a ubiquitous method in sequential problems (e.g., language modelling, time series forecasting).
+This is so because it allows long-term dependencies to propagate through the network with the help of control gates \- \emph{input} and \emph{forget}, which reduce the effect of the vanishing gradient issue in the vanilla RNN\footnote{
+    We direct readers to~\cite{bayer2015learning} where the authors demonstrate that the LSTM's \enquote{temporal} gradient is unaffected by the fixed weight factor $W$ of the vanilla RNN that is driving the derivative to zero. 
+    This is ensured by the additional architecture unit \- the \emph{forget} gate, which learns to  control the gradient flow in the network.
+}. 
+A more simple variant of the LSTM is the Gated Recurrent Unit (GRU) which combines the \emph{input} and \emph{forget} gates into an \emph{update} gate for a model with fewer parameters and faster training (\cite{cahuantzi2021gru}).
+Nevertheless, due to the sequential nature of the LSTM, the training process cannot be parallelised across GPUs, i.e., the learning cannot be made quicker by more computational resources.
+
 
 \subsection{Transformers}\label{subsec:transformers}
+The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence architecture which is parallelisable and attention-based. 
+
+
 
 \begin{figure}
     \centering
