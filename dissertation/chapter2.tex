@@ -5,6 +5,20 @@
 \subsection{TFIDF}\label{subsec:tfidf}
 
 \subsection{Word Embeddings}\label{subsec:word-embeddings}
+Historically, to represent a token (i.e., word) $w_{i}$ in a vocabulary $V$ numerically, we define a one-hot-encoding vector of all zeroes except of a one at the index of the word $w_{i}$ in $V$ (i.e., $i$). 
+The results are sparse individual word vectors being orthogonal to each other which \begin{enumerate*}
+    \item waste memory (each word is a $|V|$-sized vector, hence a total of $|V|^{2}$ for all tokens) and more importantly
+    \item fail to encode semantic similarity due to their cosine similarity being always 0
+\end{enumerate*}. 
+
+Traditionally, AF research has represented an input text with the help of bag-of-words (BOW) models which can be viewed from the  \begin{enumerate*}
+    \item the binary perspective - represent a whole document $d$ as a binary vector containing ones for all words $w_{i}$ occurring in $d$ from $V$, 
+    \item the term frequency perspective - encode number of word occurrences in documents instead of binary representation (\cite{Xu2013AnAT}), and 
+    \item the tf-idf perspective - extend the latter to penalise ubiquitous terms (\cite{SprckJones1972ASI}).
+\end{enumerate*} 
+Nevertheless, these vectors are very sparse and unable to encode more complex contextual and semantic meaning.
+
+
 
 \subsection{Attention}\label{subsec:attention}
 
