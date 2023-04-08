@@ -94,6 +94,22 @@ This is so because it allows long-term dependencies to propagate through the net
 A more simple variant of the LSTM is the Gated Recurrent Unit (GRU) which combines the \emph{input} and \emph{forget} gates into an \emph{update} gate for a model with fewer parameters and faster training (\cite{cahuantzi2021gru}).
 Nevertheless, due to the sequential nature of the LSTM, the training process cannot be parallelised across GPUs, i.e., the learning cannot be made quicker by more computational resources.
 
+\begin{figure}[ht]
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=1\columnwidth]{../charts/rnn}
+        \caption{Unfolded RNN}
+        \label{fig:rnn}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=1\columnwidth]{../charts/bi-lstm}
+        \caption{Unfolded bi-directional LSTM}
+        \label{fig:bilstm}
+    \end{subfigure}~\caption{Unfolded recurrent architectures (\cite{zhiyong2018bilstm})}
+    \label{fig:recurrent_unfolded}
+\end{figure}
 
 \subsection{Transformers}\label{subsec:transformers}
 The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence architecture which is parallelisable and attention-based. 
