@@ -80,10 +80,28 @@ In our project we acknowledge that a purpose-built financial word embedding (tra
 \subsection{Recurrent Neural Networks (RNNs)}\label{subsec:rnn}
 The vanilla RNN is a basic type of RNN architecture designed for processing sequential data.
 It learns temporal patterns from the initial data by looping over the hidden layers which allow information to persist (i.e., they serve as a network memory) (\cite{olah2015understandingLSTM}).
-The key component is the recurrent hidden state updated at each time step using input data and the previous hidden state. 
+The key component is the recurrent hidden state $h_i$ (Figure~\ref{fig:rnn}) updated at each time step using input data and the previous hidden state (Eq.\ref{eq:rnn_hidden}).
 This allows the RNN to capture contextual information and temporal dependencies in the sequence.
 However, due to the inherent vanishing and exploding gradient problems with the vanilla RNNs, they have limited ability to learn long-term dependencies (\cite{bengio1994learning}).
-To resolve these issues more advanced RNN architectures like LSTMs and GRUs have been developed. \\
+To resolve these issues more advanced RNN architectures like LSTMs and GRUs have been developed.
+
+\begin{equation}\label{eq:rnn_hidden}
+    h_t = f(W_{hh} h_{t-1} + W_{xh} x_t + b_h)
+    \footnote{
+        The algebraic formulation of the vanilla RNN has the following variables: \begin{enumerate*}
+            \item $x_t$ is the input at time step $t$.
+            \item $h_{t-1}$ is the hidden state at time step $t-1$.
+            \item $h_t$ is the hidden state at time step $t$.
+            \item $y_t$ is the output at time step $t$.
+            \item $f$ and $g$ are activation functions for the hidden and output layers, respectively.
+            \item $W_{hh}$, $W_{xh}$, $W_{hy}$ are weight matrices for the hidden-to-hidden, input-to-hidden, and hidden-to-output connections, respectively.
+            \item $b_h$ and $b_y$ are bias terms for the hidden and output layers, respectively.
+        \end{enumerate*}
+    }
+\end{equation}
+\begin{equation}
+    y_t = g(W_{hy} h_t + b_y)\label{eq:rnn_output}
+\end{equation}
 
 The Long Short-Term Memory (LSTM) recurrent neural network has become a ubiquitous method in sequential problems (e.g., language modelling, time series forecasting).
 This is so because it allows long-term dependencies to propagate through the network with the help of control gates \- \emph{input} and \emph{forget}, which reduce the effect of the vanishing gradient issue in the vanilla RNN\footnote{
@@ -93,6 +111,16 @@ This is so because it allows long-term dependencies to propagate through the net
 
 A more simple variant of the LSTM is the Gated Recurrent Unit (GRU) which combines the \emph{input} and \emph{forget} gates into an \emph{update} gate for a model with fewer parameters and faster training (\cite{cahuantzi2021gru}).
 Nevertheless, due to the sequential nature of the LSTM, the training process cannot be parallelised across GPUs, i.e., the learning cannot be made quicker by more computational resources.
+
+As noted by~\cite{graveshinton2013speech}, a limitation of the unidirectional RNNs is that they only make use of previous context in the sequence.
+To alleviate this and establish more complex relationships between words~\cite{schuster1997birnn}, propose a bi-directional architecture consisting of a forward and a backward RNN\@.
+
+We can therefore represent the hidden layers ($h_i$) per time-step (where $T$ is the sequence size) with the following notation: \begin{enumerate*}
+    \item $(\overset{\longrightarrow}{h_1}, \ldots, \overset{\longrightarrow}{h_T})$ are the forward hidden states from left to right (i.e., $x_1,\ldots,x_T$) and
+    \item $(\overset{\longleftarrow}{h_1}, \ldots, \overset{\longleftarrow}{h_T})$ are the backward hidden states from right to left (i.e., $x_T,\ldots,x_1$)
+\end{enumerate*}.
+
+Then, for a single word $x_i$, its respective \emph{annotation} (i.e., condensed representation) is constructed by the concatenation of the forward and backward hidden states - $h_i = [\overset{\longrightarrow}{h_i^T}; \overset{\longleftarrow}{h_i^T}]^T$ as specified by~\cite{bahdanau2016neural}.
 
 \begin{figure}[ht]
     \begin{subfigure}{0.49\textwidth}
