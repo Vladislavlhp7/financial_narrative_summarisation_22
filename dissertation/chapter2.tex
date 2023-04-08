@@ -118,9 +118,9 @@ To alleviate this and establish more complex relationships between words~\cite{s
 We can therefore represent the hidden layers ($h_i$) per time-step (where $T$ is the sequence size) with the following notation: \begin{enumerate*}
     \item $(\overset{\longrightarrow}{h_1}, \ldots, \overset{\longrightarrow}{h_T})$ are the forward hidden states from left to right (i.e., $x_1,\ldots,x_T$) and
     \item $(\overset{\longleftarrow}{h_1}, \ldots, \overset{\longleftarrow}{h_T})$ are the backward hidden states from right to left (i.e., $x_T,\ldots,x_1$)
-\end{enumerate*}.
+\end{enumerate*} (Figure~\ref{fig:bilstm}).
 
-Then, for a single word $x_i$, its respective \emph{annotation} (i.e., condensed representation) is constructed by the concatenation of the forward and backward hidden states - $h_i = [\overset{\longrightarrow}{h_i^T}; \overset{\longleftarrow}{h_i^T}]^T$ as specified by~\cite{bahdanau2016neural}.
+Then, for a single word $x_i$, its respective \emph{annotation} (i.e., condensed representation) is constructed by the concatenation of the forward and backward hidden states - $h_i = [\overset{\longrightarrow}{h_i^T}; \overset{\longleftarrow}{h_i^T}]^T$ as specified in~\cite{bahdanau2016neural}.
 
 \begin{figure}[ht]
     \begin{subfigure}{0.49\textwidth}
@@ -138,6 +138,73 @@ Then, for a single word $x_i$, its respective \emph{annotation} (i.e., condensed
     \end{subfigure}~\caption{Unfolded recurrent architectures (\cite{zhiyong2018bilstm})}
     \label{fig:recurrent_unfolded}
 \end{figure}
+
+\subsection{Encoder-Decoder and Attention}\label{subsec:seq2seq}
+However, to deal with many-to-many sequence-to-sequence problems (e.g., machine translation, speech recognition, abstractive text summarisation) a new type of neural architecture is necessary~\cite{sutskever2014sequence}.
+and~\cite{cho-etal-2014-learning} introduced the Encoder-Decoder network with \begin{enumerate*}
+    \item the encoder being an RNN that maps an input sequence $(x_1, x_2, \dots, x_n)$ to a continuous fixed-length context vector $c$ and
+    \item the decoder, also an RNN, taking this vector and producing an output sequence $(y_1, y_2, \dots, y_m)$
+\end{enumerate*}.
+They train the two RNNs jointly, maximising the conditional probability $p(y_1, \ldots, y_{T'} | x_1, \ldots, x_T)$ of the target sequence given a source sequence.
+For the selection of the neural model the authors had naturally chosen LSTM and GRU, respectively, due to the resolution of the vanishing gradient problem (as discussed in Section~\ref{subsec:rnn}) and for the time being~\cite{sutskever2014sequence} managed to achieve state-of-the-art results in machine translation.
+
+% Encoder-decoder schema
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[node distance=1.5cm and 1cm,>=stealth',auto,font=\footnotesize]
+        % Encoder
+        \node[draw,minimum height=1cm] (x1) {$x_1$};
+        \node[draw,minimum height=1cm, right=of x1] (x2) {$x_2$};
+        \node[right=of x2] (dots) {$\dots$};
+        \node[draw,minimum height=1cm, right=of dots] (xT) {$x_T$};
+        \node[draw,minimum height=1cm, circle, above=of x1] (h1) {$h_1$};
+        \node[draw,minimum height=1cm, circle, above=of x2] (h2) {$h_2$};
+        \node[draw,minimum height=1cm, circle, above=of xT] (hT) {$h_T$};
+
+        \draw[->] (x1) -- (h1);
+        \draw[->] (x2) -- (h2);
+        \draw[->] (xT) -- (hT);
+        \draw[->] (h1) -- (h2);
+        \draw[->] (h2) -- (hT);
+
+        % Context vector
+        \node[draw,minimum height=1cm, circle, right=of hT] (c) {c};
+
+        \draw[->] (hT) -- (c);
+
+        % Decoder
+        \node[draw,minimum height=1cm, circle, right=of c, yshift=1.5cm] (s1) {$s_1$};
+        \node[draw,minimum height=1cm, circle, right=of s1] (s2) {$s_2$};
+        \node[right=of s2, yshift=0.25cm] (sdots) {$\dots$};
+        \node[draw,minimum height=1cm, circle, right=of sdots, yshift=-0.25cm] (sT) {$s_{T'}$};
+        \node[draw,minimum height=1cm, above=of s1] (y1) {$y_1$};
+        \node[draw,minimum height=1cm, above=of s2] (y2) {$y_2$};
+        \node[draw,minimum height=1cm, above=of sT] (yT) {$y_{T'}$};
+
+        \draw[->, dotted] (c) -- (y1);
+        \draw[->, dotted] (c) -- (y2);
+        \draw[->, dotted] (c) -- (yT);
+        \draw[->, dotted] (c) -- (s1);
+        \draw[->, dotted] (c) -- (s2);
+        \draw[->, dotted] (c) -- (sT);
+
+        \draw[->] (y1) -- (y2);
+        \draw[->] (y2) -- (yT);
+
+        \draw[->] (y1) -- (s2);
+        \draw[->] (y2) -- (sT);
+
+        \draw[->] (s1) -- (s2);
+        \draw[->] (s2) -- (sT);
+
+        \draw[->] (s1) -- (y1);
+        \draw[->] (s2) -- (y2);
+        \draw[->] (sT) -- (yT);
+    \end{tikzpicture}
+    \caption{Encoder-Decoder Schema}
+    \label{fig:encoderdecoder}
+\end{figure}
+
 
 \subsection{Transformers}\label{subsec:transformers}
 The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence architecture which is parallelisable and attention-based. 
