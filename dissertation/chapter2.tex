@@ -141,15 +141,17 @@ Then, for a single word $x_i$, its respective \emph{annotation} (i.e., condensed
 
 \subsection{Encoder-Decoder and Attention}\label{subsec:seq2seq}
 However, to deal with many-to-many sequence-to-sequence problems (e.g., machine translation, speech recognition, abstractive text summarisation) a new type of neural architecture is necessary~\cite{sutskever2014sequence}.
-and~\cite{cho-etal-2014-learning} introduced the Encoder-Decoder network with \begin{enumerate*}
+and~\cite{cho-etal-2014-learning} introduced the Encoder-Decoder network (Figure~\ref{fig:encoderdecoder}) with \begin{enumerate*}
     \item the encoder being an RNN that maps an input sequence $(x_1, x_2, \dots, x_n)$ to a continuous fixed-length context vector $c$ and
     \item the decoder, also an RNN, taking this vector and producing an output sequence $(y_1, y_2, \dots, y_m)$
 \end{enumerate*}.
-They train the two RNNs jointly, maximising the conditional probability $p(y_1, \ldots, y_{T'} | x_1, \ldots, x_T)$ of the target sequence given a source sequence.
+They train the two RNNs jointly, maximising the conditional probability of the target sequence given a source sequence, i.e., $p(y_1, \ldots, y_{T'} | x_1, \ldots, x_T)$.
 For the selection of the neural model the authors had naturally chosen LSTM and GRU, respectively, due to the resolution of the vanishing gradient problem (as discussed in Section~\ref{subsec:rnn}) and for the time being~\cite{sutskever2014sequence} managed to achieve state-of-the-art results in machine translation.
+It is in~\cite{bahdanau2016neural} where the authors suppose that the fixed-length vector results in a bottleneck such that the longer the sequences, the worse the compression performance is for neural networks.
+Meanwhile, they propose to replace the fixed-length vector with a variable-length one which searches for the most relevant information from the source sequence.
 
 % Encoder-decoder schema
-\begin{figure}
+\begin{figure}[ht]
     \centering
     \begin{tikzpicture}[node distance=1.5cm and 1cm,>=stealth',auto,font=\footnotesize]
         % Encoder
