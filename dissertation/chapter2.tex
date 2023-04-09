@@ -66,17 +66,6 @@ In the same paper, the authors propose using the same algorithms (i.e., CBOW, Sk
 They report a substantial increase in performance in and sensitivity to detecting financial jargon and relationships.
 In our project we acknowledge that a purpose-built financial word embedding (trained on proprietary data) will be more beneficial and more suited for the task of text summarisation of annual financial reports, which is why we select FinText as our preferred model.
 
-
-\subsection{Attention}\label{subsec:attention}
-
-\begin{figure}
-    \begin{equation}
-        \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\label{eq:equation2}
-    \end{equation}
-    \caption{Attention calculation (Query, Key, Value)}
-    \label{fig:attention}
-\end{figure}
-
 \subsection{Recurrent Neural Networks (RNNs)}\label{subsec:rnn}
 The vanilla RNN is a basic type of RNN architecture designed for processing sequential data.
 It learns temporal patterns from the initial data by looping over the hidden layers which allow information to persist (i.e., they serve as a network memory) (\cite{olah2015understandingLSTM}).
@@ -213,7 +202,9 @@ This is achieved through an alignment model which accepts as input the produced 
 Then the context vector $c_{i}$ which is now distinct for each input word (unlike in~\cite{cho-etal-2014-learning,sutskever2014sequence}) becomes a weighted sum\footnote{
     And hence it is known as the \emph{additive attention}.
 } of the annotations $h_{j}$ (Eq.\ref{eq:context}) and each weight $\alpha_{ij}$ is calculated as the normalized attention score (Eq.\ref{eq:attention_score}).
-The alignment model is trained jointly with the encoder-decoder system and intuitively it evaluates the importance $e_{ij}$ of an annotation $h_{j}$ in generating a new state $s_{i}$ and output token $y_{i}$ (Eq.\ref{eq:energy}).
+The alignment model is itself a neural network trained jointly with the encoder-decoder system and it evaluates the importance $e_{ij}$ of an annotation $h_{j}$ in generating a new state $s_{i}$ and output token $y_{i}$ (Eq.\ref{eq:energy}).
+Intuitively, as noted in~\cite{galassi2020attention}, this attention mechanism computes a weight distribution on the input sequence and \emph{attends} (i.e., assigns a larger weight) to the most relevant parts.
+
 \begin{equation}\label{eq:context}
     c_i = \sum_j^T{\alpha_{ij}h_j}
 \end{equation}
@@ -226,11 +217,45 @@ The alignment model is trained jointly with the encoder-decoder system and intui
 
 
 \subsection{Transformers}\label{subsec:transformers}
-The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence architecture which is parallelisable and attention-based. 
 
+The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence architecture which follows the overall encoder-decoder architecture (\cite{sutskever2014sequence}), but differs in the following aspects:
+\begin{enumerate}
+    \item \emph{Internal architecture} - instead of RNNs (\cite{cho-etal-2014-learning}), the encoder and the decoder are based on fully-connected feed-forward neural networks.
+    The reasoning is that, although recurrent hidden layers have been used for compressing sequences into a context vector, the authors of the transformer introduce the concept of self-attention (extending the attention from~\cite{bahdanau2016neural}) to represent only the most salient parts of the input.
+    \item Self-Attention and Global context - while RNN architectures struggle to deal with long-range dependencies (due to the vanishing gradient problem and the last-layer bottleneck~\cite{bahdanau2016neural}), the authors propose
+    self-attention to allow capturing of global context.
+    This mechanism has two key components (Fig.\ref{fig:attention_dot_product}):
+    \begin{itemize}
+        \item The scaled dot-product (Eq.\ref{fig:attention}) computes the attention weights (see Section~\ref{subsec:seq2seq}) to be used for generating a weighted representation of the input sequence.
+        Each token from the input sequence is represented as a $q$-query, $k$-key, and $v$-value vector (packed together into linearly-projected\footnote{
+            The query vectors, key vectors, and value vectors are linearly projected from the input token embeddings using separate learnable weight matrices.
+        } $Q$, $K$, $V$ matrices, respectively).
+        Meanwhile, the dot product computes the similarity score between $Q$ - the current token's focus and $K$ - the context of the other tokens, whereas the scaling factor $\sqrt{d_{k}}$ prevents against extreme differences in softmax calculation - leading to slow convergence.
+        Once the attention weights have been calculated, they are multiplied with $V$ for a new context-aware representation combining information from other tokens in the sequence.
+        This mechanism allows the Transformer to learn relationships between any two tokens and hence the significant computational load $O(n^2)$.
+        Nevertheless, since these computations can be performed independently for each token, the entire input sequence can be processed simultaneously unlike in RNN architectures.
 
+    \end{itemize}
+    \item Positional Encoding
+    \item \emph{Training Details} - Training of a transformer requires significantly more memory
+\end{enumerate}
 
 \begin{figure}
+    \begin{equation}
+        \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\label{eq:equation2}
+    \end{equation}
+    \caption{Attention calculation (Query, Key, Value)}
+    \label{fig:attention}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.75\columnwidth]{../charts/attention}~\caption{Scaled dot product and multi-head attention (\cite{vaswani2017attention})}
+    \label{fig:attention_dot_product}
+\end{figure}
+
+
+\begin{figure}[ht]
     \centering
     \begin{tikzpicture}[
   input/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=red!20},
@@ -339,7 +364,7 @@ We will outline some key models that inspired our work below:
     \item \textbf{Hybrid model with RL} (\cite{zmandar-etal-2021-joint}): The authors train a joint extractive-abstractive summarisation model with reinforcement learning optimised for the ROUGE-2 F1 metric.
     Their networks are based on attentive LSTMs augmented with an additional copy mechanism (\cite{vinyals2015pointer}) achieving the second highest F1 score in the FNS21 competition.
 
-    \item \textbf{T5} Hybrid (\cite{orzhenovskii-2021-t5}): The author used T5 (\cite{rayson2019t5}) for a hybrid model fine-tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report’s full text.
+    \item \textbf{T5 Hybrid} (\cite{orzhenovskii-2021-t5}): The author used T5 (\cite{rayson2019t5}) for a hybrid model fine-tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report’s full text.
     This is the best performing algorithm in the FNS21 competition but also the first to consider transformer models from an abstractive summarisation perspective in the FNP workshops so far.
 
 \end{itemize}
