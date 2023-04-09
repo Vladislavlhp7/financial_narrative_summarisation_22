@@ -303,6 +303,44 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
 \end{figure}
 
 \subsection{BERT}\label{subsec:bert}
+BERT (Bidirectional Encoder Representations from Transformers) is a Transformer-based language model that was proposed by Google AI in 2018 (\cite{devlin-etal-2019-bert}).
+It revolutionised the field of NLP by introducing a new pre-training paradigm that outperformed previous state-of-the-art models on a wide range of NLP tasks.
+
+%Attention grid
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[cell/.style={rectangle, draw=black, minimum size=0.6cm}]
+            % Transformer subfigure
+            \matrix (transformer) [matrix of nodes, nodes={cell}]{
+                $q_1 k_1$ & |[fill=gray!30]| $-\infty$ & |[fill=gray!30]| $-\infty$ & |[fill=gray!30]| $-\infty$ \\
+                $q_2 k_1$ & $q_2 k_2$ & |[fill=gray!30]| $-\infty$ & |[fill=gray!30]| $-\infty$ \\
+                $q_3 k_1$ & $q_3 k_2$ & $q_3 k_3$ & |[fill=gray!30]| $-\infty$ \\
+                $q_4 k_1$ & $q_4 k_2$ & $q_4 k_3$ & $q_4 k_4$ \\
+            };
+        \end{tikzpicture}
+        \caption{Transformer}
+        \label{fig:causal_grid}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[cell/.style={rectangle, draw=black, minimum size=0.6cm}]
+            % BERT subfigure
+            \matrix (bert) [matrix of nodes, nodes={cell}]{
+                $q_1 k_1$ & $q_1 k_2$ & $q_1 k_3$ & $q_1 k_4$ \\
+                $q_2 k_1$ & $q_2 k_2$ & $q_2 k_3$ & $q_2 k_4$ \\
+                $q_3 k_1$ & $q_3 k_2$ & $q_3 k_3$ & $q_3 k_4$ \\
+                $q_4 k_1$ & $q_4 k_2$ & $q_4 k_3$ & $q_4 k_4$ \\
+            };
+        \end{tikzpicture}
+        \caption{BERT}
+        \label{fig:bert_grid}
+    \end{subfigure}
+    \caption{Comparison of query-key dot product representations for Transformer and BERT models.}
+    \label{fig:grid_comparison}
+\end{figure}
 
 
 \subsection{Text Summarisation}\label{subsec:text-summarisation}
