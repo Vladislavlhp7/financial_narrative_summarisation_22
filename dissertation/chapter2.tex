@@ -243,7 +243,7 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
             \label{fig:attention}
         \end{figure}
 
-        \item \item The multi-head attention (\cite{vaswani2017attention}) is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
+        \item The multi-head attention (\cite{vaswani2017attention}) is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
         This is achieved by stacking multiple attention heads (each with its own $Q$, $K$, $V$ matrices) and concatenating their outputs (Figure~\ref{fig:attention_dot_product}).
         For each head $h_i$, the $Q$, $K$, and $V$ vectors will be linearly projected with different weight matrices $W_i^Q$, $W_i^K$, and $W_i^V$, respectively.
         The intuition is that each attention head learns different aspects of the relationships that exist among inputs (e.g., syntactic, semantic, and discourse relationships~\cite{jurafsky2000}) and the concatenation of the different representations allows the Transformer to learn a richer overall representation of the input sequence.
