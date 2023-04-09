@@ -235,18 +235,25 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
         This mechanism allows the Transformer to learn relationships between any two tokens and hence the significant computational load $O(n^2)$.
         Nevertheless, since these computations can be performed independently for each token, the entire input sequence can be processed simultaneously unlike in RNN architectures.
 
+        \begin{figure}
+            \begin{equation}
+                \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\label{eq:equation2}
+            \end{equation}
+            \caption{Attention calculation (Query, Key, Value)}
+            \label{fig:attention}
+        \end{figure}
+
+        \item \item The multi-head attention (\cite{vaswani2017attention}) is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
+        This is achieved by stacking multiple attention heads (each with its own $Q$, $K$, $V$ matrices) and concatenating their outputs (Figure~\ref{fig:attention_dot_product}).
+        For each head $h_i$, the $Q$, $K$, and $V$ vectors will be linearly projected with different weight matrices $W_i^Q$, $W_i^K$, and $W_i^V$, respectively.
+        The intuition is that each attention head learns different aspects of the relationships that exist among inputs (e.g., syntactic, semantic, and discourse relationships~\cite{jurafsky2000}) and the concatenation of the different representations allows the Transformer to learn a richer overall representation of the input sequence.
+
     \end{itemize}
-    \item Positional Encoding
+    \item Positional Encoding - Because of the non-sequential nature of the Transformer, the heavy self-attention computations can be parallelized on modern hardware - GPUs and TPUs which makes this model easy during training and inference time.
+    Additionally, the proposed dot-product attention is practically much faster and more space-efficient in comparison to the additive one (\cite{bahdanau2016neural}), due to highly optimized matrix multiplication libraries.
+    Nevertheless, at least two computational drawbacks are that Transformers require an additional positional embedding and also have a quadratic complexity when calculating the self-attention.
     \item \emph{Training Details} - Training of a transformer requires significantly more memory
 \end{enumerate}
-
-\begin{figure}
-    \begin{equation}
-        \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\label{eq:equation2}
-    \end{equation}
-    \caption{Attention calculation (Query, Key, Value)}
-    \label{fig:attention}
-\end{figure}
 
 \begin{figure}[ht]
     \centering
