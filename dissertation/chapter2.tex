@@ -42,8 +42,7 @@ In contrast, the Skip-gram uses the middle word as an input to the classifier an
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{../charts/cbow_skipgram}
-    \caption{Word-from-context and context-from-word prediction in CBOW and Skip-gram, respectively. Figure is from~\cite{mikolov2013efficient}}.
+    \includegraphics[width=0.75\textwidth]{../charts/cbow_skipgram}~\caption{Word-from-context and context-from-word prediction in CBOW and Skip-gram, respectively (\cite{mikolov2013efficient})}.
     \label{fig:cbow_skipgram}
 \end{figure}
 
@@ -220,8 +219,8 @@ Intuitively, as noted in~\cite{galassi2020attention}, this attention mechanism c
 
 The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence architecture which follows the overall encoder-decoder architecture (\cite{sutskever2014sequence}), but differs in the following aspects:
 \begin{enumerate}
-    \item \emph{Internal architecture} - instead of RNNs (\cite{cho-etal-2014-learning}), the encoder and the decoder are based on fully-connected feed-forward neural networks.
-    The reasoning is that, although recurrent hidden layers have been used for compressing sequences into a context vector, the authors of the transformer introduce the concept of self-attention (extending the attention from~\cite{bahdanau2016neural}) to represent only the most salient parts of the input.
+    \item \emph{Internal architecture} - instead of RNNs (\cite{cho-etal-2014-learning}), the encoder and the decoder have multiple identical transformer blocks based on fully-connected feed-forward neural networks with a newly introduced concept of self-attention (Figure~\ref{fig:transformer}).
+    Although, prior to that, recurrent hidden layers have been used for compressing sequences into a context vector, the authors of the transformer extend the attention from~\cite{bahdanau2016neural} to generate salient context-aware representations of the input sequence.
     \item \emph{Self-Attention and Global context} - while RNN architectures struggle to deal with long-range dependencies (due to the vanishing gradient problem and the last-layer bottleneck~\cite{bahdanau2016neural}), the authors propose
     self-attention to allow capturing of global context.
     This mechanism has two key components (Fig.\ref{fig:attention_dot_product}):
@@ -262,92 +261,49 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
     \label{fig:attention_dot_product}
 \end{figure}
 
-
+% Transformer Architecture
 \begin{figure}[ht]
     \centering
     \begin{tikzpicture}[
-  input/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=red!20},
-  token/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=blue!20},
-  seg_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=orange!20},
-  pos_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=green!20},
-  input_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=3em, draw, fill=purple!20},
-  plus/.style={}
-]
+        block/.style={rectangle, draw, anchor=center, minimum width=3cm, minimum height=1cm},
+        attention/.style={fill=orange!30},
+        ffn/.style={fill=green!30},
+        inputlayer/.style={fill=blue!30},
+        outputlayer/.style={fill=red!30},
+        >=latex
+    ]
+        % Encoder
+        \node[block, inputlayer] (encoderInput) {Input};
+        \node[block, attention, below=of encoderInput] (encoderMultihead) {Multi-head Attention};
+        \node[block, ffn, below=of encoderMultihead] (encoderFfn) {Feed Forward Network};
+        \node[fit=(encoderMultihead)(encoderFfn), draw, dashed, inner sep=8pt] (encoder) {};
+        \node[anchor=south] at (encoder.north) {Encoder};
+        \node[anchor=east] at (encoder.west) {N$\times$};
 
-    % Tokens
-    \node[input] (i1) {[CLS]};
-    \node[input, right=0.5cm of i1] (i2) {It};
-    \node[input, right=0.5cm of i2] (i3) {is};
-    \node[input, right=0.5cm of i3] (i4) {sunny};
-    \node[input, right=0.5cm of i4] (i5) {[SEP]};
-    \node[input, right=0.5cm of i5] (i6) {But};
-    \node[input, right=0.5cm of i6] (i7) {also};
-    \node[input, right=0.5cm of i7] (i8) {cold};
-    \node[input, right=0.5cm of i8] (i9) {[SEP]};
+        % Decoder
+        \node[block, inputlayer, right=4cm of encoderInput] (decoderInput) {Target Input};
+        \node[block, attention, below=of decoderInput] (decoderMultihead1) {Multi-head Attention};
+        \node[block, attention, below=of decoderMultihead1] (decoderMultihead2) {Multi-head Attention};
+        \node[block, ffn, below=of decoderMultihead2] (decoderFfn) {Feed Forward Network};
+        \node[block, outputlayer, below=of decoderFfn] (decoderOutput) {Output};
+        \node[fit=(decoderMultihead1)(decoderMultihead2)(decoderFfn), draw, dashed, inner sep=8pt] (decoder) {};
+        \node[anchor=south] at (decoder.north) {Decoder};
+        \node[anchor=west] at (decoder.east) {$\times$N};
 
-        % Tokens
-    \node[token, below=1cm of i1] (t1) {$E_{[CLS]}$};
-    \node[token, below=1cm of i2] (t2) {$E_{It}$};
-    \node[token, below=1cm of i3] (t3) {$E_{is}$};
-    \node[token, below=1cm of i4] (t4) {$E_{sunny}$};
-    \node[token, below=1cm of i5] (t5) {$E_{[SEP]}$};
-    \node[token, below=1cm of i6] (t6) {$E_{But}$};
-    \node[token, below=1cm of i7] (t7) {$E_{also}$};
-    \node[token, below=1cm of i8] (t8) {$E_{cold}$};
-    \node[token, below=1cm of i9] (t9) {$E_{[SEP]}$};
-
-    % Add plus nodes between inputs
-    \draw ($(i1.south west) + (0,-0.3)$) -- ($(i9.south east) + (0,-0.3)$);
-
-        % Segmentation embeddings
-    \node[seg_embed, below=1cm of t1] (s1) {$E_{A}$};
-    \node[seg_embed, below=1cm of t2] (s2) {$E_{A}$};
-    \node[seg_embed, below=1cm of t3] (s3) {$E_{A}$};
-    \node[seg_embed, below=1cm of t4] (s4) {$E_{A}$};
-    \node[seg_embed, below=1cm of t5] (s5) {$E_{A}$};
-    \node[seg_embed, below=1cm of t6] (s6) {$E_{B}$};
-    \node[seg_embed, below=1cm of t7] (s7) {$E_{B}$};
-    \node[seg_embed, below=1cm of t8] (s8) {$E_{B}$};
-    \node[seg_embed, below=1cm of t9] (s9) {$E_{B}$};
-
-    % Position embeddings
-    \node[pos_embed, below=1cm of s1] (p1) {$E_{0}$};
-    \node[pos_embed, below=1cm of s2] (p2) {$E_{1}$};
-    \node[pos_embed, below=1cm of s3] (p3) {$E_{2}$};
-    \node[pos_embed, below=1cm of s4] (p4) {$E_{3}$};
-    \node[pos_embed, below=1cm of s5] (p5) {$E_{4}$};
-    \node[pos_embed, below=1cm of s6] (p6) {$E_{5}$};
-    \node[pos_embed, below=1cm of s7] (p7) {$E_{6}$};
-    \node[pos_embed, below=1cm of s8] (p8) {$E_{7}$};
-    \node[pos_embed, below=1cm of s9] (p9) {$E_{8}$};
-
-    % Pluses at 0.25 between each (s, t) pair
-    \node[above=0.25cm of $(s1)!.25!(t1)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s2)!.25!(t2)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s3)!.25!(t3)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s4)!.25!(t4)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s5)!.25!(t5)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s6)!.25!(t6)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s7)!.25!(t7)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s8)!.25!(t8)$, font=\large] {$+$};
-    \node[above=0.25cm of $(s9)!.25!(t9)$, font=\large] {$+$};
-
-
-    % Pluses at 0.25 between each (p, s) pair
-    \node[above=0.25cm of $(p1)!.25!(s1)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p2)!.25!(s2)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p3)!.25!(s3)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p4)!.25!(s4)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p5)!.25!(s5)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p6)!.25!(s6)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p7)!.25!(s7)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p8)!.25!(s8)$, font=\large] {$+$};
-    \node[above=0.25cm of $(p9)!.25!(s9)$, font=\large] {$+$};
-
-\end{tikzpicture}
-    \caption{BERT: Input Embeddings}
-    \label{fig:bert_input}
+        % Arrows
+        \draw[->] (encoderInput) -- (encoderMultihead);
+        \draw[->] (encoderMultihead) -- (encoderFfn);
+        \draw[->] (decoderInput) -- (decoderMultihead1);
+        \draw[->] (decoderMultihead1) -- (decoderMultihead2);
+        \draw[->] (decoderMultihead2) -- (decoderFfn);
+        \draw[->] (decoderFfn) -- (decoderOutput);
+        \draw[->] (encoderFfn) -- node[above] {Context Vector} (decoderMultihead2);
+    \end{tikzpicture}\caption{Simplified Transformer encoder-decoder architecture}
+    \label{fig:transformer}
 \end{figure}
+
+\subsection{BERT}\label{subsec:bert}
+
 
 \subsection{Text Summarisation}\label{subsec:text-summarisation}
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
