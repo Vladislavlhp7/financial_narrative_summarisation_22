@@ -222,7 +222,11 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
     \item \emph{Internal architecture} - instead of RNNs (\cite{cho-etal-2014-learning}), the encoder and the decoder have multiple identical transformer blocks based on fully-connected feed-forward neural networks with a newly introduced concept of self-attention (Figure~\ref{fig:transformer}).
     Although, prior to that, recurrent hidden layers have been used for compressing sequences into a context vector, the authors of the transformer extend the attention from~\cite{bahdanau2016neural} to generate salient context-aware representations of the input sequence.
     \item \emph{Self-Attention and Global context} - while RNN architectures struggle to deal with long-range dependencies (due to the vanishing gradient problem and the last-layer bottleneck~\cite{bahdanau2016neural}), the authors propose
-    self-attention to allow capturing of global context.
+    \emph{causal}\footnote{
+        Causal attention is a special case of self-attention where the attention weights are computed only from the past tokens.
+        This is achieved by masking the future tokens in the attention score computation (Figure~\ref{fig:causal_grid}).
+        We direct readers to~\cite{jurafsky2000} for a detailed discussion on Transformer language modelling.
+    } self-attention to allow capturing of global context.
     This mechanism has two key components (Fig.\ref{fig:attention_dot_product}):
     \begin{itemize}
         \item \emph{The scaled dot-product} (Eq.\ref{fig:attention}) computes the attention weights (see Section~\ref{subsec:seq2seq}) to be used for generating a weighted representation of the input sequence.
@@ -304,7 +308,26 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
 
 \subsection{BERT}\label{subsec:bert}
 BERT (Bidirectional Encoder Representations from Transformers) is a Transformer-based language model that was proposed by Google AI in 2018 (\cite{devlin-etal-2019-bert}).
-It revolutionised the field of NLP by introducing a new pre-training paradigm that outperformed previous state-of-the-art models on a wide range of NLP tasks.
+It revolutionised the field of NLP by introducing a new pre-training paradigm that outperformed previous state-of-the-art models on a wide range of NLP tasks while being easily applicable to autoregressive generation problems (e.g., abstractive summarization and machine translation).
+We will discuss the main components of BERT and how it differs from the original Transformer model.
+\begin{enumerate}
+    \item \emph{Bidirectional Nature} - ~\cite{jurafsky2000} argue that the uni-directional nature of the Transformer (i.e., causal self-attention) is a drawback that
+    prevents it from capturing the full context of a sentence, especially when applied to sequence classification and labelling tasks.
+    BERT addresses this issue by using a bidirectional Transformer architecture that allows the model to capture the full context of a sentence.
+    This contextualisation is achieved by allowing the self-attention mechanism to range over the entire input as visible from the query-key comparisons in Figure~\ref{fig:bert_grid}.
+    \item \emph{Pre-training} - BERT is a model pre-trained on two tasks: Masked Language Model (MLM) and Next Sentence Prediction (NSP).
+    \begin{enumerate}
+        \item \emph{Masked Language Model} - BERT uses a pre-training task called Masked Language Model (MLM) to learn the representations of words in a sentence.
+        The authors (\cite{devlin-etal-2019-bert}) propose masking 15\% of the input tokens at random and then training the model to predict the masked tokens.
+        To make it more accessible for fine-tuning where the [MASK] token is not available, they replace it with a random or with the original token with probabilities of 10\% each.
+        \item \emph{Next Sentence Prediction} - BERT is also pre-trained on Next Sentence Prediction (NSP) to learn the representations of sentences in a document.
+        To understand the relationship between two sentences, BERT uses a binary classification task where the model is trained to predict whether a sentence $B$ is following another sentence $A$.
+        The authors (\cite{devlin-etal-2019-bert}) propose using 50\% of the training data as positive examples (i.e., $A$ and $B$ are consecutive sentences) and 50\% as negative examples (i.e., $B$ is a random sentence from the corpus).
+    \end{enumerate}
+    \item \emph{Contextualised Word Embeddings} - BERT is a model that learns contextualised word embeddings.
+
+    \item \emph{Fine-tuning for Sequence Classification} -
+\item \end{enumerate}
 
 %Attention grid
 \begin{figure}[h]
