@@ -147,8 +147,7 @@ and~\cite{cho-etal-2014-learning} introduced the Encoder-Decoder network (Figure
 \end{enumerate*}.
 They train the two RNNs jointly, maximising the conditional probability of the target sequence given a source sequence, i.e., $p(y_1, \ldots, y_{T'} | x_1, \ldots, x_T)$.
 For the selection of the neural model the authors had naturally chosen LSTM and GRU, respectively, due to the resolution of the vanishing gradient problem (as discussed in Section~\ref{subsec:rnn}) and for the time being~\cite{sutskever2014sequence} managed to achieve state-of-the-art results in machine translation.
-It is in~\cite{bahdanau2016neural} where the authors suppose that the fixed-length vector results in a bottleneck such that the longer the sequences, the worse the compression performance is for neural networks.
-Meanwhile, they propose to replace the fixed-length vector with a variable-length one which searches for the most relevant information from the source sequence.
+
 
 % Encoder-decoder schema
 \begin{figure}[ht]
@@ -206,6 +205,24 @@ Meanwhile, they propose to replace the fixed-length vector with a variable-lengt
     \caption{Encoder-Decoder Schema}
     \label{fig:encoderdecoder}
 \end{figure}
+
+
+It is in~\cite{bahdanau2016neural} where the authors suppose that the fixed-length vector results in a bottleneck such that the longer the sequences, the worse the compression performance is for neural networks.
+Meanwhile, they propose to replace the fixed-length vector with a variable-length one which searches for the most relevant information from the source sequence.
+This is achieved through an alignment model which accepts as input the produced annotations from the encoder $h_1,\ldots, h_T$ (see Section~\ref{subsec:rnn} for details on how these are generated).
+Then the context vector $c_{i}$ which is now distinct for each input word (unlike in~\cite{cho-etal-2014-learning,sutskever2014sequence}) becomes a weighted sum\footnote{
+    And hence it is known as the \emph{additive attention}.
+} of the annotations $h_{j}$ (Eq.\ref{eq:context}) and each weight $\alpha_{ij}$ is calculated as the normalized attention score (Eq.\ref{eq:attention_score}).
+The alignment model is trained jointly with the encoder-decoder system and intuitively it evaluates the importance $e_{ij}$ of an annotation $h_{j}$ in generating a new state $s_{i}$ and output token $y_{i}$ (Eq.\ref{eq:energy}).
+\begin{equation}\label{eq:context}
+    c_i = \sum_j^T{\alpha_{ij}h_j}
+\end{equation}
+\begin{equation}\label{eq:attention_score}
+    \alpha_{ij} = \frac{\exp(e_{ij})}{\sum_{k=1}^{T} \exp(e_{ik})}
+\end{equation}
+\begin{equation}\label{eq:energy}
+    e_{ij} = a(s_{i-1}, h_j)
+\end{equation}
 
 
 \subsection{Transformers}\label{subsec:transformers}
