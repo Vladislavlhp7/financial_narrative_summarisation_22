@@ -222,11 +222,11 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
 \begin{enumerate}
     \item \emph{Internal architecture} - instead of RNNs (\cite{cho-etal-2014-learning}), the encoder and the decoder are based on fully-connected feed-forward neural networks.
     The reasoning is that, although recurrent hidden layers have been used for compressing sequences into a context vector, the authors of the transformer introduce the concept of self-attention (extending the attention from~\cite{bahdanau2016neural}) to represent only the most salient parts of the input.
-    \item Self-Attention and Global context - while RNN architectures struggle to deal with long-range dependencies (due to the vanishing gradient problem and the last-layer bottleneck~\cite{bahdanau2016neural}), the authors propose
+    \item \emph{Self-Attention and Global context} - while RNN architectures struggle to deal with long-range dependencies (due to the vanishing gradient problem and the last-layer bottleneck~\cite{bahdanau2016neural}), the authors propose
     self-attention to allow capturing of global context.
     This mechanism has two key components (Fig.\ref{fig:attention_dot_product}):
     \begin{itemize}
-        \item The scaled dot-product (Eq.\ref{fig:attention}) computes the attention weights (see Section~\ref{subsec:seq2seq}) to be used for generating a weighted representation of the input sequence.
+        \item \emph{The scaled dot-product} (Eq.\ref{fig:attention}) computes the attention weights (see Section~\ref{subsec:seq2seq}) to be used for generating a weighted representation of the input sequence.
         Each token from the input sequence is represented as a $q$-query, $k$-key, and $v$-value vector (packed together into linearly-projected\footnote{
             The query vectors, key vectors, and value vectors are linearly projected from the input token embeddings using separate learnable weight matrices.
         } $Q$, $K$, $V$ matrices, respectively).
@@ -243,21 +243,22 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
             \label{fig:attention}
         \end{figure}
 
-        \item The multi-head attention (\cite{vaswani2017attention}) is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
+        \item \emph{The multi-head attention} (\cite{vaswani2017attention}) is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
         This is achieved by stacking multiple attention heads (each with its own $Q$, $K$, $V$ matrices) and concatenating their outputs (Figure~\ref{fig:attention_dot_product}).
         For each head $h_i$, the $Q$, $K$, and $V$ vectors will be linearly projected with different weight matrices $W_i^Q$, $W_i^K$, and $W_i^V$, respectively.
         The intuition is that each attention head learns different aspects of the relationships that exist among inputs (e.g., syntactic, semantic, and discourse relationships~\cite{jurafsky2000}) and the concatenation of the different representations allows the Transformer to learn a richer overall representation of the input sequence.
 
     \end{itemize}
-    \item Positional Encoding - Because of the non-sequential nature of the Transformer, the heavy self-attention computations can be parallelized on modern hardware - GPUs and TPUs which makes this model easy during training and inference time.
+    \item \emph{Positional Encoding} - the Transformer does not have a recurrent hidden layer to capture the sequential nature of the input sequence.
+    Instead, the authors (\cite{vaswani2017attention}) propose adding a positional encoding to the input embeddings as a way to capture positional information.
+    \item \emph{Training Details} - Because of the non-sequential nature of the Transformer, the heavy self-attention computations can be parallelised on modern hardware - GPUs and TPUs which makes this model easy during training and inference time.
     Additionally, the proposed dot-product attention is practically much faster and more space-efficient in comparison to the additive one (\cite{bahdanau2016neural}), due to highly optimized matrix multiplication libraries.
-    Nevertheless, at least two computational drawbacks are that Transformers require an additional positional embedding and also have a quadratic complexity when calculating the self-attention.
-    \item \emph{Training Details} - Training of a transformer requires significantly more memory
+    Nevertheless, at least two computational drawbacks are that Transformers require an additional positional embedding and also have a quadratic complexity when calculating the self-attention which is extremely expensive for long sequences (\cite{jurafsky2000}).
 \end{enumerate}
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.75\columnwidth]{../charts/attention}~\caption{Scaled dot product and multi-head attention (\cite{vaswani2017attention})}
+    \includegraphics[width=0.75\columnwidth]{../charts/attention}~\caption{Scaled dot-product and multi-head attention (\cite{vaswani2017attention})}
     \label{fig:attention_dot_product}
 \end{figure}
 
