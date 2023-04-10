@@ -50,7 +50,7 @@ To address these issues, we have developed a rigorous data cleaning pipeline tha
 \end{enumerate*}.
 
 As discussed in Section~\ref{subsec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages (\cite{litvak-vanetik-2021-summarization}).
-Each one has at least two--three gold summaries provided by the FNS21 organisers, and we provide some statistics
+Each one has at least two--three gold summaries provided by the FNS21 organisers, and we compute some statistics
 \begin{enumerate*}
     \item helpful for grasping the nature of the output text, but also
     \item useful for the evaluation of the summarisation models
@@ -80,9 +80,6 @@ As we were only provided with the training and the validation FNS21 datasets (Ta
 we decided to treat the validation set as a testing set (Table~\ref{tab:fns21-my-data})\footnote{
     We observed that two of the annual report files were empty, hence the difference of 3,361 and 3,363 (Table~\ref{tab:fns21-data} without testing set).
 } and perform our own training-validation data split on a sentence level instead due to the significant variation in report lengths (\cite{litvak-vanetik-2021-summarization}).
-
-
-
 \begin{table}[h]
     \centering
     \begin{tabular}{lrr r}
@@ -95,6 +92,14 @@ we decided to treat the validation set as a testing set (Table~\ref{tab:fns21-my
     \caption{Training-Validation-Testing Data Split}
     \label{tab:fns21-my-data}
 \end{table}
+Specifically, we use a 90--10 \emph{stratified split} (i.e., the label distribution is retained in both sets) for training and validation, respectively.
+We are aware that a validation and a training sentence can come from the same report, but we claim that this is not problematic for the following reasons:
+\begin{enumerate}
+    \item Sentences are \emph{de-contextualised} (i.e., without references or dependencies to others, taken out of context) and \emph{shuffled}.
+    \item Sentences contain a \emph{great deal of textual noise} due to the PDF-to-text conversion.
+    \item Annual reports are \emph{numerous} but also \emph{extremely long} (i.e., containing a lot of sentences).
+\end{enumerate}
+Therefore, we believe that the training and validation sentences are to a large extent independent, and as for the process of sentence extraction, we refer you to Section~\ref{subsec:methodology} for an in-depth discussion.
 
 
 \subsection{Methodology}\label{subsec:methodology}
