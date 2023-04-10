@@ -322,10 +322,13 @@ We will discuss the main components of BERT and how it differs from the original
         To make it more accessible for fine-tuning where the [MASK] token is not available, they replace it with a random or with the original token with probabilities of 10\% each.
         \item \emph{Next Sentence Prediction} - BERT is also pre-trained on Next Sentence Prediction (NSP) to learn the representations of sentences in a document.
         To understand the relationship between two sentences, BERT uses a binary classification task where the model is trained to predict whether a sentence $B$ is following another sentence $A$.
-        The authors (\cite{devlin-etal-2019-bert}) propose using 50\% of the training data as positive examples (i.e., $A$ and $B$ are consecutive sentences) and 50\% as negative examples (i.e., $B$ is a random sentence from the corpus).
+        The authors (\cite{devlin-etal-2019-bert}) capture the sentence structure with the help of two new tokens - [CLS] (added before the sentence pair) and [SEP] (inserted in-between sentences), which are essential for the fine-tuning process (see below).
+        They further propose using 50\% of the training data as positive examples (i.e., $A$ and $B$ are consecutive sentences) and 50\% as negative examples (i.e., $B$ is a random sentence from the corpus).
     \end{enumerate}
     \item \emph{Fine-tuning for Sequence Classification} - Unlike in Word2Vec (\cite{mikolov2013efficient}) where the word embeddings are \emph{static} (i.e., related to the single word token only), BERT learns \emph{contextualised word embeddings} which can produce different representations for the same word depending on the context around it.
-    Therefore, we can use the output of BERT's last layer (i.e., the embedding itself) as an input to a downstream task - e.g., sequence classification, just as we would do with Word2Vec or FastText (\cite{bojanowski-etal-2017-enriching}).
+    Here, instead of using the output of the last hidden layer (as we do with RNNs and the Transformer), the authors (\cite{devlin-etal-2019-bert}) propose a \emph{sentence embedding} that summarizes the entire sequence of hidden states - the output vector of the model for the [CLS] token.
+    The reasoning is that BERT is pre-trained with the [CLS] token being prepended to the input sequence (during the NSP task) and it can be used as an aggregate representation of the entire sequence.
+    
 
 \item \end{enumerate}
 
@@ -446,6 +449,12 @@ We will discuss the main components of BERT and how it differs from the original
     \node[above=0.25cm of $(p7)!.25!(s7)$, font=\large] {$+$};
     \node[above=0.25cm of $(p8)!.25!(s8)$, font=\large] {$+$};
     \node[above=0.25cm of $(p9)!.25!(s9)$, font=\large] {$+$};
+
+    % Details
+    \node[left=0.5cm of i1] (d1) {Input};
+    \node[left=0.5cm of t1] (d2) {Token Embeddings};
+    \node[left=0.5cm of s1] (d3) {Segment Embeddings};
+    \node[left=0.5cm of p1] (d4) {Position Embeddings};
 
 \end{tikzpicture}
     \caption{BERT: Input Embeddings}
