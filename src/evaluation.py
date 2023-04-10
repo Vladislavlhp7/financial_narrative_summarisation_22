@@ -35,14 +35,14 @@ def trim_string(text, max_length=1000):
         return text
 
 
-def select_summary_sents(probabilities, sentences, max_sents=25):
+def select_summary_sents(probabilities, sentences, max_sents=int(1000/25)):
     """
     Selects a summary of the input sentences based on the predicted probabilities of label 1.
 
     Args:
         probabilities (numpy.ndarray): Array of predicted probabilities with shape (N, 2).
         sentences (List[str]): List of input sentences.
-        max_sents (int, optional): Maximum number of sentences to include in the summary. Defaults to 25.
+        max_sents (int, optional): Maximum number of sentences to include in the summary. Defaults to 40.
 
     Returns:
         summary (str): The selected summary.
@@ -180,13 +180,13 @@ def evaluate_model(model, config, embedding_model=None):
     return rouge_scores
 
 
-def evaluate_baseline(config, max_sent=25):
+def evaluate_baseline(config, max_sents=int(1000/25)):
     df_test = pd.read_csv(f'{config["df_test_path"]}')
     reports = df_test['report'].unique()
     rouge_scores = []
     for report_id in tqdm(reports):
         report = get_report(report_id, training=False)
-        generated_summary = get_baseline_summary(text=clean(report), max_sent=max_sent)
+        generated_summary = get_baseline_summary(text=clean(report), max_sents=max_sents, method=config['model_name'])
 
         # Calculate ROUGE scores for each summary compared to the generated summary
         rouge_scores_per_summary = []
@@ -202,10 +202,10 @@ def evaluate_baseline(config, max_sent=25):
     return rouge_scores
 
 
-def evaluate_baselines(configs, max_sent=25):
+def evaluate_baselines(configs, max_sents=int(1000/25)):
     rouge_scores_list = []
     for c in tqdm(configs):
-        rouge_scores = evaluate_baseline(config=c, max_sent=max_sent)
+        rouge_scores = evaluate_baseline(config=c, max_sents=max_sents)
         print(rouge_scores)
         rouge_scores_list.append(rouge_scores)
         df = rouge_dict_to_df(rouge_scores)
@@ -278,16 +278,16 @@ def main():
     configs = []
     # GRU models
     # 64-0.9-None-dot
-    # config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-    #           'model_name': 'model-0.001-64-0.9-2023-03-26-19-08.h5'}
-    # config['model_path'] = config['model_name']
-    # configs.append(config)
-    #
-    # # 64-0.9-None-dot
-    # config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-    #           'model_name': 'model-0.001-64-0.9-2023-03-26-22-26.h5'}
-    # config['model_path'] = config['model_name']
-    # configs.append(config)
+    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
+              'model_name': 'model-0.001-64-0.9-2023-03-26-19-08.h5'}
+    config['model_path'] = config['model_name']
+    configs.append(config)
+
+    # 64-0.9-None-dot
+    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
+              'model_name': 'model-0.001-64-0.9-2023-03-26-22-26.h5'}
+    config['model_path'] = config['model_name']
+    configs.append(config)
 
     # 64-0.8-fr-dot
     config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
@@ -296,28 +296,32 @@ def main():
     configs.append(config)
 
     # Transformer model
-    # config = {
-    #     'seed_v': 42,
-    #     'data_augmentation': 'fr',
-    #     'lr': 2e-5,
-    #     'training_downsample_rate': 0.75,
-    #     'model_type': 'transformer',
-    #     'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
-    # }
-    # config[
-    #     'model_name'] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
-    # config['model_dir'] = config['model_name']
-    # configs.append(config)
+    config = {
+        'seed_v': 42,
+        'data_augmentation': 'fr',
+        'lr': 2e-5,
+        'training_downsample_rate': 0.75,
+        'model_type': 'transformer',
+        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+    }
+    config['model_name'] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
+    config['model_dir'] = config['model_name']
+    configs.append(config)
 
     evaluate_models(configs=configs, embedding_model=embedding_model, device=device)
 
-    # configs = []
-    # config = {
-    #     'model_name': 'LexRank',
-    #     'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
-    # }
-    # configs.append(config)
-    # evaluate_baselines(configs)
+    configs = []
+    config = {
+        'model_name': 'lex',
+        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+    }
+    configs.append(config)
+    config = {
+        'model_name': 'textrank',
+        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+    }
+    configs.append(config)
+    evaluate_baselines(configs)
 
 
 if __name__ == '__main__':
