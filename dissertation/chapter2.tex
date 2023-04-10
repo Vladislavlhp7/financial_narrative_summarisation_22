@@ -460,6 +460,17 @@ We will discuss the main components of BERT and how it differs from the original
     \label{fig:bert_input}
 \end{figure}
 
+\subsection{FinBERT}\label{subsec:finbert}
+FinBERT\footnote{\url{https://github.com/yya518/FinBERT}} (\cite{yang2020finbert}) is a pre-trained domain-specific language model based on
+BERT (\cite{devlin-etal-2019-bert}) (Section~\ref{subsec:bert}) that is trained on a total of $4.9B$ tokens from financial corpora:
+\begin{enumerate*}
+    \item Corporate Reports 10-K \& 10-Q (introduced in Section~\ref{subsec:financial_reports}),
+    \item Earnings Call Transcripts (discussing financial performance, business updates, and future expectations), and
+    \item Analyst Reports (providing an in-depth textual analysis of the company and an earnings forecast)
+\end{enumerate*}.
+This makes FinBERT a natural choice for our experiments, as the language of the training data is very similar to the one of the UK annual reports (Section~\ref{subsec:uk-annual-reports}).
+Furthermore, the authors demonstrate that FinBERT outperforms BERT on three financial sentiment classification tasks, which is why we select to fine-tune it on our extractive summarisation task.
+
 
 \subsection{Text Summarisation}\label{subsec:text-summarisation}
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
