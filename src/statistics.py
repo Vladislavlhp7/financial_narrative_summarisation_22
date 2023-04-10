@@ -9,7 +9,7 @@ from nltk.corpus.reader.plaintext import PlaintextCorpusReader
 from nltk.tokenize import word_tokenize, sent_tokenize
 import pandas as pd
 
-from src.metrics import calc_rouge_agg
+from metrics import calc_rouge_agg
 
 
 def compute_corpus_stats(raw_data: bool = True, training: bool = True):
