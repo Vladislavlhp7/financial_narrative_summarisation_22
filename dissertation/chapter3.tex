@@ -8,7 +8,7 @@ As discussed in Section~\ref{subsec:fns} due to the rich visual representations 
     \item \emph{symbol encoding issues} - introduction of unreadable non-alphanumeric characters, and
     \item \emph{formatting issues} - words having different casing, hyphenation at the end of a line, etc
     \item \emph{conversion of tables to text} - financial figures spanning over multiple lines and being mixed with the text.
-\end{enumerate*}.
+\end{enumerate*} (Figure~\ref{fig:pdf_to_text}).
 
 % PDF-to-text conversion issues
 \begin{figure}[ht]
@@ -40,6 +40,25 @@ As discussed in Section~\ref{subsec:fns} due to the rich visual representations 
     \label{fig:pdf_to_text}
 \end{figure}
 
+To address these issues, we have developed a rigorous data cleaning pipeline that achieves the following key objectives:
+\begin{enumerate*}
+    \item handles space-tab mixing via hand-crafted rules (derived from observation\footnote{
+      E.g., for some of the lines, characters were separated by spaces and words with tabs, hence the need for a custom rule.
+    }),
+    \item retains alphanumeric characters, punctuation, spaces, financial symbols, and
+    \item removes sentences shorter than 3 words
+\end{enumerate*}.
+
+As discussed in Section~\ref{subsec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages (\cite{litvak-vanetik-2021-summarization}).
+Each one has at least two--three gold summaries provided by the FNS21 organisers, and we provide some statistics
+\begin{enumerate*}
+    \item helpful for grasping the nature of the output text, but also
+    \item useful for the evaluation of the summarisation models
+\end{enumerate*}.
+On one hand, we can see that the average number of words in the longest summary is over $2,000$ (Figure~\ref{fig:longest_summary_word_count}), while the FNS21 regulations specify an expected output of at most $1,000$ words.
+Furthermore, as we are not competing in the FNS21 task, for simplicity, during evaluation we will generate only summaries with at most 40 sentences.
+We arrive at this number by observing that the median number of words in the longest summaries is 25 (Figure~\ref{fig:sentence_word_count}), and calculating that $\frac{1,000\text{words}}{25\text{words}}=40$ sentences can suffice.
+
 \begin{figure}[ht]
     \begin{subfigure}{0.49\textwidth}
         \centering        \includegraphics[width=1\columnwidth]{../charts/longest_summary_word_count}
@@ -56,6 +75,27 @@ As discussed in Section~\ref{subsec:fns} due to the rich visual representations 
     \caption{Distribution of number of words in training sentences and report summaries}
     \label{fig:word_count}
 \end{figure}
+
+As we were only provided with the training and the validation FNS21 datasets (Table~\ref{tab:fns21-data}),
+we decided to treat the validation set as a testing set (Table~\ref{tab:fns21-my-data})\footnote{
+    We observed that two of the annual report files were empty, hence the difference of 3,361 and 3,363 (Table~\ref{tab:fns21-data} without testing set).
+} and perform our own training-validation data split on a sentence level instead due to the significant variation in report lengths (\cite{litvak-vanetik-2021-summarization}).
+
+
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lrr r}
+        \hline
+        Data Type & Training + Validation & Testing & Total \\
+        \midrule
+        Report full text & 2,998 & 363 & 3,361 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Training-Validation-Testing Data Split}
+    \label{tab:fns21-my-data}
+\end{table}
+
 
 \subsection{Methodology}\label{subsec:methodology}
 We approach the annual report summarisation problem from a supervised perspective - we cast the task of Extractive Text Summarisation (ETS) as a binary classification problem defined on the sentence level.
