@@ -94,4 +94,4 @@ def main():
     pprint(stats_clean)
 
 
-main()
+# main()
