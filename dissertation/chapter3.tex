@@ -1,5 +1,62 @@
 \section{Design \& Development}\label{sec:design-and-development}
 
+\subsection{Data}\label{subsec:data}
+The data for the FNS21 task is a collection of narrative parts of annual reports, converted from PDF to plain text.
+As discussed in Section~\ref{subsec:fns} due to the rich visual representations in the PDFs, the resulting text suffers from various problems like
+\begin{enumerate*}
+    \item \emph{spacing inconsistencies} - mixing of tab-space word delimiters, over-segmentation (i.e., a split into incoherent chunks) and under-segmentation (i.e., merging of unrelated words),
+    \item \emph{symbol encoding issues} - introduction of unreadable non-alphanumeric characters, and
+    \item \emph{formatting issues} - words having different casing, hyphenation at the end of a line, etc
+    \item \emph{conversion of tables to text} - financial figures spanning over multiple lines and being mixed with the text.
+\end{enumerate*}.
+
+% PDF-to-text conversion issues
+\begin{figure}[ht]
+    \centering
+    \begin{enumerate}
+        \item \begin{verbatim}
+         Following my appointment as Chief
+        E x e c u t i v e	in	J u l y	2 0 1 0 ,	g r e ate r	e m p h a s i s
+        h a s	b e e n	p l a c e d	o n	f u l fi l l in g	t h e	s u p p l y	o f
+        tonnage due under legacy contracts and
+    \end{verbatim}
+    \item \begin{verbatim}
+        However,   the   Directors   further   believe   that   additional
+        capital   	could   	be	  deployed	  to 	beneficial   	effect.
+    \end{verbatim}
+    \item \begin{verbatim}
+        Opening net book amount 116,635 35,624 166,754 319,013
+        Additions 51,380 7,647 307,546 366,573
+    \end{verbatim}
+    \item \begin{verbatim}
+          This means that buyers can
+        _0_@uk_ar06_front.indd   5 20/04/2007   09:13:30 05
+        @UK PLC
+        Annual Report and Accounts 2006
+        use our network to purchase from their suppliers.
+    \end{verbatim}
+    \end{enumerate}
+    \caption{PDF-to-text conversion issues.}
+    \label{fig:pdf_to_text}
+\end{figure}
+
+\begin{figure}[ht]
+    \begin{subfigure}{0.49\textwidth}
+        \centering        \includegraphics[width=1\columnwidth]{../charts/longest_summary_word_count}
+        \caption{Number of words in longest report summary}
+        \label{fig:longest_summary_word_count}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=1\columnwidth]{../charts/sentence_word_count}
+        \caption{Number of words in training sentences}
+        \label{fig:sentence_word_count}
+    \end{subfigure}
+    \caption{Distribution of number of words in training sentences and report summaries}
+    \label{fig:word_count}
+\end{figure}
+
 \subsection{Methodology}\label{subsec:methodology}
 We approach the annual report summarisation problem from a supervised perspective - we cast the task of Extractive Text Summarisation (ETS) as a binary classification problem defined on the sentence level.
 More formally, we can describe the annual report as $d=\{s_{1}, s_{2}, \dots, s_{n}\}$, where $d$ is a document, represented in terms of sentences $s_{i}, \  1 \leq i \leq n$ (\cite{liu2019finetuningbert}).
@@ -46,20 +103,3 @@ After manual observation of the reports against their gold summaries, it became 
 This hypothesis was proven correct by one of the FNS21 contestants (\cite{orzhenovskii-2021-t5}) who reported that 99.4\% of the summaries were included in the
 report as whole subsequences.
 Hence, after having pre-processed the text documents we iteratively match the sentences and generate the binary classification labels ($\{1,0\}$ representing \emph{summary} and \emph{non-summary}, respectively) for both the training and testing datasets.
-
-\begin{figure}[ht]
-    \begin{subfigure}{0.49\textwidth}
-        \centering        \includegraphics[width=1\columnwidth]{../charts/longest_summary_word_count}
-        \caption{Number of words in longest report summary}
-        \label{fig:longest_summary_word_count}
-    \end{subfigure}%
-    \hfill
-    \begin{subfigure}{0.49\textwidth}
-        \centering
-        \includegraphics[width=1\columnwidth]{../charts/sentence_word_count}
-        \caption{Number of words in training sentences}
-        \label{fig:sentence_word_count}
-    \end{subfigure}
-    \caption{Distribution of number of words in training sentences and report summaries}
-    \label{fig:word_count}
-\end{figure}
