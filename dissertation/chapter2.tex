@@ -2,7 +2,14 @@
 
 \subsection{Supervised Learning}\label{subsec:supervised-learning}
 
-\subsection{TFIDF}\label{subsec:tfidf}
+\subsection{Tf-Idf}\label{subsec:tfidf}
+Tf-Idf (Term Frequency - Inverse Document Frequency) is a statistical technique intended to reflect the importance of a word to a document in a corpus.
+The term frequency is the number of occurrences of term $t$ in document $d$ (\cite{luhn1957termfreq}), but it is not enough to capture the importance of a term due to \emph{all terms being considered equally important} (\cite{manning_raghavan_schutze_2008}).
+Meanwhile, the \emph{document frequency ($df_{t}$)} is the number of documents in the corpus containing the term $t$, which evaluates how \emph{common} and \emph{unimportant} a term is (\cite{leskovec_rajaraman_ullman_2020}).
+Therefore, \emph{idf} becomes $\frac{N}{\text{df}_{t}}$, where $N$ is the corpus size, and then the tf-idf term weight $w_{t,d}$ is calculated as the product of the two - $\text{tf}_{t,d} \cdot \text{idf}_{t,d}$ (\cite{jurafsky2000}).
+The latter represents now the importance of a term $t$ but normalised by its \emph{commonness}.
+Tf-Idf is often used as a weighting factor in information retrieval and text mining.
+It has also been successfully integrated in summarisation methods like LexRank (\cite{Erkan2004LexRankGC}) (Section~\ref{subsec:lexrank}) and in FNS competitive systems (\cite{litvak2021tiber, el-haj-ogden-2022-financial}).
 
 \subsection{Word Embeddings}\label{subsec:word-embeddings}
 Historically, to represent a token (i.e., word) $w_{i}$ in a vocabulary $V$ numerically, we define a one-hot-encoding vector of all zeroes except of a one at the index of the word $w_{i}$ in $V$ (i.e., $i$).
