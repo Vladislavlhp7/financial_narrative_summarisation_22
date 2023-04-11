@@ -515,15 +515,22 @@ TextRank (\cite{mihalcea-tarau-2004-textrank}) is a graph-based unsupervised alg
     \item \textbf{Sentence similarity}: TextRank computes the similarity between two sentences based on either the \emph{cosine similarity}
         \footnote{
             Cosine similarity is defined as the dot product of two vectors divided by the product of their norms, i.e., $\cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}$.
-        } of their bag-of-words vectors or the \emph{Jaccard similarity} of their sets of words
+        } of their vectors (e.g., bag-of-words, Word2Vec, FastText, etc.) or the \emph{Jaccard similarity}
         \footnote{
             Jaccard similarity is defined as the size of the intersection  divided by the size of the union of two sets, i.e., $J(A,B)= \frac{|A\cup B|}{|A\cap B|}$.
             For example, if sentence A is ``I love apples.'' and sentence B is ``I love oranges.'', then $J(A,B)=\frac{2}{4}=\frac{1}{2}$, indicating that $A$ and $B$ share 50\% of their unique words.
-        },
-%    \item \textbf{Sentence graph}: The sentences are represented as nodes in a graph, and the similarity between two sentences is represented as an edge between them.
-%    \item \textbf{Sentence ranking}: The sentences are ranked by computing their importance based on \emph{eigenvector centrality}.
+        } of their sets of words,
+    \item \textbf{Graph Construction}: TextRank represents sentences as nodes in a graph, and the similarity between each two sentences is represented as an edge between them.
+    \item \textbf{Sentence ranking}: The constructed graph is passed into the PageRank algorithm (\cite{page1998anatomy}) that assigns each sentence a score based on the importance of its neighbours.
+    The final summary is then assembled from the selection of the top $k$ sentences with the highest scores.
 \end{enumerate}
-
+Nevertheless,~\cite{Shearing2020AutomatedTS} report two considerable weaknesses of TextRank (hence the need for a better baseline - LexRank):
+\begin{enumerate}
+    \item \textbf{Extraneous words} - TextRank does not penalise the extraneous words (i.e., words that do not add any essential information to the sentence) which can artificially increase the PageRank score (i.e., the importance) of a sentence.
+    \item \textbf{Frequent words} - There is no weighting applied regarding the frequency (or rarity) of words in the sentence, which can lead to a bias towards sentences with more frequent words.
+\end{enumerate}
+As a countermeasure, \emph{stop words} (e.g, ``a'', ``the'', ``and'', etc) can be removed and \emph{tf-idf} can be integrated into the similarity metric for a more balanced scoring mechanism.
+LexRank (\cite{Erkan2004LexRankGC}) builds up and resolves the issues of this algorithm, and we will discuss it in the next section.
 
 \subsection{LexRank}\label{subsec:lexrank}
 LexRank (\cite{Erkan2004LexRankGC}) is another unsupervised extractive summarisation method consistently used as a baseline in the FNS21 and previous challenges.
