@@ -509,9 +509,24 @@ We will outline some key models that inspired our work below:
 
 In this work we will be solely exploring the extractive method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
 
+\subsection{TextRank}\label{subsec:textrank}
+TextRank (\cite{mihalcea-tarau-2004-textrank}) is a graph-based unsupervised algorithm for extractive summarisation with the following key components:
+\begin{enumerate}
+    \item \textbf{Sentence similarity}: TextRank computes the similarity between two sentences based on either the \emph{cosine similarity}
+        \footnote{
+            Cosine similarity is defined as the dot product of two vectors divided by the product of their norms, i.e., $\cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}$.
+        } of their bag-of-words vectors or the \emph{Jaccard similarity} of their sets of words
+        \footnote{
+            Jaccard similarity is defined as the size of the intersection  divided by the size of the union of two sets, i.e., $J(A,B)= \frac{|A\cup B|}{|A\cap B|}$.
+            For example, if sentence A is ``I love apples.'' and sentence B is ``I love oranges.'', then $J(A,B)=\frac{2}{4}=\frac{1}{2}$, indicating that $A$ and $B$ share 50\% of their unique words.
+        },
+%    \item \textbf{Sentence graph}: The sentences are represented as nodes in a graph, and the similarity between two sentences is represented as an edge between them.
+%    \item \textbf{Sentence ranking}: The sentences are ranked by computing their importance based on \emph{eigenvector centrality}.
+\end{enumerate}
+
 
 \subsection{LexRank}\label{subsec:lexrank}
-LexRank (\cite{Erkan2004LexRankGC}) is an unsupervised extractive summarisation method consistently used as a baseline in the FNS21 and previous challenges.
+LexRank (\cite{Erkan2004LexRankGC}) is another unsupervised extractive summarisation method consistently used as a baseline in the FNS21 and previous challenges.
 It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
 To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes (\cite{Shearing2020AutomatedTS}).
 The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:idf},\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
@@ -538,5 +553,5 @@ The authors further propose finding the most important sentences by \begin{enume
     \item applying a threshold for the creation of edges with Eq.\ref{eq:cosinesimtfidf},
     \item building an adjacency matrix and normalizing it to produce \emph{transition probabilities},
     \item computing in an iterative fashion the \emph{eigenvector centrality} until convergence, and finally
-    \item ranking sentences based on their \emph{lexical} PageRank (\cite{page1998anatomy}) score.
+    \item ranking sentences based on their \emph{lexical} PageRank (\cite{page1998anatomy}) score similarly to TextRank (\cite{mihalcea-tarau-2004-textrank}).
 \end{enumerate*}
