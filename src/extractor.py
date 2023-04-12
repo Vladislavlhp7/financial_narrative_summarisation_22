@@ -142,10 +142,10 @@ class FinRNN(nn.Module):
         self.D = 2 if bidirectional else 1
         if attention_type is not None:
             self.attention = Attention(query_dim=self.D * hidden_size)
-        self.hidden2label = nn.Linear(in_features=self.D * hidden_size, out_features=label_size)
+        self.fully_connected2 = nn.Linear(in_features=self.D * hidden_size, out_features=label_size)
 
     def forward(self, sent):
-        out = self.fully_connected(sent)
+        out = F.relu(self.fully_connected(sent))
         out, hidden = self.rnn(out)
         if isinstance(hidden, tuple):
             hidden = hidden[1]
@@ -161,7 +161,7 @@ class FinRNN(nn.Module):
             # attended_output = query
             linear_combination = out[:, -1, :]
         # Apply linear layer to get final output
-        logits = self.hidden2label(linear_combination)
+        logits = F.relu(self.fully_connected2(linear_combination))
         logits = F.softmax(logits, dim=1)
         return logits, energy
 
