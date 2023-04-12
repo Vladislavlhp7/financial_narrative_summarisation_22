@@ -3,8 +3,8 @@ from extractor import *
 
 
 def experiment_comparison(project: str = 'extractive_summarisation-data-augmentation-unified', seed: int = 42):
-    trainining_data = f'../tmp/train_downsample_0.75_random_{seed}.csv'
-    validation_data = f'../tmp/validation_downsample_0.75_random_{seed}.csv'
+    trainining_data = f'../tmp/train_downsample_0.8_random_{seed}.csv'
+    validation_data = f'../tmp/validation_downsample_0.8_random_{seed}.csv'
     # Define W&B hyperparameter sweep
     sweep_config = {
         'method': 'grid'
@@ -29,7 +29,7 @@ def experiment_comparison(project: str = 'extractive_summarisation-data-augmenta
             'values': [256, 64]
         },
         'downsample_rate': {
-            'values': [0.75]  # [0.5, 0.75, 0.9]
+            'values': [0.8]  # [0.5, 0.75, 0.9]
         },
         'dropout': {
             'values': [0]
@@ -68,13 +68,13 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [seed]
         },
         'attention_type': {
-            'values': ['dot']
+            'values': ['dot', None]
         },
         'data_augmentation': {
             'values': [None]
         },
         'lr': {
-            'values': [1e-3, 5e-4, 1e-4]
+            'values': [1e-3]
         },
         'batch_size': {
             'values': [32]
@@ -83,10 +83,10 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
             'values': [64]
         },
         'downsample_rate': {
-            'values': [0.9]  # [0.5, 0.75, 0.9]
+            'values': [0.9]
         },
         'dropout': {
-            'values': [0, 0.25, 0.5]
+            'values': [0]
         },
         'rnn_type': {
             'values': ['gru']
@@ -113,8 +113,8 @@ def experiment_downsample90(project: str = 'extractive_summarisation-data-augmen
 def main():
     nltk.download('punkt')
     # root = '..'
-    # experiment_comparison(seed=42)
     experiment_downsample90(seed=42)
+    experiment_comparison(seed=42)
 
 
 main()
