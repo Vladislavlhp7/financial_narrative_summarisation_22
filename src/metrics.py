@@ -1,3 +1,4 @@
+import numpy as np
 import rouge
 from pprint import pprint
 import pandas as pd
@@ -23,7 +24,18 @@ def calc_rouge(txt1: str, txt2: str, stats=None, verbose: bool = True):
         r = rouge.Rouge(stats=stats)
     else:
         r = rouge.Rouge()
-    scores = r.get_scores(txt1, txt2)[0]
+    try:
+        scores = r.get_scores(txt1, txt2)[0]
+    except RecursionError as e:
+        print(f"RecursionError: {e}")
+        print('Lengths are:', len(txt1), len(txt2))
+        print(f"txt1: {txt1}")
+        print(f"txt2: {txt2}")
+        scores = {
+            "rouge-1": {"f": np.nan},
+            "rouge-2": {"f": np.nan},
+            "rouge-l": {"f": np.nan}
+        }
     if verbose:
         pprint(scores)
     return scores
