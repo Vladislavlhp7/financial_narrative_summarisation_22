@@ -155,9 +155,10 @@ As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-
         \node[box, fill=yellow!30, below=1cm of fc] (biGRU1) {Bi-GRU Layer 1};
         \node[box, fill=yellow!30, below=1cm of biGRU1] (biGRU2) {Bi-GRU Layer 2};
         \node[box, fill=orange!30, below=1cm of biGRU2] (dpa) {Dot-Product Attention};
-        \node[box, fill=purple!30, below=1cm of dpa] (lp) {Linear Projection + Softmax};
-        \node[circle, fill=white, draw=black, below left=0.5cm and 0.1cm of lp, minimum size=0.5cm] (bo1) {0};
-        \node[circle, fill=white, draw=black, below right=0.5cm and 0.1cm of lp, minimum size=0.5cm] (bo2) {1};
+        \node[box, fill=green!30, below=1cm of dpa] (fc2) {Fully-Connected FFNN};
+        \node[box, fill=purple!30, below=1cm of fc2] (sf) {Softmax};
+        \node[circle, fill=white, draw=black, below left=0.5cm and 0.1cm of sf, minimum size=0.5cm] (bo1) {0};
+        \node[circle, fill=white, draw=black, below right=0.5cm and 0.1cm of sf, minimum size=0.5cm] (bo2) {1};
 
         % Arrows
         \draw[arrow] (input) -- node[right] {} (we);
@@ -165,9 +166,10 @@ As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-
         \draw[arrow] (fc) -- node[right] {} (biGRU1);
         \draw[arrow] (biGRU1) -- node[right] {} (biGRU2);
         \draw[arrow] (biGRU2) -- node[right] {} (dpa);
-        \draw[arrow] (dpa) -- node[right] {} (lp);
-        \draw[arrow] (lp) -- node[right] {} (bo1);
-        \draw[arrow] (lp) -- node[right] {} (bo2);
+        \draw[arrow] (dpa) -- node[right] {} (fc2);
+        \draw[arrow] (fc2) -- node[right] {} (sf);
+        \draw[arrow] (sf) -- node[right] {} (bo1);
+        \draw[arrow] (sf) -- node[right] {} (bo2);
     \end{tikzpicture}
     \captionof{figure}{GRU-based extractive model}
     \label{fig:rnn_model}
