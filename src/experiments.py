@@ -26,7 +26,7 @@ def experiment_comparison(project: str = 'extractive_summarisation-data-augmenta
             'values': [32]
         },
         'hidden_size': {
-            'values': [256, 64]
+            'values': [64]
         },
         'downsample_rate': {
             'values': [0.8]  # [0.5, 0.75, 0.9]
