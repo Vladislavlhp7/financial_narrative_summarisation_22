@@ -115,7 +115,7 @@ We argue that in order to increase the positive samples (i.e., the summarizing s
 ourselves to just one gold summary in the training process unlike~\cite{orzhenovskii-2021-t5}.
 Our goal is to achieve better latent feature extraction of summaries through the employment of all existing data, hence using \textbf{\emph{any}} gold summaries.
 However, we are aware that this approach is more likely to encounter standard ETS issues, specifically - extracted summary sentences could be retrieved from unrelated paragraphs in the report.
-This can cause the \enquote{dangling anaphora} phenomenon, i.e. de-contextualised extracts are stitched together and can mislead the reader due to out-of-context references (\cite{lin2009summarization}).
+This can cause the \enquote{dangling anaphora} phenomenon, i.e.\ de-contextualised extracts are stitched together and can mislead the reader due to out-of-context references (\cite{lin2009summarization}).
 
 While some authors (\cite{zmandar-etal-2021-joint}) follow the greedy ROUGE-maximisation method of matching summary
 sentences to document sentences (established in~\cite{nallapati2017summarunner}), we approach the problem in a
@@ -128,3 +128,49 @@ This hypothesis was proven correct by one of the FNS21 contestants (\cite{orzhen
 Hence, after having pre-processed the text documents we iteratively match the sentences and generate the binary
 classification labels ($\{1,0\}$ representing \emph{summary} and \emph{non-summary}, respectively) for both
 the training and testing datasets.
+
+\section{Recurrent Extractor Model}\label{sec:rnn_model}
+As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-2014-learning}), inspired by~\cite{zmandar-etal-2021-joint} and depicted in Figure~\ref{fig:rnn_model}. \\
+
+\begin{minipage}[ht]{0.5\textwidth}
+    The model consists of a word embedding layer, a fully-connected feed-forward neural network (FCFFNN), two bidirectional gated recurrent units (GRU) layers, a dot-product attention layer, and a linear projection layer with softmax activation.
+
+    The word embedding layer is used to convert the pre-processed input sentence into a vector representation.
+    One of our implementation innovations is that we use FinText's FastText word embeddings~\cite{rahimikia2021realised} because they
+    \begin{enumerate*}
+        \item are character-based and thus can handle noisy or out-of-vocabulary words, and
+        \item are pre-trained on large corpora of financial news, achieving considerable in-domain performance improvements over general-purpose embeddings
+    \end{enumerate*}.
+
+    We use the FCFFNN layer to map the vectorized sentences to a higher-level representation (similar to~\cite{saikh2020deep}) capturing more complex features or patterns from the input text, but also to reduce the dimensionality of the input.
+
+    Two stacked GRU layers are used to extract the latent recurrent features from the compressed vector representation in both directions - forward and backward (refer to Section~\ref{subsec:rnn} for details).
+\end{minipage}\hfill
+\noindent\begin{minipage}[ht]{0.4\textwidth}
+    \begin{tikzpicture} [node distance = 0cm and 1cm,    box/.style={draw, rectangle, minimum height=0.5cm, minimum width=5cm},    arrow/.style={-{Stealth[length=4mm]}, thick, font=\footnotesize}]
+        % Nodes
+        \node[box] (input) {Pre-processed Input Sentence};
+        \node[box, fill=blue!30, below=1cm of input] (we) {FinText Word Embedding};
+        \node[box, fill=green!30, below=1cm of we] (fc) {Fully-Connected FFNN};
+        \node[box, fill=yellow!30, below=1cm of fc] (biGRU1) {Bi-GRU Layer 1};
+        \node[box, fill=yellow!30, below=1cm of biGRU1] (biGRU2) {Bi-GRU Layer 2};
+        \node[box, fill=orange!30, below=1cm of biGRU2] (dpa) {Dot-Product Attention};
+        \node[box, fill=purple!30, below=1cm of dpa] (lp) {Linear Projection + Softmax};
+        \node[circle, fill=white, draw=black, below left=0.5cm and 0.1cm of lp, minimum size=0.5cm] (bo1) {0};
+        \node[circle, fill=white, draw=black, below right=0.5cm and 0.1cm of lp, minimum size=0.5cm] (bo2) {1};
+
+        % Arrows
+        \draw[arrow] (input) -- node[right] {} (we);
+        \draw[arrow] (we) -- node[right] {} (fc);
+        \draw[arrow] (fc) -- node[right] {} (biGRU1);
+        \draw[arrow] (biGRU1) -- node[right] {} (biGRU2);
+        \draw[arrow] (biGRU2) -- node[right] {} (dpa);
+        \draw[arrow] (dpa) -- node[right] {} (lp);
+        \draw[arrow] (lp) -- node[right] {} (bo1);
+        \draw[arrow] (lp) -- node[right] {} (bo2);
+    \end{tikzpicture}
+    \captionof{figure}{GRU-based extractive model}
+    \label{fig:rnn_model}
+\end{minipage}
+
+
