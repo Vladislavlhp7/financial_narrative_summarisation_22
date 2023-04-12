@@ -1,7 +1,5 @@
 \section{Background}\label{sec:background}
 
-\subsection{Supervised Learning}\label{subsec:supervised-learning}
-
 \subsection{Tf-Idf}\label{subsec:tfidf}
 Tf-Idf (Term Frequency - Inverse Document Frequency) is a statistical technique intended to reflect the importance of a word to a document in a corpus.
 The term frequency is the number of occurrences of term $t$ in document $d$ (\cite{luhn1957termfreq}), but it is not enough to capture the importance of a term due to \emph{all terms being considered equally important} (\cite{manning_raghavan_schutze_2008}).
@@ -147,7 +145,7 @@ For the selection of the neural model the authors had naturally chosen LSTM and 
 % Encoder-decoder schema
 \begin{figure}[ht]
     \centering
-    \begin{tikzpicture}[node distance=1.5cm and 1cm,>=stealth',auto,font=\footnotesize]
+    \begin{tikzpicture}[node distance=1.5cm and 1cm, >=stealth,auto,font=\footnotesize]
         % Encoder
         \node[draw,minimum height=1cm] (x1) {$x_1$};
         \node[draw,minimum height=1cm, right=of x1] (x2) {$x_2$};
@@ -220,7 +218,6 @@ Intuitively, as noted in~\cite{galassi2020attention}, this attention mechanism c
 \begin{equation}\label{eq:energy}
     e_{ij} = a(s_{i-1}, h_j)
 \end{equation}
-
 
 \subsection{Transformers}\label{subsec:transformers}
 
@@ -478,7 +475,6 @@ BERT (\cite{devlin-etal-2019-bert}) (Section~\ref{subsec:bert}) that is trained 
 This makes FinBERT a natural choice for our experiments, as the language of the training data is very similar to the one of the UK annual reports (Section~\ref{subsec:uk-annual-reports}).
 Furthermore, the authors demonstrate that FinBERT outperforms BERT on three financial sentiment classification tasks, which is why we select to fine-tune it on our extractive summarisation task.
 
-
 \subsection{Text Summarisation}\label{subsec:text-summarisation}
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
 There are two overarching categories: extractive and abstractive text summarisation.
@@ -562,3 +558,87 @@ The authors further propose finding the most important sentences by \begin{enume
     \item computing in an iterative fashion the \emph{eigenvector centrality} until convergence, and finally
     \item ranking sentences based on their \emph{lexical} PageRank (\cite{page1998anatomy}) score similarly to TextRank (\cite{mihalcea-tarau-2004-textrank}).
 \end{enumerate*}
+
+\subsection{Evaluation Metrics}\label{subsec:evaluation-metrics}
+\subsubsection{Confusion Matrix}\label{subsubsec:confusion-matrix}
+The confusion matrix is an essential tool to visualise and help assessing the performance of trained classifiers against
+the true labels $y_{i}$.
+
+For the problem of binary classification, it is a square matrix (Table~\ref{tab:confusion_matrix}) that displays the
+following key elements:
+
+\begin{itemize}
+    \item True Positives (TP): Correct predictions of the positive class.
+    \item True Negatives (TN): Correct predictions of the negative class.
+    \item False Positives (FP): Incorrect predictions of the positive class (Type I error).
+    \item False Negatives (FN): Incorrect predictions of the negative class (Type II error).
+\end{itemize}
+
+where for the problem of extractive text summarisation, the positive and negative classes correspond to \emph{summary}
+and \emph{non-summary} sentences, respectively.
+These matrix elements can be further combined into informative classification metrics:
+
+\begin{itemize}
+    \item Accuracy: Proportion of correctly classified instances out of the total instances.
+    Formulated as $\frac{TP + TN}{TP + TN + FP + FN}$.
+    \item Precision (or Positive Predictive Value): Proportion of true positive instances out of all instances predicted as positive.
+    Formulated as $\frac{TP}{TP + FP}$.
+    \item Recall (or Sensitivity): Proportion of true positive instances out of all actual positive instances.
+    Formulated as $\frac{TP}{TP + FN}$.
+    \item F1-score: Harmonic mean of precision and recall (i.e., the trade-off between the two).
+    Formulated as $2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}$.
+\end{itemize}
+
+
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{c c c}
+        \toprule
+        \multirow{2}{*}{} & \multicolumn{2}{c}{\textbf{Actual}} \\
+        \cmidrule(lr){2-3}
+        & \textbf{Positive} & \textbf{Negative} \\
+        \midrule
+        \textbf{Predicted Positive} & TP & FP \\
+        \textbf{Predicted Negative} & FN & TN \\
+        \bottomrule
+    \end{tabular}
+    \caption{Confusion Matrix}
+    \label{tab:confusion_matrix}
+\end{table}
+
+\subsubsection{ROUGE}\label{subsubsec:rouge}
+The Recall-Oriented Understudy for Gisting Evaluation (ROUGE) (\cite{lin2004rouge}) is a popular recall-based evaluation metric for
+summarisation tasks which measures the overlapping units (i.e., n-grams) of a predicted summary $c$ and a reference summary $c^{*}$.
+Here we briefly describe some of the most common variants of ROUGE (especially in the context of the FNS21 Task):
+\begin{enumerate}
+    \item \textbf{ROUGE-N} measures the overlap of $n$-grams (sequences of $n$ words) between $c$ and $c^{*}$.
+    For example, ROUGE-1 and ROUGE-2\footnote{
+        We briefly demonstrate how to compute ROUGE-2 for a sentence pair $c$="Fox can run" and $c^{*}$="Fox can walk".
+        Here, the bigrams of $c$ are \{("Fox", "can"), ("can", "run")\} and the bigrams of $c^{*}$ are \{("Fox", "can"), ("can", "walk")\}.
+        The intersection of the two sets is \{("Fox", "can")\}, which is the only bigram that appears in both $c$ and $c^{*}$.
+        Therefore, ROUGE-2 recall = Overlapping bigrams / Total bigrams in reference summary = $\frac{1}{2}=0.5$.
+    } (the official FNS21 metric) correspond to the overlap measurement of unigrams and bigrams, respectively.
+    \item \textbf{ROUGE-L} uses the longest common subsequence (LCS) to measure the similarity between $c$ and $c^{*}$.
+    The LCS is the longest sequence of words that appears in both summaries \emph{in the same order}, but \emph{not necessarily consecutively}.
+    Thus, ROUGE-L is less sensitive to word order compared to ROUGE-N and can capture longer-range dependencies.
+\end{enumerate}
+
+While ROUGE scores are explainable and easily implementable, they have certain limitations like
+\begin{enumerate*}
+    \item inability to capture semantic similarity (\cite{akter-etal-2022-revisiting}),
+    \item insensitivity to summary coherence (\cite{christensen-etal-2013-towards}), and
+    \item lack of correlation with human evaluation (\cite{liu2010exploring})
+\end{enumerate*}.
+Despite these limitations, ROUGE remains a widely-used evaluation measure, particularly in extractive summarization and we use it in this work as well.
+
+
+
+\begin{figure}[h]
+    \centering
+    \begin{equation}
+        ROUGE-N = \frac{\sum_{S \in R} \sum_{n-gram \in S} count_{match}(n-gram)}{\sum_{S \in R} \sum_{n-gram \in S} count(n-gram)}\label{eq:equation}
+    \end{equation}
+    \caption{ROUGE-N: N-gram Co-Occurrence Statistics}
+    \label{fig:rouge_formula}
+\end{figure}

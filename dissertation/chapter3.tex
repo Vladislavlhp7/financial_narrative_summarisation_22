@@ -142,9 +142,9 @@ As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-
         \item are pre-trained on large corpora of financial news, achieving considerable in-domain performance improvements over general-purpose embeddings
     \end{enumerate*}.
 
-    We use the FCFFNN layer to map the vectorized sentences to a higher-level representation (similar to~\cite{saikh2020deep}) capturing more complex features or patterns from the input text, but also to reduce the dimensionality of the input.
+    We use the FCFFNN layer to \emph{map the vectorized sentences to a higher-level representation} (similar to~\cite{saikh2020deep}) capturing more complex features or patterns from the input text, but also to \emph{reduce the dimensionality} of the input.
 
-    Two stacked GRU layers are used to extract the latent recurrent features from the compressed vector representation in both directions - forward and backward (refer to Section~\ref{subsec:rnn} for details).
+    Two stacked GRU layers are used to \emph{extract the latent recurrent features} from the compressed vector representation in both directions - forward and backward (refer to Section~\ref{subsec:rnn} for details).
 \end{minipage}\hfill
 \noindent\begin{minipage}[ht]{0.4\textwidth}
     \begin{tikzpicture} [node distance = 0cm and 1cm,    box/.style={draw, rectangle, minimum height=0.5cm, minimum width=5cm},    arrow/.style={-{Stealth[length=4mm]}, thick, font=\footnotesize}]
@@ -173,6 +173,18 @@ As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-
     \end{tikzpicture}
     \captionof{figure}{GRU-based extractive model}
     \label{fig:rnn_model}
-\end{minipage}
+\end{minipage}\\
+
+We further implement the scaled dot-product attention (Eq.\ref{eq:attention_score} from~\cite{vaswani2017attention}) to
+compute a new weighted context-aware representation from the extracted features by the GRU layers.
+
+The final layer is a fully-connected feed-forward neural network (FCFFNN) with a softmax activation function, which is
+used to \emph{map the latent features to a binary classification} of the input sentence.
+
+
+
+
+
+
 
 

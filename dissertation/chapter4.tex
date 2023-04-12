@@ -1,6 +1,5 @@
 \section{Evaluation}\label{sec:evaluation}
 
-
 In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$
 based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-$F_{1}$\footnote{
     We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
@@ -27,58 +26,3 @@ $c_{1}$ and $c_{2}$, respectively.
 Their individual evaluation is based on gold summaries $c^{*}_{1}$ and $c^{*}_{2}$ (which can be the same when the
 candidates $c_{1}$ and $c_{2}$ are identical).
 
-\subsection{Confusion Matrix}\label{subsec:confusion-matrix}
-The confusion matrix is an essential tool to visualise and help assessing the performance of trained classifiers against
-the true labels $y_{i}$.
-
-For the problem of binary classification, it is a square matrix (Table~\ref{tab:confusion_matrix}) that displays the
-following key elements:
-
-\begin{itemize}
-    \item True Positives (TP): Correct predictions of the positive class.
-    \item True Negatives (TN): Correct predictions of the negative class.
-    \item False Positives (FP): Incorrect predictions of the positive class (Type I error).
-    \item False Negatives (FN): Incorrect predictions of the negative class (Type II error).
-\end{itemize}
-
-where for the problem of extractive text summarisation, the positive and negative classes correspond to \emph{summary}
-and \emph{non-summary} sentences, respectively.
-These matrix elements can be further combined into informative classification metrics:
-
-\begin{itemize}
-    \item Accuracy: Proportion of correctly classified instances out of the total instances.
-    Formulated as $\frac{TP + TN}{TP + TN + FP + FN}$.
-    \item Precision (or Positive Predictive Value): Proportion of true positive instances out of all instances predicted as positive.
-    Formulated as $\frac{TP}{TP + FP}$.
-    \item Recall (or Sensitivity): Proportion of true positive instances out of all actual positive instances.
-    Formulated as $\frac{TP}{TP + FN}$.
-    \item F1-score: Harmonic mean of precision and recall (i.e., the trade-off between the two).
-    Formulated as $2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}$.
-\end{itemize}
-
-
-
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{c c c}
-        \toprule
-        \multirow{2}{*}{} & \multicolumn{2}{c}{\textbf{Actual}} \\
-        \cmidrule(lr){2-3}
-        & \textbf{Positive} & \textbf{Negative} \\
-        \midrule
-        \textbf{Predicted Positive} & TP & FP \\
-        \textbf{Predicted Negative} & FN & TN \\
-        \bottomrule
-    \end{tabular}
-    \caption{Confusion Matrix}
-    \label{tab:confusion_matrix}
-\end{table}
-
-\begin{figure}[h]
-    \centering
-    \begin{equation}
-        ROUGE-N = \frac{\sum_{S \in R} \sum_{n-gram \in S} count_{match}(n-gram)}{\sum_{S \in R} \sum_{n-gram \in S} count(n-gram)}\label{eq:equation}
-    \end{equation}
-    \caption{ROUGE-N: N-gram Co-Occurrence Statistics}
-    \label{fig:rouge_formula}
-\end{figure}
