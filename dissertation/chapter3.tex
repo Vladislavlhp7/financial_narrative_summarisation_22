@@ -168,8 +168,8 @@ Therefore, we took two\footnote{
     \end{table}
 \end{enumerate}.
 
-
 Refer to Section~\ref{subsec:hyperparameters} for the experiments with the different data balancing techniques.
+
 
 \section{Recurrent Extractor Model}\label{sec:rnn_model}
 As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-2014-learning}), inspired by~\cite{zmandar-etal-2021-joint} and depicted in Figure~\ref{fig:rnn_model}. \\
@@ -225,7 +225,7 @@ used to \emph{map the latent features to a binary classification} of the input s
 
 \subsection{Hyperparameter Tuning}\label{subsec:hyperparameters}
 We have experimented with a number of hyperparameters for our recurrent model, including the use of a FCFFNN,
-the recurrence type, the effect of applying attention, the dropout rate, the learning rate, and the effect of data augmentation.
+the recurrence type, the hidden units, the effect of applying attention, the dropout rate, the learning rate, and the effect of data augmentation.
 
 For the analysis we will be extensively using the test accuracy, $F1$-score, and the \emph{summary recall} metric.
 The latter is defined as the ratio of the number of correctly predicted summary sentences to the total number of summary sentences in the test dataset.
@@ -256,13 +256,62 @@ As for the Test Accuracy, we believe that the small decrease is insignificant an
     \label{fig:FCFFNN}
 \end{figure}
 
+We also explore the effect of using back-translated data (Section~\ref{subsec:data_augmentation}) on the model performance.
+Results shown in Fig.~\ref{fig:data_augmentation_effect} suggest that the data augmentation does not improve the $F1$-score or the summary recall with a statistically significant margin.
+At the same time, it seems to be amplifying the effect of the scaled dot-product attention (Section~\ref{subsec:seq2seq}, Figure~\ref{fig:summary_recall_data_augmentation_effect}).
+\begin{figure}[ht]
+    \begin{subfigure}{0.49\textwidth}
+        \centering \includegraphics[width=1\columnwidth]{../charts/Summary Recall comparison}
+        \caption{Effect of data augmentation on summary recall}
+        \label{fig:summary_recall_data_augmentation_effect}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=1\columnwidth]{../charts/f1 score comparison}
+        \caption{Effect of data augmentation on $F1$-score}
+        \label{fig:f1_score_comparison_data_augmentation_effect}
+    \end{subfigure}
+    \caption{Effect of back-translation data augmentation on summary recall and $F1$-score}
+    \label{fig:data_augmentation_effect}
+\end{figure}
+While we are disappointed by these results, we believe that there can be a number of reasons for this.
+For a machine translated sentence $s^m_i$ and its original sentence $s_i$, we hypothesise that:
+\begin{enumerate*}
+    \item $s^m_i$ contain a similar amount of noise as $s_i$ (due to the pdf-to-text conversion process),
+    \item $s^m_i$ does not introduce enough variation to $s_i$ (i.e., $s^m_i$ and $s_i$ are too similar), and
+    \item while financial language itself is very domain-specific, it is not very semantically diverse (i.e., metaphors, idioms, etc. are limited in use)
+\end{enumerate*}.
+
 % GRU vs LSTM + hidden size 64 vs 256
 In our proposed architecture we choose a bidirectional GRU (Bi-GRU) instead of a Bi-LSTM because
 \begin{enumerate*}
     \item GRUs have a simpler structure than LSTMs and are easier to train (Section~\ref{subsec:rnn}), and
     \item our experiments show that GRUs outperform LSTMs with 1\% in terms of Summary Recall
 \end{enumerate*}.
+Furthermore, in terms of the hidden units, we select 64 over 256 because:
+\begin{enumerate*}
+    \item the architecture has $143,938$ and $2,050,306$ parameters, respectively (i.e., $256$ would result in an over-parameterised model),
+    \item almost 4\% increase in Summary Recall (Fig.~\ref{fig:64vs256_summary_recall}),
+    although a 2\% decrease in Test Accuracy (Fig.~\ref{fig:test_accuracy_dropout_and_hidden_size}), if we use $64$ hidden units.
+\end{enumerate*}
+\begin{figure}[ht]
+    \begin{subfigure}{0.49\textwidth}
+        \centering \includegraphics[width=1\columnwidth]{../charts/64vs256_summary_recall}
+        \caption{Summary Recall: 256 vs 64 hidden units + dropout}
+        \label{fig:64vs256_summary_recall}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=1\columnwidth]{../charts/test_accuracy_dropout_and_hidden_size}
+        \caption{Test Accuracy: 256 vs 64 hidden units + dropout}
+        \label{fig:test_accuracy_dropout_and_hidden_size}
+    \end{subfigure}
+    \caption{Effect of hidden units and dropout on summary recall and test accuracy}
+    \label{fig:dropout_and_hidden_size}
+\end{figure}
 
-% Attention + data augmentation
-We further explore the benefits of applying a scaled dot-product attention (\cite{vaswani2017attention}, Section~\ref{subsec:seq2seq}) to the Bi-GRU layers output.
-
+From the above experiments it is hard to make any certain conclusions on the effect of dropout\footnote{
+    It would make more sense for its application in the over-parameterised model, though this does not seem to be the case (Fig.~\ref{fig:dropout_and_hidden_size}).
+}.
