@@ -129,6 +129,20 @@ Hence, after having pre-processed the text documents we iteratively match the se
 classification labels ($\{1,0\}$ representing \emph{summary} and \emph{non-summary}, respectively) for both
 the training and testing datasets.
 
+\subsection{Under-sampling and Data Augmentation}\label{subsec:data_augmentation}
+Due to the fact that the annual reports are extremely long while the summaries are very short, the sentence dataset is highly imbalanced with a ratio of around 1:10.
+Therefore, we took two\footnote{
+    We also tried a third approach that is to augment sentences with the help of DINO (\cite{schick2021generating}) used for high-quality
+    semantic augmentation, but we did not manage to recreate the desired output.
+} different approaches to balance the classes:
+\begin{enumerate}
+    \item \textbf{Random under-sampling} -- As described in~\cite{weiss2013foundations, wongvorachan2023undersampling}, we \emph{randomly remove 90\% of the sentences} from the majority class (i.e., non-summary sentences) to produce a ratio of 1:1 summary to non-summary sentences.
+    \item \textbf{Data Augmentation} -- We use the \emph{backtranslation} technique (\cite{hoang-etal-2018-iterative}) to generate new sentences from the minority class (i.e., summary sentences), followed by a 80\% random under-sampling of the majority class.
+    For that purpose, we translate all training summary sentences from English to French and back to English with the help of the MarianMT model (\cite{junczysdowmunt2018marian})\footnote{\url{https://huggingface.co/Helsinki-NLP/opus-mt-fr-en}}.
+    The resulting dataset is then directly injected during the training process.
+\end{enumerate}.
+Refer to Section~\ref{subsec:hyperparameters} for the experiments with the different data balancing techniques.
+
 \section{Recurrent Extractor Model}\label{sec:rnn_model}
 As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-2014-learning}), inspired by~\cite{zmandar-etal-2021-joint} and depicted in Figure~\ref{fig:rnn_model}. \\
 
@@ -192,8 +206,8 @@ Our reasoning is that our classifier must be as good as possible in recognising 
 In practice, the user can always remove irrelevant sentences, but it is much harder to add sentences that should have already been in the summary.
 
 Each sentence in the report is represented as a (100, 300)-sized word embeddings vector, where 100 is the longest possible sentence length (i.e., implying long sentences are trimmed) and 300 is the dimensionality of the word embeddings.
-We test the effect of inserting an FCFFNN layer between the word embeddings and the GRU layers (each with 64 hidden units) and arrive at the following conclusions:
-Adding an FCFFNN layer increases Summary Recall by 2.5\% (Fig.~\ref{fig:summary_recall_FFNN_effect}), but marginally reduces Test Accuracy by less than 1\% (Fig.~\ref{fig:test_accuracy_FFNN_effect}).
+We test the effect of inserting an FCFFNN layer between the word embeddings and the GRU layers (each with 64 hidden units) and arrive at the following results:
+adding an FCFFNN layer increases Summary Recall by 2.5\% (Fig.~\ref{fig:summary_recall_FFNN_effect}), but marginally reduces Test Accuracy by less than 1\% (Fig.~\ref{fig:test_accuracy_FFNN_effect}).
 We attribute the increase in Summary Recall to the fact that the FCFFNN layer is able to extract an additional mix of features from the word embeddings, which are then used by the GRU layers to make better predictions.
 As for the Test Accuracy, we believe that the small decrease is insignificant and we therefore choose to use the FCFFNN layer in our final model.
 
@@ -214,4 +228,13 @@ As for the Test Accuracy, we believe that the small decrease is insignificant an
     \label{fig:FCFFNN}
 \end{figure}
 
+% GRU vs LSTM + hidden size 64 vs 256
+In our proposed architecture we choose a bidirectional GRU (Bi-GRU) instead of a bidirectional LSTM (Bi-LSTM) because
+\begin{enumerate*}
+    \item GRUs have a simpler structure than LSTMs and are easier to train (Section~\ref{subsec:rnn}), and
+    \item our experiments ...
+\end{enumerate*}
+
+% Attention + data augmentation
+We further explore the benefits of applying a scaled dot-product attention (\cite{vaswani2017attention}, Section~\ref{subsec:seq2seq}) to the Bi-GRU layers output.
 
