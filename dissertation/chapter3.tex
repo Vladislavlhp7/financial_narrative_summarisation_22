@@ -181,9 +181,45 @@ compute a new weighted context-aware representation from the extracted features 
 The final layer is a fully-connected feed-forward neural network (FCFFNN) with a softmax activation function, which is
 used to \emph{map the latent features to a binary classification} of the input sentence.
 
+\subsection{Hyperparameter Tuning}\label{subsec:hyperparameters}
+We have experimented with a number of hyperparameters for our recurrent model, including the use of a FCFFNN,
+the recurrence type, the effect of applying attention, the dropout rate, the learning rate, and the effect of data augmentation.
+
+For the analysis we will be extensively using the test accuracy, $F1$-score, and the \emph{summary recall} metric.
+The latter is defined as the ratio of the number of correctly predicted summary sentences to the total number of summary sentences in the test dataset.
+We consider this metric to be extremely relevant because in the context of extractive summarisation, our goal is to minimise the Type II error (i.e., the number of sentences that should be in the summary but are not).
+Our reasoning is that our classifier must be as good as possible in recognising salient sentences (i.e., summarising sentences) even if it introduces some false positives (i.e., non-summarising sentences).
+In practice, the user can always remove irrelevant sentences, but it is much harder to add sentences that should have already been in the summary.
+
+Each sentence in the report is represented as a (100, 300)-sized word embeddings vector, where 100 is the longest possible sentence length (i.e., implying long sentences are trimmed) and 300 is the dimensionality of the word embeddings.
+We test the effect of inserting an FCFFNN layer between the word embeddings and the GRU layers (each with 64 hidden units) and arrive at the following conclusions:
+Adding an FCFFNN layer increases Summary Recall by 2.5\% (Fig.~\ref{fig:summary_recall_FFNN_effect}), but marginally reduces Test Accuracy by less than 1\% (Fig.~\ref{fig:test_accuracy_FFNN_effect}).
+We attribute the increase in Summary Recall to the fact that the FCFFNN layer is able to extract an additional mix of features from the word embeddings, which are then used by the GRU layers to make better predictions.
+As for the Test Accuracy, we believe that the small decrease is insignificant and we therefore choose to use the FCFFNN layer in our final model.
+
+\begin{figure}[ht]
+    \begin{subfigure}{0.49\textwidth}
+        \centering \includegraphics[width=1\columnwidth]{../charts/summary_recall_FFNN_effect}
+        \caption{Effect of FCFFNN layer on summary recall}
+        \label{fig:summary_recall_FFNN_effect}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=1\columnwidth]{../charts/test_accuracy_FFNN_effect}
+        \caption{Effect of FCFFNN layer on test accuracy}
+        \label{fig:test_accuracy_FFNN_effect}
+    \end{subfigure}
+    \caption{Effect of FCFFNN layer on summary precision and test accuracy}
+    \label{fig:FCFFNN}
+\end{figure}
 
 
 
+
+\begin{enumerate}
+
+\end{enumerate}
 
 
 
