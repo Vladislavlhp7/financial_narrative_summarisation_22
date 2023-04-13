@@ -129,6 +129,9 @@ Hence, after having pre-processed the text documents we iteratively match the se
 classification labels ($\{1,0\}$ representing \emph{summary} and \emph{non-summary}, respectively) for both
 the training and testing datasets.
 
+We perform the sentence extraction as discussed above to produce a dataset (training and validation combined) of $3,554,800$ and $361,703$ sentences for classes 0 and 1, respectively.
+Additionally, the training and validation sets are split in a 90--10 stratified fashion.
+
 \subsection{Under-sampling and Data Augmentation}\label{subsec:data_augmentation}
 Due to the fact that the annual reports are extremely long while the summaries are very short, the sentence dataset is highly imbalanced with a ratio of around 1:10.
 Therefore, we took two\footnote{
@@ -136,11 +139,36 @@ Therefore, we took two\footnote{
     semantic augmentation, but we did not manage to recreate the desired output.
 } different approaches to balance the classes:
 \begin{enumerate}
-    \item \textbf{Random under-sampling} -- As described in~\cite{weiss2013foundations, wongvorachan2023undersampling}, we \emph{randomly remove 90\% of the sentences} from the majority class (i.e., non-summary sentences) to produce a ratio of 1:1 summary to non-summary sentences.
-    \item \textbf{Data Augmentation} -- We use the \emph{backtranslation} technique (\cite{hoang-etal-2018-iterative}) to generate new sentences from the minority class (i.e., summary sentences), followed by a 80\% random under-sampling of the majority class.
+    \item \textbf{Random under-sampling} -- As described in~\cite{weiss2013foundations, wongvorachan2023undersampling}, we \emph{randomly remove 90\% of the sentences} from the majority class (i.e., non-summary sentences) to produce a ratio of 1:1 summary to non-summary sentences (Figure~\ref{tab:random_under_sampling}).
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{lccc}
+            \toprule
+                & \textbf{initial data} & \textbf{90\% under-sampled training} & \textbf{validation} \\
+            \midrule
+                \textbf{label 0} & 3,199,319 & 319,931 & 355,481 \\
+                \textbf{label 1} & 325,533 & 325,533 & 36,170 \\
+            \bottomrule
+        \end{tabular}
+        \caption{90\% Random Under-sampling}\label{tab:random_under_sampling}
+    \end{table}
+    \item \textbf{Data Augmentation} -- We use the \emph{back-translation} technique (\cite{hoang-etal-2018-iterative}) to generate new sentences from the minority class (i.e., summary sentences), followed by a 80\% random under-sampling of the majority class (Figure~\ref{tab:data_augmentation}).
     For that purpose, we translate all training summary sentences from English to French and back to English with the help of the MarianMT model (\cite{junczysdowmunt2018marian})\footnote{\url{https://huggingface.co/Helsinki-NLP/opus-mt-fr-en}}.
     The resulting dataset is then directly injected during the training process.
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{lcccc}
+        \toprule
+            & \textbf{initial data} & \textbf{80\% under-sampled training} & \textbf{augmented training} & \textbf{validation} \\
+        \midrule
+            \textbf{label 0} & 3,199,319 & 639,863 & 639,863 & 355,481 \\
+            \textbf{label 1} & 325,533 & 325,533 & 651,066 & 36,170 \\
+        \end{tabular}
+        \caption{Data Augmentation + 80\% Random Under-sampling}\label{tab:data_augmentation}
+    \end{table}
 \end{enumerate}.
+
+
 Refer to Section~\ref{subsec:hyperparameters} for the experiments with the different data balancing techniques.
 
 \section{Recurrent Extractor Model}\label{sec:rnn_model}
@@ -229,11 +257,11 @@ As for the Test Accuracy, we believe that the small decrease is insignificant an
 \end{figure}
 
 % GRU vs LSTM + hidden size 64 vs 256
-In our proposed architecture we choose a bidirectional GRU (Bi-GRU) instead of a bidirectional LSTM (Bi-LSTM) because
+In our proposed architecture we choose a bidirectional GRU (Bi-GRU) instead of a Bi-LSTM because
 \begin{enumerate*}
     \item GRUs have a simpler structure than LSTMs and are easier to train (Section~\ref{subsec:rnn}), and
-    \item our experiments ...
-\end{enumerate*}
+    \item our experiments show that GRUs outperform LSTMs with 1\% in terms of Summary Recall
+\end{enumerate*}.
 
 % Attention + data augmentation
 We further explore the benefits of applying a scaled dot-product attention (\cite{vaswani2017attention}, Section~\ref{subsec:seq2seq}) to the Bi-GRU layers output.
