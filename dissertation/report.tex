@@ -1,7 +1,7 @@
 % !TEX TS-program = pdflatexmk
 \InputIfFileExists{a4-mancs.sty}{}{}
 
-\documentclass[12pt,BSc,wordcount,twoside]{third-rep}
+\documentclass[12pt,BSc,wordcount,twoside]{muthesis}
 \usepackage[a4paper, total={6.5in, 8in}]{geometry}
 \usepackage{csquotes}
 
@@ -49,14 +49,15 @@
   UK Annual Reports}
 %% and author
 \author{Vladislav Yotkov}
+\stuid{10463973}
 %% and supervisor
-\supervisor{Dr. Jonathan Shapiro}
+\principaladviser{Dr. Jonathan Shapiro}
 %% and the year of the report
-\reportyear{2023}
+%\reportyear{2023}
 
 %% this defines the file that contains the text of the abstract, there
 %% must be one of these by the time you submit your report.
-\abstractfile{abstract.tex}
+%\abstractfile{abstract.tex}
 
 %% this defines the file that contains the acknowledgements (it can be
 %% omitted if you don't feel like thanking anyone
@@ -112,10 +113,15 @@
 \begin{document}
 
 %% This actually creates the title and abstract pages
-\dotitleandabstract
+%\dotitleandabstract
+\beforeabstract
+
+\prefacesection{Abstract}
+\input{abstract}
+\afterabstract
 
 %% Generate contents etc
-\tableofcontents
+%\tableofcontents
 
 %% Generate Acronym list
 %\clearpage
@@ -123,8 +129,8 @@
 %\printglossary
 
 
-\listoffigures
-\listoftables
+%\listoffigures
+%\listoftables
 
 %% These include the actual text
 \include{chapter1}
