@@ -223,6 +223,31 @@ compute a new weighted context-aware representation from the extracted features 
 The final layer is a fully-connected feed-forward neural network (FCFFNN) with a softmax activation function, which is
 used to \emph{map the latent features to a binary classification} of the input sentence.
 
+\subsection{Training}\label{subsec:training}
+We trained both models on Tesla V100-SXM2-16GB\footnote{
+    We extend our gratitude to the University of Manchester's Computational Shared Facility (CSF) for kindly agreeing to provide us with the computational resources for this research.
+} and provide the following specifications:
+\begin{enumerate}
+    \item \textbf{RNN architectures} - below we provide the common general details, however for an in-depth discussion on the hyperparameter tuning, see Section~\ref{subsec:hyperparameters}.
+        \begin{itemize}
+            \item \textbf{Loss function:} Binary cross-entropy loss
+            \item \textbf{Optimizer:} Adam~\cite{kingma2017adam}
+            \item \textbf{Batch size:} 32
+            \item \textbf{Epochs:} set to 60, but due to early stopping, the model practically trains for less than 10 epochs
+            \item \textbf{Early stopping:} patience (i.e., the number of epochs to wait for improvement based on validation loss) set to 1
+        \end{itemize}
+    \item \textbf{FinBERT} - We followed the prescribed fine-tuning specifications provided in the original BERT paper~\cite{devlin-etal-2019-bert}:
+        \begin{itemize}
+            \item \textbf{Loss function:} Binary cross-entropy loss
+            \item \textbf{Optimizer:} Adam~\cite{kingma2017adam}
+            \item \textbf{Batch size:} 32
+            \item \textbf{Epochs:} 3
+            \item \textbf{Learning rate:} 2e-5
+            \item \textbf{Weight decay:} 0.01
+        \end{itemize}
+\end{enumerate}
+
+
 \subsection{Hyperparameter Tuning}\label{subsec:hyperparameters}
 We have experimented with a number of hyperparameters for our recurrent model, including the use of a FCFFNN,
 the recurrence type, the hidden units, the effect of applying attention, the dropout rate, the learning rate, and the effect of data augmentation.
@@ -314,4 +339,8 @@ Furthermore, in terms of the hidden units, we select 64 over 256 because:
 
 From the above experiments it is hard to make any certain conclusions on the effect of dropout\footnote{
     It would make more sense for its application in the over-parameterised model, though this does not seem to be the case (Fig.~\ref{fig:dropout_and_hidden_size}).
-}.
+} or the use of an attention mechanism (Section~\ref{subsec:seq2seq}).
+We believe that only one \emph{single-head attention} is not sufficient to learn all the complex relationships between words in the sentences.
+Our reasoning is that because a particular head specializes to only specific language aspects (i.e., syntactic, semantic, etc) (\cite{clark-etal-2019-bert})),
+for future experiments it would be much more reasonable to use multiple heads instead.
+Nevertheless, there still are some practical benefits of attention to our extractive summarisation system which we will discuss in Section~\ref{sec:evaluation}.
