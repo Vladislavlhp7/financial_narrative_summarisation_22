@@ -32,7 +32,7 @@ Following this evaluation mechanism, we compare our models in terms of their ROU
 Please keep in mind that we include official results from the FNS21 competition for comparison, namely the T5-LONG-EXTRACT model
 (\cite{orzhenovskii-2021-t5}) and the MUSE model (\cite{litvak-last-2013-multilingual}), which have been
 \begin{enumerate*}
-    \item trained on more data than our models due to us using the official validation as a test set (see Section~\ref{subsec:dataset}),
+    \item trained on more data than our models due to us using the official validation as a test set (see Section~\ref{subsec:data}),
     \item evaluated on the official test set which we did not have access to
 \end{enumerate*}.
 
@@ -42,9 +42,9 @@ Please keep in mind that we include official results from the FNS21 competition 
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            $\star$ Finbert-base & 0.544 & 0.382 & 0.524 \\
+            $\star$ FinBERT-base & 0.544 & 0.382 & 0.524 \\
             T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5})* & 0.54 & 0.38 & 0.52 \\
-            Finbert-base + back-translation & 0.490 & 0.321 & 0.468 \\
+            FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
             MUSE (\cite{litvak-last-2013-multilingual})* & 0.5 & 0.28 & 0.45 \\
             $\star$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
             GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
@@ -59,14 +59,14 @@ Please keep in mind that we include official results from the FNS21 competition 
 
 We can provide the following commentary on the results:
 \begin{itemize}
-    \item The best performing model is FinBERT-base, which is a pre-trained on financial communication documents, achieving a
-          Surprisingly, It is followed by Finbert-base + back-translation, which is the same model but with back-translation data augmentation.
-          This shows that the back-translation data augmentation is beneficial for the task.
+    \item The best performing model is FinBERT-base (\cite{yang2020finbert}), which is a pre-trained on financial communication documents,
+        achieving a ROUGE-2 score of $0.382$, which is \emph{at least as good as the official best-performing model} in the FNS21 competition:
+        the T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5}, Section~\ref{subsec:text-summarisation}).
+        Surprisingly, data augmentation does not improve the performance of FinBERT-base, and we believe this was caused by
+        the \hypertarget{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters}.
+        Nevertheless, both models outperform the official top-line (\cite{litvak-last-2013-multilingual}) by a significant margin for ROUGE-2.
     \item The GRU-base + attention + back-translation model is the best performing model that uses a neural architecture.
           It is followed by the GRU-base + back-translation model, which is the same model but without attention.
-          This shows that the attention mechanism is beneficial for the task.
-    \item The GRU-base + attention model is the best performing model that uses a neural architecture and does not use back-translation.
-          It is followed by the GRU-base model, which is the same model but without attention.
           This shows that the attention mechanism is beneficial for the task.
     \item The LexRank and TextRank models are the best performing models that do not use a neural architecture.
           This shows that the neural architecture is beneficial for the task.
