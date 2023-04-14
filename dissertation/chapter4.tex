@@ -63,11 +63,10 @@ We can provide the following commentary on the results:
         achieving a ROUGE-2 score of $0.382$, which is \emph{at least as good as the official best-performing model} in the FNS21 competition:
         the T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5}, Section~\ref{subsec:text-summarisation}).
         Surprisingly, data augmentation does not improve the performance of FinBERT-base, and we believe this was caused by
-        the \hypertarget{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters}.
+        the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters}.
         Nevertheless, both models outperform the official top-line (\cite{litvak-last-2013-multilingual}) by a significant margin for ROUGE-2.
-    \item The GRU-base + attention + back-translation model is the best performing model that uses a neural architecture.
-          It is followed by the GRU-base + back-translation model, which is the same model but without attention.
-          This shows that the attention mechanism is beneficial for the task.
+    \item The GRU-base + attention + back-translation model is the best performing model out of all recurrent neural architectures.
+
     \item The LexRank and TextRank models are the best performing models that do not use a neural architecture.
           This shows that the neural architecture is beneficial for the task.
 \end{itemize}
