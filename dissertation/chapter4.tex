@@ -79,4 +79,53 @@ We can provide the following commentary on the results:
     \end{enumerate*}
 \end{itemize}
 
+\subsection{Qualitative Discussion}\label{subsec:qualitative-discussion}
+After having established the quantitative performance of our models, we now turn to the qualitative discussion of the results.
+For a random annual report we generated a summary using the FinBERT-base + data augmentation model and
+the GRU-base + attention + back-translation model (see Figure~\ref{fig:summary_examples}
+where green colour indicates the summarising sentences, and red colour -- the non-summarising sentences).
+We can make the following conclusions based on observation:
+\begin{enumerate}
+    \item The FinBERT-base model has \emph{around 50\% of its contents} belonging to any of the gold summaries (Figure~\ref{fig:finbert_summary}),
+        while all other sentences look very convincing in terms of their summarising potential (i.e., they are informative of the financial situation but also concise)
+    \item At the same time, the GRU-model has the opposite characteristics:
+    \begin{enumerate*}
+        \item none of its sentences are in the gold summary (Figure~\ref{fig:rnn_summary}), and
+        \item all the sentences are very long, containing uninformative but diverse sets of words.
+    \end{enumerate*}
+\end{enumerate}
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{transformer-example-summary}
+        \caption{Example summary from the FinBERT-base + data augmentation model.}
+        \label{fig:finbert_summary}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{rnn_summary}
+        \caption{Example summary from the GRU-base + attention + data augmentation model.}
+        \label{fig:rnn_summary}
+    \end{subfigure}
+    \caption{Examples of summaries produced by our models.}
+    \label{fig:summary_examples}
+\end{figure}
+
+
 \section{Conclusion}\label{sec:conclusion}
+\subsection{Summary}\label{subsec:summary}
+In this project we have explored the problem of summarising UK annual reports.
+
+
+\subsection{Discussion}\label{subsec:discussion}
+
+\subsection{Limitations}\label{subsec:limitations}
+Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive performance for the FNS21 task, there are several limitations that we would like to discuss:
+\begin{itemize}
+    \item
+\end{itemize}
+
+\subsection{Future Work}\label{subsec:future-work}
