@@ -3,6 +3,10 @@
 \subsection{Supervised Learning}\label{subsec:supervised_learning}
 Supervised learning is a machine learning paradigm where a training set $X$ with data points $x$ is provided, along with the corresponding set $Y$ with labels $y$.
 Then the goal is to learn a function $f$ that maps $X$ to $Y$, i.e., $f: X \rightarrow Y$, which makes predictions $f(x)$ as close as possible to the true labels $y$ (\cite{sammut2011encyclopedia}).
+The difference between $f(x)$ and $y$ is quantified by a loss function $L$, which is being minimized during the training process by updating the model parameters with respect to the gradient of the loss (\cite{Goodfellow-et-al-2016}).
+In the context of extractive summarisation, supervised learning can be used to identify the most important sentences in a document, which can then be used to generate a summary.
+In this case, the task can be cast as a binary classification problem, where the sentence labels are either $1$ (summarising) or $0$ (non-summarising) (\cite{manning_raghavan_schutze_2008}).
+
 
 
 \subsection{Tf-Idf}\label{subsec:tfidf}
