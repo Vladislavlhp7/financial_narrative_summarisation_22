@@ -180,6 +180,43 @@ def evaluate_model(model, config, embedding_model=None):
     return rouge_scores
 
 
+def generate_summaries(model, config, embedding_model=None, num_reports=10):
+    """
+        Evaluates the model on the test set. The model is evaluated using the ROUGE evaluation metric.
+    """
+    trainer = None
+    tokenizer = None
+    predictions = None
+    sentences = None
+    if config['model_type'] == 'transformer':
+        trainer = Trainer(model=model, args=args)
+
+    model.eval()
+    df_test = pd.read_csv(f'{config["df_test_path"]}')
+    report_ids = df_test['report'].unique()
+    generated_summaries = []
+    for report_id in tqdm(report_ids[:num_reports]):
+        df_test_report = df_test.loc[df_test.report.isin([int(report_id), str(report_id)])]
+        sentences = df_test_report['sent'].tolist()
+        if config['model_type'] == 'gru':
+            inputs_embedded = batch_str_to_batch_tensors(sentence_list=sentences, embedding_model=embedding_model)
+            with torch.no_grad():
+                outputs = model(inputs_embedded)
+                if isinstance(outputs, tuple):
+                    outputs = outputs[0]
+            predictions = outputs.numpy()
+        elif config['model_type'] == 'transformer':
+            tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
+            inputs_embedded = load_data_transformer(tokenizer=tokenizer, df_test=df_test_report)
+            outputs = trainer.predict(inputs_embedded)
+            print(outputs)
+            predictions = softmax(outputs.predictions, axis=1)
+            print(predictions)
+        generated_summary = select_summary_sents(predictions, sentences)
+        generated_summaries.append(str(generated_summary))
+    return generated_summaries
+
+
 def evaluate_baseline(config, max_sents=int(1000/25)):
     df_test = pd.read_csv(f'{config["df_test_path"]}')
     reports = df_test['report'].unique()

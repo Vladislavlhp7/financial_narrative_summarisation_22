@@ -116,3 +116,21 @@ The workshop's goal was to build ATS systems that generate a single summary for 
 \end{table}
 
 We acknowledge that due to the scarcity of publicly available financial data this third-year project could not have been possible without the kind permission of the FNP organisers to use the training and validation datasets from their FNS21 Task (\cite{fnp-2021-financial}).
+
+\subsection{Aim and Objectives}\label{subsec:aim-and-objectives}
+The summarisation of UK annual reports is a challenging task because of
+ \begin{enumerate*}
+     \item the various inconveniences of the reports around their large-scale understanding (Section~\ref{subsec:uk-annual-reports}),
+     \item the discrepancy between Accounting and Finance (AF) research in NLP and the general NLP field (Section~\ref{subsec:nlp-in-accounting-and-finance}), and
+     \item the nature of long-text summarisation in terms of available training data, financial language representation, complex model architectures, and reliability of evaluation metrics (Section~\ref{sec:background}).
+ \end{enumerate*}
+ Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field (Section~\ref{subsec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank (\cite{mihalcea-tarau-2004-textrank}), and LexRank (\cite{Erkan2004LexRankGC}).
+ For that purpose, several objectives had to be made:
+ \begin{itemize}
+     \item pre-processing noisy report narratives (Section~\ref{subsec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{subsec:sentence_extraction}).
+     \item researching and incorporating the public financial state-of-the-art word embeddings (Section~\ref{subsec:word-embeddings}) for an effective text representation.
+     \item building an extractive neural model and tuning its hyperparameters for optimal classification capabilities (Section~\ref{subsec:hyperparameters}).
+     \item researching approaches on dealing with imbalanced datasets and implementing a data augmentation technique for a more discriminative learning process (Section~\ref{subsec:data_augmentation}).
+     \item exploring the capabilities of a pre-trained financial transformer (Section~\ref{subsec:finbert}).
+     \item evaluating all summarisation models with the help of the FNS21 metric - ROUGE-2 (Section~\ref{sec:evaluation}).
+ \end{itemize}

@@ -66,8 +66,16 @@ We can provide the following commentary on the results:
         the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters}.
         Nevertheless, both models outperform the official top-line (\cite{litvak-last-2013-multilingual}) by a significant margin for ROUGE-2.
     \item The GRU-base + attention + back-translation model is the best performing model out of all recurrent neural architectures.
-
-    \item The LexRank and TextRank models are the best performing models that do not use a neural architecture.
-          This shows that the neural architecture is beneficial for the task.
+    While preliminary binary classification results did not show any considerable differences between the models, clearly
+    \begin{enumerate*}
+        \item the attention mechanism helps the model to better recognise the summarising sentences (i.e., attends to the most descriptive linguistic features), and
+        \item the back-translation data augmentation significantly improves the practical performance of the model (i.e., the probability distribution of the summarising sentences).
+    \end{enumerate*}
+    \item At the same time, we acknowledge that the universal summarisation baselines: LexRank and TextRank, outperform
+        our simple GRU models, and we attribute this to both:
+    \begin{enumerate*}
+        \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}), and
+        \item the 90\% random under-sampling of the majority class data (see Section~\ref{subsec:data}).
+    \end{enumerate*}
 \end{itemize}
 
