@@ -152,8 +152,14 @@ We also discuss the quality of the produced summaries (Section~\ref{subsec:quali
     \item our summary generation process is not effective for our GRU-based system, and
     \item the evaluation metric is problematic because it does not capture semantic importance
 \end{enumerate*}.
-
-
+\\
+In terms of \emph{innovational aspects} of our project in the context of the FNS challenge, we are the first to our knowledge that:
+\begin{itemize}
+    \item \emph{Use all summaries during sentence extraction} -
+    \item \emph{Integrate FinText word embeddings} -
+    \item \emph{Perform back-translation as data augmentation} -
+    \item \emph{Fine-tune FinBERT (\cite{yang2020finbert})} -
+\end{itemize}
 
 \subsection{Discussion of Limitations}\label{subsec:limitations}
 Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive
