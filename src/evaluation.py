@@ -255,7 +255,7 @@ def generate_summaries(model, config, embedding_model=None, num_reports=10):
             print(outputs)
             predictions = softmax(outputs.predictions, axis=1)
             print(predictions)
-        generated_summary = select_summary_sents(predictions, sentences)
+        generated_summary = select_summary_sents(predictions, sentences, rouge_maximisation=False)
         generated_summaries.append(str(generated_summary))
     return generated_summaries
 

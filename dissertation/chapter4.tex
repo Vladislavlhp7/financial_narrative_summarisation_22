@@ -1,15 +1,9 @@
 \section{Evaluation}\label{sec:evaluation}
 
 To assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the GRUs and FinBERT, respectively).
-Afterwards, we feed them into our model computing the output summary probabilities $p_{j}^{i}$, and then we select the top-$k$ sentences ($k=40$, Section~\ref{subsec:data}).
-The sentence ranking is based on two different approaches:
-\begin{enumerate*}
-    \item \emph{Sentence-level} where we compute the ROUGE-2 score between a sentence from the candidate summary $s_{j}^{i}$ and the whole gold summary $c^{*}_{i}$.
-    Then, the top-$k$ sentences are selected based on the highest ROUGE-2 scores.
-    The rationale is that they should be greedily maximising the global summary-level ROUGE (\cite{zmandar-etal-2021-joint}).
-    \item \emph{Summary-level} where we select the top-$k$ sentences based on the highest sentence probabilities $p_{j}^{i}$.
-\end{enumerate*}
-Finally, we concatenate the selected sentences to form the summary $c_{i}$ in natural order (i.e., the order in the input text),
+Afterwards, we feed them into our model computing the output summary probabilities $p_{j}^{i}$, and then we select the
+top-$k$ sentences ($k=40$, Section~\ref{subsec:data}) based on the highest sentence probabilities $p_{j}^{i}$.
+Finally, we concatenate them to form the summary $c_{i}$ in natural order (i.e., the order in the input text),
 but also trim it to the maximum length of $1,000$ words (Section~\ref{subsec:fns}).
 
 In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$
@@ -34,21 +28,20 @@ the ROUGE-L--maximising $c^{*}_{i}$ gold summary (Section~\ref{subsubsec:rouge})
 
 The intuition is that by extracting multiple sentences from the report, our generated candidate summary can
 retain sentences from \emph{any} of the gold summaries.
-Hence, there must be at least one such gold summary where the longest common subsequence overlap is maximal.
+Hence, there must be at least one such gold summary where the longest common subsequence overlap (ROUGE-L) is maximal.
 The practical implications are that two models, $m_{1}$ and $m_{2}$ can produce two different candidate summaries
 $c_{1}$ and $c_{2}$, respectively.
 Their individual evaluation is based on gold summaries $c^{*}_{1}$ and $c^{*}_{2}$ (which can be the same when the
 candidates $c_{1}$ and $c_{2}$ are identical).
+This guarantees that we are always comparing candidate summaries based on their maximal evaluation scores.
 
-Following these evaluation mechanisms, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance}.
+Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance}.
 Please keep in mind that we include official results from the FNS21 competition for comparison, namely the T5-LONG-EXTRACT model
 (\cite{orzhenovskii-2021-t5}) and the MUSE model (\cite{litvak-last-2013-multilingual}), which have been
 \begin{enumerate*}
     \item trained on more data than our models due to us using the official validation as a test set (see Section~\ref{subsec:data}),
     \item evaluated on the official test set which we did not have access to
 \end{enumerate*}.
-
-Table~\ref{tab:rouge_performance} demonstrates the evaluation with summary-level ranking, while Table~\ref{} shows the results with sentence-level ranking.
 
 \begin{table}[ht]
     \centering
@@ -88,8 +81,9 @@ We can provide the following commentary on the results:
     \item At the same time, we acknowledge that the universal summarisation baselines: LexRank and TextRank, outperform
         our simple GRU models, and we attribute this to both:
     \begin{enumerate*}
-        \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}), and
-        \item the 90\% random under-sampling of the majority class data (see Section~\ref{subsec:data}).
+        \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}),
+        \item the 90\% random under-sampling of the majority class data (see Section~\ref{subsec:data}), and
+        \item the summary generation process of selecting the top $k$ sentences based on their sorted probabilities (see discussion in Sections~\ref{subsec:qualitative-discussion} and~\ref{subsec:limitations}).
     \end{enumerate*}
 \end{itemize}
 
@@ -109,7 +103,13 @@ We can make the following conclusions based on observation:
     \end{enumerate*}.
     This clearly represents the problem of using ROUGE as a metric for summarisation since it is only measures the lexical overlap, while being semantically unaware (\cite{akter-etal-2022-revisiting}).
 \end{enumerate}
-Although, these results might seem disappointing, we must once again remind the reader that the reports are extremely
+While we acknowledge that the GRU model seems to be biased towards long and noisy sentences, we must note that in the example
+only $5$ sentences have been generated to fit the word limit.
+As we demonstrated that our model is accurate at recognising the summarising sentences (Section~\ref{subsec:hyperparameters}),
+we believe that it is more of a summary generation issue (i.e., the mechanism to combine predicted sentences into a single summary)
+rather than a classification issue (see Section~\ref{subsec:limitations}).
+
+Although, the practical results from Figure~\ref{fig:summary_examples} might seem disappointing, we must once again remind the reader that the reports are extremely
 long with an average number of sentences and words at around $2,700$ and $58,000$, respectively (\cite{litvak-vanetik-2021-summarization}).
 Meanwhile, we are constrained to producing a summary of at most $40$ sentences (Section~\ref{subsec:data}) or $1,000$ words (Section~\ref{subsec:fns}).
 
@@ -138,12 +138,21 @@ Meanwhile, we are constrained to producing a summary of at most $40$ sentences (
 In this project we have explored the problem of summarising UK annual reports.
 
 
-\subsection{Discussion}\label{subsec:discussion}
-
-\subsection{Limitations}\label{subsec:limitations}
-Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive performance for the FNS21 task, there are several limitations that we would like to discuss:
+\subsection{Discussion of Limitations}\label{subsec:limitations}
+Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive
+performance for the FNS21 task, there are several limitations that we would like to discuss:
 \begin{itemize}
-    \item
+    \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{sec:evaluation}).
+        However, this is a very simplistic approach to summarisation that
+        \begin{enumerate*}
+            \item introduces incoherence issues (like the \emph{dangling anaphora phenomenon} from Section~\ref{subsec:sentence_extraction}),
+            \item trims the last sentence to fit the $1,000$ word limit, but more importantly
+            \item does not account for the \emph{informativeness} of the individual sentences.
+        \end{enumerate*}.
+        This third point is the reason why our GRU architecture returns a summary without any whole--sentence overlap with the gold summary (Fig.~\ref{fig:rnn_summary}).
+        Instead, what \cite{zmandar-etal-2021-joint} propose is a reinforcement learning approach which incorporates the \emph{sentence-level} ROUGE-2 score with the whole gold summary.
+        While this method is much more sophisticated, it conveys the intuitive idea that the top-$k$ sentences comprising the
+        \emph{optimal candidate summary} should be \emph{greedily maximising the global summary-level ROUGE-2} score.
 \end{itemize}
 
 \subsection{Future Work}\label{subsec:future-work}
