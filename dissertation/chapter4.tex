@@ -146,10 +146,14 @@ performance for the FNS21 task, there are several limitations that we would like
         However, this is a very simplistic approach to summarisation that
         \begin{enumerate*}
             \item introduces incoherence issues (like the \emph{dangling anaphora phenomenon} from Section~\ref{subsec:sentence_extraction}),
-            \item trims the last sentence to fit the $1,000$ word limit, but more importantly
-            \item does not account for the \emph{informativeness} of the individual sentences.
+            \item trims the last sentence to fit the $1,000$ word limit, and it
+            \item does not account for the \emph{informativeness} of the individual sentences
         \end{enumerate*}.
-        This third point is the reason why our GRU architecture returns a summary without any whole--sentence overlap with the gold summary (Fig.~\ref{fig:rnn_summary}).
+        To address the incoherence issues, we can try resolving the correferences in the either through a
+        graph-based approach on the generated summary (\cite{sonawane2016coreference}), or by introducing a more complex
+        encoder architecture that represents and attends to entities as well as sentences (\cite{Huang2021ExtractiveSC}).
+        Regarding the trimming heuristic, a natural improvement can be to use text compression techniques for the final predicted sentence (\cite{ghalandari2022efficient, KNIGHT200291}).
+        As for the third point, we believe this is one of the main reasons why our GRU architecture returns a summary without any whole--sentence overlap with the gold standard (Fig.~\ref{fig:rnn_summary}).
         Instead, what \cite{zmandar-etal-2021-joint} propose is a reinforcement learning approach which incorporates the \emph{sentence-level} ROUGE-2 score with the whole gold summary.
         While this method is much more sophisticated, it conveys the intuitive idea that the top-$k$ sentences comprising the
         \emph{optimal candidate summary} should be \emph{greedily maximising the global summary-level ROUGE-2} score.
