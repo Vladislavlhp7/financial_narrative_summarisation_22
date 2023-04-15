@@ -90,7 +90,7 @@ We can provide the following commentary on the results:
 \subsection{Qualitative Discussion}\label{subsec:qualitative-discussion}
 After having established the quantitative performance of our models, we now turn to the qualitative discussion of the results.
 For a random annual report we generated a summary using the FinBERT-base + data augmentation model and
-the GRU-base + attention + back-translation model (see Figure~\ref{fig:summary_examples}
+the GRU-base + attention model (see Figure~\ref{fig:summary_examples}
 where green colour indicates the summarising sentences, and red colour -- the non-summarising sentences).
 We can make the following conclusions based on observation:
 \begin{enumerate}
@@ -125,7 +125,7 @@ Meanwhile, we are constrained to producing a summary of at most $40$ sentences (
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../charts/rnn_summary}
-        \caption{Example summary from the GRU-base + attention + data augmentation model.}
+        \caption{Example summary from the GRU-base + attention model.}
         \label{fig:rnn_summary}
     \end{subfigure}
     \caption{Examples of summaries produced by our models.}
@@ -147,18 +147,22 @@ training them in a supervised manner for a binary classification task (Sections~
 We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Section~\ref{sec:evaluation}).
 Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement over an official FNS21 topline but also a
 competitive performance with the best FNS21 extractive model, although noting that the our models are tested on different data (Section~\ref{subsec:data}).
-We also discuss the quality of the produced summaries (Section~\ref{subsec:qualitative-discussion}), while claiming that
-\begin{enumerate*}
-    \item our summary generation process is not effective for our GRU-based system, and
-    \item the evaluation metric is problematic because it does not capture semantic importance
-\end{enumerate*}.
+We also discuss the quality of the produced summaries (Section~\ref{subsec:qualitative-discussion}), and in
+Section~\ref{subsec:limitations} we describe in more depth the limitations of our system and possible solutions.
 \\
 In terms of \emph{innovational aspects} of our project in the context of the FNS challenge, we are the first to our knowledge that:
 \begin{itemize}
-    \item \emph{Use all summaries during sentence extraction} -
-    \item \emph{Integrate FinText word embeddings} -
-    \item \emph{Perform back-translation as data augmentation} -
-    \item \emph{Fine-tune FinBERT (\cite{yang2020finbert})} -
+    \item \emph{Integrate FinText word embeddings} - While some FNS21 competitors use general-domain sentence embeddings
+    based on BERT (\cite{litvak-vanetik-2021-summarization, gokhan-etal-2021-extractive}), we represent sentences as
+    a vector of word embeddings purpose-built for financial text analysis (\cite{rahimikia2021realised}).
+    \item \emph{Perform back-translation as data augmentation} - In contrast to approaches where only the first 10\% of
+    the annual report is used (\cite{orzhenovskii-2021-t5}), we over-sample the summarising sentences (minority class)
+    by back-translating from French.
+    \item \emph{Fine-tune FinBERT (\cite{yang2020finbert}) for extractive summarisation} - Transformer-based models have become increasingly
+    popular in the next edition of the FNP Workshop (FNP22) (\cite{khanna-etal-2022-transformer, pant-chopra-2022-multilingual}),
+    where some have used FinBERT for classifying definitions (\cite{ghosh-etal-2022-finrad}),
+    detecting hypernyms (\cite{peng-etal-2022-discovering}), and classifying financial sentiments (\cite{stepisnik-perdih-etal-2022-sentiment}).
+    However, we are the first to adapt FinBERT for extractive summarisation.
 \end{itemize}
 
 \subsection{Discussion of Limitations}\label{subsec:limitations}
@@ -176,8 +180,8 @@ performance for the FNS21 task, there are several limitations that we would like
         graph-based approach on the generated summary (\cite{sonawane2016coreference}), or by introducing a more complex
         encoder architecture that represents and attends to entities as well as sentences (\cite{Huang2021ExtractiveSC}).
         Regarding the trimming heuristic, a natural improvement can be to use text compression techniques for the final predicted sentence (\cite{ghalandari2022efficient, KNIGHT200291}).
-        As for the third point, we believe this is one of the main reasons why our GRU architecture returns a summary
-        without any whole--sentence overlap with the gold standard (Fig.~\ref{fig:rnn_summary}).
+        As for the third point, we believe this is very exacerbating reason why our GRU architecture returns a summary
+        without any single whole--sentence overlap with the gold standard (Fig.~\ref{fig:rnn_summary}).
         Instead, what \cite{zmandar-etal-2021-joint} propose is a reinforcement learning approach which incorporates
         the \emph{sentence-level} ROUGE-2 score with the whole gold summary.
         While this method is much more sophisticated, it conveys the intuitive idea that the top-$k$ sentences comprising the
