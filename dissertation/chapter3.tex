@@ -166,8 +166,7 @@ Therefore, we took two\footnote{
         \end{tabular}
         \caption{Data Augmentation + 80\% Random Under-sampling}\label{tab:data_augmentation}
     \end{table}
-\end{enumerate}.
-
+\end{enumerate}
 Refer to Section~\ref{subsec:hyperparameters} for the experiments with the different data balancing techniques.
 
 
@@ -215,7 +214,7 @@ As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-
     \end{tikzpicture}
     \captionof{figure}{GRU-based extractive model}
     \label{fig:rnn_model}
-\end{minipage}\\
+\end{minipage}
 
 We further implement the scaled dot-product attention (Eq.\ref{eq:attention_score} from~\cite{vaswani2017attention}) to
 compute a new weighted context-aware representation from the extracted features by the GRU layers.
