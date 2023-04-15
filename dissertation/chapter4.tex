@@ -1,15 +1,27 @@
 \section{Evaluation}\label{sec:evaluation}
 
+To assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the GRUs and FinBERT, respectively).
+Afterwards, we feed them into our model computing the output summary probabilities $p_{j}^{i}$, and then we select the top-$k$ sentences ($k=40$, Section~\ref{subsec:data}).
+The sentence ranking is based on two different approaches:
+\begin{enumerate*}
+    \item \emph{Sentence-level} where we compute the ROUGE-2 score between a sentence from the candidate summary $s_{j}^{i}$ and the whole gold summary $c^{*}_{i}$.
+    Then, the top-$k$ sentences are selected based on the highest ROUGE-2 scores.
+    The rationale is that they should be greedily maximising the global summary-level ROUGE (\cite{zmandar-etal-2021-joint}).
+    \item \emph{Summary-level} where we select the top-$k$ sentences based on the highest sentence probabilities $p_{j}^{i}$.
+\end{enumerate*}
+Finally, we concatenate the selected sentences to form the summary $c_{i}$ in natural order (i.e., the order in the input text),
+but also trim it to the maximum length of $1,000$ words (Section~\ref{subsec:fns}).
+
 In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$
 based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-$F_{1}$\footnote{
     \begin{itemize}
         \item We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
               It can be accessed at: \url{https://github.com/pltrdy/rouge}
-        \item The official FNS21 evaluation metric is the $F1$-score of ROUGE-2 and we will use it for the final evaluation.
+        \item The FNS21 evaluation metric is the $F1$-score of ROUGE-2, and we will use it for the final evaluation.
     \end{itemize}
 } metric(\cite{lin2004rouge}).
 For the FNS21 task due to the extractive nature of our approach we will evaluate our models based on
-the ROUGE--maximising $c^{*}_{i}$ gold summary, i.e.,
+the ROUGE-L--maximising $c^{*}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
 
 \begin{figure}[h]
     \centering
@@ -22,19 +34,21 @@ the ROUGE--maximising $c^{*}_{i}$ gold summary, i.e.,
 
 The intuition is that by extracting multiple sentences from the report, our generated candidate summary can
 retain sentences from \emph{any} of the gold summaries.
-Hence, there must be at least one such gold summary where the overlap is maximal.
+Hence, there must be at least one such gold summary where the longest common subsequence overlap is maximal.
 The practical implications are that two models, $m_{1}$ and $m_{2}$ can produce two different candidate summaries
 $c_{1}$ and $c_{2}$, respectively.
 Their individual evaluation is based on gold summaries $c^{*}_{1}$ and $c^{*}_{2}$ (which can be the same when the
 candidates $c_{1}$ and $c_{2}$ are identical).
 
-Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance}.
+Following these evaluation mechanisms, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance}.
 Please keep in mind that we include official results from the FNS21 competition for comparison, namely the T5-LONG-EXTRACT model
 (\cite{orzhenovskii-2021-t5}) and the MUSE model (\cite{litvak-last-2013-multilingual}), which have been
 \begin{enumerate*}
     \item trained on more data than our models due to us using the official validation as a test set (see Section~\ref{subsec:data}),
     \item evaluated on the official test set which we did not have access to
 \end{enumerate*}.
+
+Table~\ref{tab:rouge_performance} demonstrates the evaluation with summary-level ranking, while Table~\ref{} shows the results with sentence-level ranking.
 
 \begin{table}[ht]
     \centering
