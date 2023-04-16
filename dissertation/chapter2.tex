@@ -489,7 +489,7 @@ Text summarisation is the task of transforming a piece of text into a shorter  v
 There are two overarching categories: extractive and abstractive text summarisation.
 The former formulates the problem as a subset selection problem by returning only the most salient text excerpts from the original document (\cite{zhong-etal-2020-extractive}), while the latter aims to generate content anew, similar to how humans would do.
 
-We will outline some key models that inspired our work below:
+We will outline some key models from the FNS21 (the previous year competition) that inspired our work below:
 \begin{itemize}
     \item \textbf{Gokhan}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT (\cite{reimers2019sentence}).
     However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
@@ -507,8 +507,9 @@ We will outline some key models that inspired our work below:
     \item \textbf{Hybrid model with RL} (\cite{zmandar-etal-2021-joint}): The authors train a joint extractive-abstractive summarisation model with reinforcement learning optimised for the ROUGE-2 F1 metric.
     Their networks are based on attentive LSTMs augmented with an additional copy mechanism (\cite{vinyals2015pointer}) achieving the second highest F1 score in the FNS21 competition.
 
-    \item \textbf{T5 Hybrid} (\cite{orzhenovskii-2021-t5}): The author used T5 (\cite{rayson2019t5}) for a hybrid model fine-tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report’s full text.
+    \item \textbf{T5-LONG-EXTRACT} (\cite{orzhenovskii-2021-t5}): The author used T5 (\cite{rayson2019t5}) for an extractive model fine--tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report’s full text.
     This is the best performing algorithm in the FNS21 competition but also the first to consider transformer models from an abstractive summarisation perspective in the FNP workshops so far.
+    It serves as an inspiration for the best English FNS22 model (\cite{el-haj-etal-2022-financial}) and other contestants (\cite{khanna-etal-2022-transformer, foroutan-etal-2022-multilingual}).
 
 \end{itemize}
 
@@ -538,7 +539,7 @@ As a countermeasure, \emph{stop words} (e.g, ``a'', ``the'', ``and'', etc) can b
 LexRank (\cite{Erkan2004LexRankGC}) builds up and resolves the issues of this algorithm, and we will discuss it in the next section.
 
 \subsection{LexRank}\label{subsec:lexrank}
-LexRank (\cite{Erkan2004LexRankGC}) is another unsupervised extractive summarisation method consistently used as a baseline in the FNS21 and previous challenges.
+LexRank (\cite{Erkan2004LexRankGC}) is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
 It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
 To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes (\cite{Shearing2020AutomatedTS}).
 The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:idf},\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
@@ -619,7 +620,7 @@ These matrix elements can be further combined into informative classification me
 \subsubsection{ROUGE}\label{subsubsec:rouge}
 The Recall-Oriented Understudy for Gisting Evaluation (ROUGE) (\cite{lin2004rouge}) is a popular recall-based evaluation metric for
 summarisation tasks which measures the overlapping units (i.e., n-grams) of a predicted summary $c$ and a reference summary $c^{*}$.
-Here we briefly describe some of the most common variants of ROUGE (especially in the context of the FNS21 Task):
+Here we briefly describe some of the most common variants of ROUGE (especially in the context of the FNS Task):
 \begin{enumerate}
     \item \textbf{ROUGE-N} measures the overlap of $n$-grams (sequences of $n$ words) between $c$ and $c^{*}$.
     For example, ROUGE-1 and ROUGE-2\footnote{
@@ -627,7 +628,7 @@ Here we briefly describe some of the most common variants of ROUGE (especially i
         Here, the bigrams of $c$ are \{("Fox", "can"), ("can", "run")\} and the bigrams of $c^{*}$ are \{("Fox", "can"), ("can", "walk")\}.
         The intersection of the two sets is \{("Fox", "can")\}, which is the only bigram that appears in both $c$ and $c^{*}$.
         Therefore, ROUGE-2 recall = Overlapping bigrams / Total bigrams in reference summary = $\frac{1}{2}=0.5$.
-    } (the official FNS21 metric) correspond to the overlap measurement of unigrams and bigrams, respectively.
+    } (the official FNS metric) correspond to the overlap measurement of unigrams and bigrams, respectively.
     \item \textbf{ROUGE-L} uses the longest common subsequence (LCS) to measure the similarity between $c$ and $c^{*}$.
     The LCS is the longest sequence of words that appears in both summaries \emph{in the same order}, but \emph{not necessarily consecutively}.
     Thus, ROUGE-L is less sensitive to word order compared to ROUGE-N and can capture longer-range dependencies.

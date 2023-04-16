@@ -76,12 +76,12 @@ These challenges motivate the work of~\cite{elhaj2019multilingual} who \begin{en
 The relevance of this project should also be understood from the perspective of the development of Natural Language Processing (NLP) in the Accounting and Finance (AF) domain.
 As outlined in~\cite{elliott1998accounting}, investors’ trust in the accountability of businesses would be based no longer as much on just the financial statements, but also on more descriptive narratives that define strategy and planning of resource use.
 While some recognise the importance of understanding in-domain textual information (\cite{li2010textual}), others like~\cite{el-haj2019meaning} report that the industry is still doubtful and cynical about the NLP applications in the analysis of financial market disclosures.
-Furthermore, the latter also observe that AF researchers rely extensively on bag-of-words models, which are \emph{not sufficient to encode complex contextual and semantic meaning} (especially in a domain with such \emph{specialized language}).
+Furthermore, the latter also observe that AF researchers rely extensively on bag--of--words models, which are \emph{not sufficient to encode complex contextual and semantic meaning} (especially in a domain with such \emph{specialized language}).
 As for ATS~\cite{hollander-white-af} is said to be the single AF study into disclosure summarisation.
 It demonstrates that machine-generated summaries are less likely to bias positively investor decisions compared to managerial ones.
 Therefore, this only confirms the existence of a wide gap in NLP applications in Accounting research, which further motivates our work.
 
-\subsection{Financial Narrative Summarisation 2021 (FNS21) Task} \label{subsec:fns}
+\subsection{Financial Narrative Summarisation (FNS) Task} \label{subsec:fns}
 The FNS Task is part of the annual Financial Narrative Processing (FNP) Workshop~\footnote{\url{https://wp.lancs.ac.uk/cfie/}} organised by Lancaster University since 2018, which aims to:
 \begin{itemize}
     \item encourage the advancement of financial text mining \& narrative processing
@@ -91,7 +91,7 @@ The FNS Task is part of the annual Financial Narrative Processing (FNP) Workshop
 
 For that purpose, they produce datasets of extracted narratives (with the help of the CFIE-FRSE tool) from annual reports of UK companies listed on the London Stock Exchange (LSE).
 
-In their FNS21 Task, there were $3,863$ such reports (Table~\ref{tab:fns21-data}), while the average length was reported at 80 pages, and the maximum of more than 250 pages (\cite{litvak-vanetik-2021-summarization}).
+In their FNS 2022 Task, there were $3,863$ such reports (Table~\ref{tab:fns22-data}), while the average length was reported at 80 pages, and the maximum of more than 250 pages (\cite{litvak-vanetik-2021-summarization}).
 
 Additionally, for every report, there were at least two gold summaries situated in the annual report itself~\footnote{
     The gold summaries being already in the annual report is not problematic because these reports are already written by domain experts who know how to summarise the financial state of a company.
@@ -111,11 +111,11 @@ The workshop's goal was to build ATS systems that generate a single summary for 
         Gold summaries & 9,873 & 1,250 & 1,673 & 12,796 \\
         \bottomrule
     \end{tabular}
-    \caption{FNS21 Data Split}
-    \label{tab:fns21-data}
+    \caption{FNS22 Data Split}
+    \label{tab:fns22-data}
 \end{table}
 
-We acknowledge that due to the scarcity of publicly available financial data this third-year project could not have been possible without the kind permission of the FNP organisers to use the training and validation datasets from their FNS21 Task (\cite{fnp-2021-financial}).
+We acknowledge that due to the scarcity of publicly available financial data this third-year project could not have been possible without the kind permission of the FNP organisers to use the training and validation datasets from their FNS22 Task (\cite{fnp-2022-financial}).
 
 \subsection{Aim and Objectives}\label{subsec:aim-and-objectives}
 The summarisation of UK annual reports is a challenging task because of
@@ -132,5 +132,5 @@ The summarisation of UK annual reports is a challenging task because of
      \item building an extractive neural model and tuning its hyperparameters for optimal classification capabilities (Section~\ref{subsec:hyperparameters}).
      \item researching approaches on dealing with imbalanced datasets and implementing a data augmentation technique for a more discriminative learning process (Section~\ref{subsec:data_augmentation}).
      \item exploring the capabilities of a pre-trained financial transformer (Section~\ref{subsec:finbert}).
-     \item evaluating all summarisation models with the help of the FNS21 metric - ROUGE-2 (Section~\ref{sec:evaluation}).
+     \item evaluating all summarisation models with the help of the FNS metric - ROUGE-2 (Section~\ref{sec:evaluation}).
  \end{itemize}

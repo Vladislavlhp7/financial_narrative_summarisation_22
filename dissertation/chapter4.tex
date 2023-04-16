@@ -11,10 +11,10 @@ based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-$F_{1}$\foo
     \begin{itemize}
         \item We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
               It can be accessed at: \url{https://github.com/pltrdy/rouge}
-        \item The FNS21 evaluation metric is the $F1$-score of ROUGE-2, and we will use it for the final evaluation.
+        \item The FNS evaluation metric is the $F1$-score of ROUGE-2, and we will use it for the final evaluation.
     \end{itemize}
 } metric(\cite{lin2004rouge}).
-For the FNS21 task due to the extractive nature of our approach we will evaluate our models based on
+For the FNS task due to the extractive nature of our approach we will evaluate our models based on
 the ROUGE-L--maximising $c^{*}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
 
 \begin{figure}[h]
@@ -36,12 +36,12 @@ candidates $c_{1}$ and $c_{2}$ are identical).
 This guarantees that we are always comparing candidate summaries based on their maximal evaluation scores.
 
 Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance}.
-Please keep in mind that we include official results from the FNS21 competition for comparison, namely the T5-LONG-EXTRACT model
-(\cite{orzhenovskii-2021-t5}) and the MUSE model (\cite{litvak-last-2013-multilingual}), which have been
-\begin{enumerate*}
-    \item trained on more data than our models due to us using the official validation as a test set (see Section~\ref{subsec:data}),
-    \item evaluated on the official test set which we did not have access to
-\end{enumerate*}.
+We also include official results from the FNS competitions for comparison, namely the FNS21's T5-LONG-EXTRACT
+(\cite{orzhenovskii-2021-t5}), and topline MUSE (\cite{litvak-last-2013-multilingual}) (highlighted with a $**$).
+As for the FNS22, we include team LIPI's T5 model (with a $*$) (\cite{el-haj-etal-2022-financial}), which is the best English model
+in that competition edition and it is completely based on the T5-LONG-EXTRACT model.
+We must remind the reader that we were not provided with the FNS22 testing data, and we had to create our own training-validation sets (see Section~\ref{subsec:data}),
+hence our \emph{evaluation can only serve as an approximation}.
 
 \begin{table}[ht]
     \centering
@@ -50,9 +50,10 @@ Please keep in mind that we include official results from the FNS21 competition 
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
             $\star$ FinBERT-base & 0.544 & 0.382 & 0.524 \\
-            T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5})* & 0.54 & 0.38 & 0.52 \\
+            T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5})** & 0.54 & 0.38 & 0.52 \\
+            LIPI's T5 (\cite{el-haj-etal-2022-financial})* & 0.496 & 0.374 & 0.487 \\
             FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
-            MUSE (\cite{litvak-last-2013-multilingual})* & 0.5 & 0.28 & 0.45 \\
+            MUSE (\cite{litvak-last-2013-multilingual})** & 0.5 & 0.28 & 0.45 \\
             $\star$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
             GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
             LexRank & 0.250 & 0.086 & 0.227 \\
@@ -67,10 +68,10 @@ Please keep in mind that we include official results from the FNS21 competition 
 We can provide the following commentary on the results:
 \begin{itemize}
     \item The best performing model is FinBERT-base (\cite{yang2020finbert}), which is a pre-trained on financial communication documents,
-        achieving a ROUGE-2 score of $0.382$, which is \emph{at least as good as the official best-performing model} in the FNS21 competition:
-        the T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5}, Section~\ref{subsec:text-summarisation}).
+        achieving an average ROUGE-2 score of $0.382$, which \emph{outperforms the best English model in the FNS22} - LIPI's T5 (\cite{el-haj-etal-2022-financial})
+        and it is \emph{at least as good as the official best model in the FNS21} competition: the T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5}, Section~\ref{subsec:text-summarisation}).
         Surprisingly, data augmentation does not improve the performance of FinBERT-base, and we believe this was caused by
-        the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters}.
+        the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters} and potentially over-fitting.
         Nevertheless, both models outperform the official top-line (\cite{litvak-last-2013-multilingual}) by a significant margin for ROUGE-2.
     \item The GRU-base + attention + back-translation model is the best performing model out of all recurrent neural architectures.
     While preliminary binary classification results did not show any considerable differences between the models, clearly
@@ -198,3 +199,21 @@ performance for the FNS21 task, there are several limitations that we would like
 \end{itemize}
 
 \subsection{Future Work}\label{subsec:future-work}
+In this section we outline some possible directions for future work.
+\begin{itemize}
+    \item \emph{PDF-to-Summary Pipeline} - While in our project we only consider the narrative summarisation of
+    financial reports already converted to plain text, we propose the following pipeline for an ambitious project:
+    \begin{enumerate}
+        \item \emph{PDF-to-Text} - Integrate into the summarisation system a PDF-to-Text conversion tool for annual
+        reports like the CFIE-FRSE\footnote{\url{https://github.com/drelhaj/CFIE-FRSE}} (\cite{elhaj2019multilingual}), which
+        also extracts the text into 8 generic section headers (Section~\ref{subsec:uk-annual-reports}).
+        \item \emph{Text-to-Summary} - Implement a more advanced summarisation technique like the ones discussed on the previous point.
+        \item \emph{Summary-to-Analysis} - Apply NLP techniques like sentiment analysis (\cite{araci2019finbert}), named entity recognition
+        (\cite{zhang2022finbertmrc}), and detection of forward-looking sentences (\cite{stihec-etal-2021-preliminary}),
+        to extract useful information from the summary.
+        \item \emph{Packaged Software} - Build a drag-and-drop application that allows users to upload a PDF file of an
+        annual report, where the backend will perform the steps above and return a summary.
+        The above textual analysis features could be integrated as interactive visual elements.
+        Furthermore,
+    \end{enumerate}
+\end{itemize}
