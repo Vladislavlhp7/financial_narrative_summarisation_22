@@ -158,7 +158,7 @@ In terms of \emph{innovational aspects} of our project in the context of the FNS
     \item \emph{Perform back-translation as data augmentation} - In contrast to approaches where only the first 10\% of
     the annual report is used (\cite{orzhenovskii-2021-t5}), we over-sample the summarising sentences (minority class)
     by back-translating from French.
-    \item \emph{Fine-tune FinBERT (\cite{yang2020finbert}) for extractive summarisation} - Transformer-based models have become increasingly
+    \item~\emph{Fine-tune FinBERT (\cite{yang2020finbert}) for extractive summarisation} - Transformer-based models have become increasingly
     popular in the next edition of the FNP Workshop (FNP22) (\cite{khanna-etal-2022-transformer, pant-chopra-2022-multilingual}),
     where some have used FinBERT for classifying definitions (\cite{ghosh-etal-2022-finrad}),
     detecting hypernyms (\cite{peng-etal-2022-discovering}), and classifying financial sentiments (\cite{stepisnik-perdih-etal-2022-sentiment}).
@@ -169,6 +169,15 @@ In terms of \emph{innovational aspects} of our project in the context of the FNS
 Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive
 performance for the FNS21 task, there are several limitations that we would like to discuss:
 \begin{itemize}
+    \item \emph{Sentence embedding} - Although, we note our use of domain-specific FastText word embeddings due to their
+    ability to handle noise and outperform general-domain embeddings (\cite{rahimikia2021realised}), we do not perform
+    any sentence--level aggregation (i.e., dimensionality reduction) like averaging to condense the overall representation.
+    While, this was a deliberate design decision to better capture the relationship between individual words,
+    our sentence vectors became of size $(100, 300)$ instead of $(300,)$, which became more computationally expensive.
+    Although, we are aware that FastText (\cite{bojanowski-etal-2017-enriching}) provides average-pooling for any sequence,
+    we were pessimistic of using it due to the loss of word order information (e.g., ``the company is good'' being represented just as ``is the company good'').
+    Therefore, a limitation of our work is that we do not investigate the impact of using sentence embeddings
+    (be it with positional encoding or average-pooling) on the performance of our models.
     \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{sec:evaluation}).
         However, this is a very simplistic approach to summarisation that
         \begin{enumerate*}
@@ -182,7 +191,7 @@ performance for the FNS21 task, there are several limitations that we would like
         Regarding the trimming heuristic, a natural improvement can be to use text compression techniques for the final predicted sentence (\cite{ghalandari2022efficient, KNIGHT200291}).
         As for the third point, we believe this is very exacerbating reason why our GRU architecture returns a summary
         without any single whole--sentence overlap with the gold standard (Fig.~\ref{fig:rnn_summary}).
-        Instead, what \cite{zmandar-etal-2021-joint} propose is a reinforcement learning approach which incorporates
+        Instead, what~\cite{zmandar-etal-2021-joint} propose is a reinforcement learning approach which incorporates
         the \emph{sentence-level} ROUGE-2 score with the whole gold summary.
         While this method is much more sophisticated, it conveys the intuitive idea that the top-$k$ sentences comprising the
         \emph{optimal candidate summary} should be \emph{greedily maximising the global summary-level ROUGE-2} score.
