@@ -1,40 +1,22 @@
-\chapter{Example of operation}
+\section{Appendix}
+\subsection{UK annual report example}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../charts/oxfam}
+    \caption{Example of a UK annual report: Oxfam 2021-2022}\label{fig:annual_report_example}
+\end{figure}
 
-An appendix is just like any other chapter, except that it comes after
-the appendix command in the master file.
+\subsection{Example Model Summaries}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{../charts/transformer-example-summary}
+    \caption{Example summary from the FinBERT-base + data augmentation model.}
+    \label{fig:finbert_summary}
+\end{figure}
 
-One use of an appendix is to include an example of input to the system
-and the corresponding output.
-
-One way to do this is to include, unformatted, an existing input file. 
-You can do this using \verb=\verbatiminput=. In this appendix we
-include a copy of the C file \textsf{hello.c} and its output file
-\textsf{hello.out}. If you use this facility you should make sure that
-the file which you input does not contain \texttt{TAB} characters,
-since \LaTeX\ treats each \texttt{TAB} as a single space; you can use
-the Unix command \texttt{expand} (see manual page) to expand tabs into
-the appropriate number of spaces. 
-
-\section{Example input and output}
-\label{sec:inp-eg}
-\subsection{Input}
-\label{sec:input}
-(Actually, this isn't input, it's the source code, but it will do as
-an example)
-
-\verbatiminput{hello.c}
-
-\subsection{Output}
-\label{sec:output}
-
-\verbatiminput{hello.out}
-\subsection{Another way to include code}
-You can also use the capabilities of the \texttt{listings} package to
-include sections of code, it does some keyword highlighting.
-
-\lstinputlisting[language=C]{hello.c}
-
-% Local Variables: 
-% mode: latex
-% TeX-master: "report"
-% End: 
+\begin{figure}[ht]
+        \centering
+        \includegraphics[width=\textwidth]{../charts/rnn_summary}
+        \caption{Example summary from the GRU-base + attention model.}
+        \label{fig:rnn_summary}
+\end{figure}
