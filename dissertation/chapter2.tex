@@ -2,21 +2,21 @@
 
 \subsection{Supervised Learning}\label{subsec:supervised_learning}
 Supervised learning is a machine learning paradigm where a training set $X$ with data points $x$ is provided, along with the corresponding set $Y$ with labels $y$.
-Then the goal is to learn a function $f$ that maps $X$ to $Y$, i.e., $f: X \rightarrow Y$, which makes predictions $f(x)$ as close as possible to the true labels $y$ (\cite{sammut2011encyclopedia}).
-The difference between $f(x)$ and $y$ is quantified by a loss function $L$, which is being minimized during the training process by updating the model parameters with respect to the gradient of the loss (\cite{Goodfellow-et-al-2016}).
+Then the goal is to learn a function $f$ that maps $X$ to $Y$, i.e., $f: X \rightarrow Y$, which makes predictions $f(x)$ as close as possible to the true labels $y$~\cite{sammut2011encyclopedia}.
+The difference between $f(x)$ and $y$ is quantified by a loss function $L$, which is being minimized during the training process by updating the model parameters with respect to the gradient of the loss~\cite{Goodfellow-et-al-2016}.
 In the context of extractive summarisation, supervised learning can be used to identify the most important sentences in a document, which can then be used to generate a summary.
-In this case, the task can be cast as a binary classification problem, where the sentence labels are either $1$ (summarising) or $0$ (non-summarising) (\cite{manning_raghavan_schutze_2008}).
+In this case, the task can be cast as a binary classification problem, where the sentence labels are either $1$ (summarising) or $0$ (non-summarising)~\cite{manning_raghavan_schutze_2008}.
 
 
 
 \subsection{Tf-Idf}\label{subsec:tfidf}
 Tf-Idf (Term Frequency - Inverse Document Frequency) is a statistical technique intended to reflect the importance of a word to a document in a corpus.
-The term frequency is the number of occurrences of term $t$ in document $d$ (\cite{luhn1957termfreq}), but it is not enough to capture the importance of a term due to \emph{all terms being considered equally important} (\cite{manning_raghavan_schutze_2008}).
-Meanwhile, the \emph{document frequency ($df_{t}$)} is the number of documents in the corpus containing the term $t$, which evaluates how \emph{common} and \emph{unimportant} a term is (\cite{leskovec_rajaraman_ullman_2020}).
-Therefore, \emph{idf} becomes $\frac{N}{\text{df}_{t}}$, where $N$ is the corpus size, and then the tf-idf term weight $w_{t,d}$ is calculated as the product of the two - $\text{tf}_{t,d} \cdot \text{idf}_{t,d}$ (\cite{jurafsky2000}).
+The term frequency is the number of occurrences of term $t$ in document $d$~\cite{luhn1957termfreq}, but it is not enough to capture the importance of a term due to \emph{all terms being considered equally important}~\cite{manning_raghavan_schutze_2008}.
+Meanwhile, the \emph{document frequency ($df_{t}$)} is the number of documents in the corpus containing the term $t$, which evaluates how \emph{common} and \emph{unimportant} a term is~\cite{leskovec_rajaraman_ullman_2020}.
+Therefore, \emph{idf} becomes $\frac{N}{\text{df}_{t}}$, where $N$ is the corpus size, and then the tf-idf term weight $w_{t,d}$ is calculated as the product of the two - $\text{tf}_{t,d} \cdot \text{idf}_{t,d}$~\cite{jurafsky2000}.
 The latter represents now the importance of a term $t$ but normalised by its \emph{commonness}.
 Tf-Idf is often used as a weighting factor in information retrieval and text mining.
-It has also been successfully integrated in summarisation methods like LexRank (\cite{Erkan2004LexRankGC}) (Section~\ref{subsec:lexrank}) and in FNS competitive systems (\cite{litvak2021tiber, el-haj-ogden-2022-financial}).
+It has also been successfully integrated in summarisation methods like LexRank~\cite{Erkan2004LexRankGC} (Section~\ref{subsec:lexrank}) and in FNS competitive systems~\cite{litvak2021tiber, el-haj-ogden-2022-financial}.
 
 \subsection{Word Embeddings}\label{subsec:word-embeddings}
 Historically, to represent a token (i.e., word) $w_{i}$ in a vocabulary $V$ numerically, we define a one-hot-encoding vector of all zeroes except of a one at the index of the word $w_{i}$ in $V$ (i.e., $i$).
@@ -29,13 +29,13 @@ The results are sparse individual word vectors being orthogonal to each other wh
 
 Traditionally, AF research has represented an input text with the help of bag-of-words (BOW) models which can be viewed from the  \begin{enumerate*}
     \item the binary perspective - represent a whole document $d$ as a binary vector containing ones for all words $w_{i}$ occurring in $d$ from $V$,
-    \item the term frequency perspective - encode number of word occurrences in documents instead of binary representation (\cite{Xu2013AnAT}), and
-    \item the tf-idf perspective - extend the latter to penalise ubiquitous terms (\cite{SprckJones1972ASI}).
+    \item the term frequency perspective - encode number of word occurrences in documents instead of binary representation~\cite{Xu2013AnAT}, and
+    \item the tf-idf perspective - extend the latter to penalise ubiquitous terms~\cite{SprckJones1972ASI}.
 \end{enumerate*}
 Nevertheless, these vectors are very sparse and unable to encode more complex contextual and semantic meaning.
 
-To address these shortcomings \emph{short}\footnote{i.e., with a small number of dimensions} and \emph{dense}\footnote{i.e., continuous real-numbered values instead of 0/1s} word embeddings like Word2Vec (\cite{mikolov2013efficient}) and FastText (\cite{bojanowski-etal-2017-enriching}) have been developed.
-In~\cite{mikolov2013efficient} the authors manage to condense the vector space and ensure that word representations have \emph{multiple degrees of similarity} (\cite{mikolov-etal-2013-linguistic}) (e.g., semantic - the meaning of words, morphological - structure of sub-words, etc).
+To address these shortcomings \emph{short}\footnote{i.e., with a small number of dimensions} and \emph{dense}\footnote{i.e., continuous real-numbered values instead of 0/1s} word embeddings like Word2Vec~\cite{mikolov2013efficient} and FastText~\cite{bojanowski-etal-2017-enriching} have been developed.
+In~\cite{mikolov2013efficient} the authors manage to condense the vector space and ensure that word representations have \emph{multiple degrees of similarity}~\cite{mikolov-etal-2013-linguistic} (e.g., semantic - the meaning of words, morphological - structure of sub-words, etc).
 
 
 Furthermore, the proposed models - CBOW (Continuous Bag of Words\footnote{
@@ -56,7 +56,7 @@ In contrast, the Skip-gram uses the middle word as an input to the classifier an
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{../charts/cbow_skipgram}~\caption{Word-from-context and context-from-word prediction in CBOW and Skip-gram, respectively, taken from~\cite{mikolov2013efficient}}.
+    \includegraphics[width=0.75\textwidth]{../charts/cbow_skipgram}~\caption{Word-from-context and context-from-word prediction in CBOW and Skip-gram, respectively, taken from~\cite{mikolov2013efficient}}
     \label{fig:cbow_skipgram}
 \end{figure}
 
@@ -67,7 +67,7 @@ Additionally, two symbols are further introduced to mark the beginning and the e
 For example, the character trigrams of the word \emph{believe} are \emph{$<$be, bel, eli, lie, iev, eve, ve$>$} where the sub-word \emph{lie} is different from the word token \emph{$<$lie$>$}.
 
 Therefore, the final target word embedding is the sum of its constituent character n-grams which are learned via the Skip-gram model.
-This makes FastText very convenient for representing unknown words as the sum of \emph{static} constituent n-grams (\cite{jurafsky2000}).
+This makes FastText very convenient for representing unknown words as the sum of \emph{static} constituent n-grams~\cite{jurafsky2000}.
 
 Nevertheless, when it comes to domain-specific problems, general pre-trained word embeddings do not perform very well~\cite{rahimikia2021realised}.
 demonstrate that even state-of-the-art embedding models like Google's Word2Vec(skip-gram)\footnote{\url{https://code.google.com/archive/p/word2vec/}} and Facebook’s FastText(skip-gram)\footnote{\url{https://fasttext.cc/}}trained on 100 billion and 16 billion words, respectively, struggle to understand financial language like \begin{enumerate*}
@@ -81,10 +81,10 @@ In our project we acknowledge that a purpose-built financial word embedding (tra
 
 \subsection{Recurrent Neural Networks (RNNs)}\label{subsec:rnn}
 The vanilla RNN is a basic type of RNN architecture designed for processing sequential data.
-It learns temporal patterns from the initial data by looping over the hidden layers which allow information to persist (i.e., they serve as a network memory) (\cite{olah2015understandingLSTM}).
+It learns temporal patterns from the initial data by looping over the hidden layers which allow information to persist (i.e., they serve as a network memory)~\cite{olah2015understandingLSTM}.
 The key component is the recurrent hidden state $h_i$ (Figure~\ref{fig:rnn}) updated at each time step using input data and the previous hidden state (Eq.\ref{eq:rnn_hidden}).
 This allows the RNN to capture contextual information and temporal dependencies in the sequence.
-However, due to the inherent vanishing and exploding gradient problems with the vanilla RNNs, they have limited ability to learn long-term dependencies (\cite{bengio1994learning}).
+However, due to the inherent vanishing and exploding gradient problems with the vanilla RNNs, they have limited ability to learn long-term dependencies~\cite{bengio1994learning}.
 To resolve these issues more advanced RNN architectures like LSTMs and GRUs have been developed.
 
 \begin{equation}\label{eq:rnn_hidden}
@@ -111,7 +111,7 @@ This is so because it allows long-term dependencies to propagate through the net
     This is ensured by the additional architecture unit \- the \emph{forget} gate, which learns to  control the gradient flow in the network.
 }.
 
-A more simple variant of the LSTM is the Gated Recurrent Unit (GRU) which combines the \emph{input} and \emph{forget} gates into an \emph{update} gate for a model with fewer parameters and faster training (\cite{cahuantzi2021gru}).
+A more simple variant of the LSTM is the Gated Recurrent Unit (GRU) which combines the \emph{input} and \emph{forget} gates into an \emph{update} gate for a model with fewer parameters and faster training~\cite{cahuantzi2021gru}.
 Nevertheless, due to the sequential nature of the LSTM, the training process cannot be parallelised across GPUs, i.e., the learning cannot be made quicker by more computational resources.
 
 As noted by~\cite{graveshinton2013speech}, a limitation of the unidirectional RNNs is that they only make use of previous context in the sequence.
@@ -230,9 +230,9 @@ Intuitively, as noted in~\cite{galassi2020attention}, this attention mechanism c
 
 \subsection{Transformers}\label{subsec:transformers}
 
-The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence architecture which follows the overall encoder-decoder architecture (\cite{sutskever2014sequence}), but differs in the following aspects:
+The Transformer~\cite{vaswani2017attention} is another sequence-to-sequence architecture which follows the overall encoder-decoder architecture~\cite{sutskever2014sequence}, but differs in the following aspects:
 \begin{enumerate}
-    \item \emph{Internal architecture} - instead of RNNs (\cite{cho-etal-2014-learning}), the encoder and the decoder have multiple identical transformer blocks based on fully-connected feed-forward neural networks with a newly introduced concept of self-attention (Figure~\ref{fig:transformer}).
+    \item \emph{Internal architecture} - instead of RNNs~\cite{cho-etal-2014-learning}, the encoder and the decoder have multiple identical transformer blocks based on fully-connected feed-forward neural networks with a newly introduced concept of self-attention (Figure~\ref{fig:transformer}).
     Although, prior to that, recurrent hidden layers have been used for compressing sequences into a context vector, the authors of the transformer extend the attention from~\cite{bahdanau2016neural} to generate salient context-aware representations of the input sequence.
     \item \emph{Self-Attention and Global context} - while RNN architectures struggle to deal with long-range dependencies (due to the vanishing gradient problem and the last-layer bottleneck~\cite{bahdanau2016neural}), the authors propose
     \emph{causal}\footnote{
@@ -252,20 +252,20 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
         Nevertheless, since these computations can be performed independently for each token, the entire input sequence can be processed simultaneously unlike in RNN architectures.
 
         \begin{equation}\label{eq:attention}
-            \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\label{eq:equation2}
+            \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
         \end{equation}
 
-        \item \emph{The multi-head attention} (\cite{vaswani2017attention}) is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
+        \item \emph{The multi-head attention}~\cite{vaswani2017attention} is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
         This is achieved by stacking multiple attention heads (each with its own $Q$, $K$, $V$ matrices) and concatenating their outputs (Figure~\ref{fig:attention_dot_product}).
         For each head $h_i$, the $Q$, $K$, and $V$ vectors will be linearly projected with different weight matrices $W_i^Q$, $W_i^K$, and $W_i^V$, respectively.
         The intuition is that each attention head learns different aspects of the relationships that exist among inputs (e.g., syntactic, semantic, and discourse relationships~\cite{jurafsky2000}) and the concatenation of the different representations allows the Transformer to learn a richer overall representation of the input sequence.
 
     \end{itemize}
     \item \emph{Positional Encoding} - the Transformer does not have a recurrent hidden layer to capture the sequential nature of the input sequence.
-    Instead, the authors (\cite{vaswani2017attention}) propose adding a positional encoding to the input embeddings as a way to capture positional information.
+    Instead, the authors~\cite{vaswani2017attention} propose adding a positional encoding to the input embeddings as a way to capture positional information.
     \item \emph{Training Details} - Because of the non-sequential nature of the Transformer, the heavy self-attention computations can be parallelised on modern hardware - GPUs and TPUs which makes this model easy during training and inference time.
-    Additionally, the proposed dot-product attention is practically much faster and more space-efficient in comparison to the additive one (\cite{bahdanau2016neural}), due to highly optimized matrix multiplication libraries.
-    Nevertheless, at least two computational drawbacks are that Transformers require an additional positional embedding and also have a quadratic complexity when calculating the self-attention which is extremely expensive for long sequences (\cite{jurafsky2000}).
+    Additionally, the proposed dot-product attention is practically much faster and more space-efficient in comparison to the additive one~\cite{bahdanau2016neural}, due to highly optimized matrix multiplication libraries.
+    Nevertheless, at least two computational drawbacks are that Transformers require an additional positional embedding and also have a quadratic complexity when calculating the self-attention which is extremely expensive for long sequences~\cite{jurafsky2000}.
 \end{enumerate}
 
 \begin{figure}[ht]
@@ -316,7 +316,7 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
 \end{figure}
 
 \subsection{BERT}\label{subsec:bert}
-BERT (Bidirectional Encoder Representations from Transformers) is a Transformer-based language model that was proposed by Google AI in 2018 (\cite{devlin-etal-2019-bert}).
+BERT (Bidirectional Encoder Representations from Transformers) is a Transformer-based language model that was proposed by Google AI in 2018~\cite{devlin-etal-2019-bert}.
 It revolutionised the field of NLP by introducing a new pre-training paradigm that outperformed previous state-of-the-art models on a wide range of NLP tasks while being easily applicable to autoregressive generation problems (e.g., abstractive summarization and machine translation).
 We will discuss the main components of BERT and how it differs from the original Transformer model.
 \begin{enumerate}
@@ -362,15 +362,15 @@ We will discuss the main components of BERT and how it differs from the original
     \item \emph{Pre-training} - BERT is a model pre-trained on two tasks: Masked Language Model (MLM) and Next Sentence Prediction (NSP).
     \begin{enumerate}
         \item \emph{Masked Language Model} - BERT uses a pre-training task called Masked Language Model (MLM) to learn the representations of words in a sentence.
-        The authors (\cite{devlin-etal-2019-bert}) propose masking 15\% of the input tokens at random and then training the model to predict the masked tokens.
+        The authors~\cite{devlin-etal-2019-bert} propose masking 15\% of the input tokens at random and then training the model to predict the masked tokens.
         To make it more accessible for fine-tuning where the [MASK] token is not available, they replace it with a random or with the original token with probabilities of 10\% each.
         \item \emph{Next Sentence Prediction} - BERT is also pre-trained on Next Sentence Prediction (NSP) to learn the representations of sentences in a document.
         To understand the relationship between two sentences, BERT uses a binary classification task where the model is trained to predict whether a sentence $B$ is following another sentence $A$.
-        The authors (\cite{devlin-etal-2019-bert}) capture the sentence structure with the help of two new tokens - [CLS] (added before the sentence pair) and [SEP] (inserted in-between sentences), which are essential for the fine-tuning process (Figure~\ref{fig:bert_input}).
+        The authors~\cite{devlin-etal-2019-bert} capture the sentence structure with the help of two new tokens - [CLS] (added before the sentence pair) and [SEP] (inserted in-between sentences), which are essential for the fine-tuning process (Figure~\ref{fig:bert_input}).
         They further propose using 50\% of the training data as positive examples (i.e., $A$ and $B$ are consecutive sentences) and 50\% as negative examples (i.e., $B$ is a random sentence from the corpus).
     \end{enumerate}
-    \item \emph{Fine-tuning for Sequence Classification} - Unlike in Word2Vec (\cite{mikolov2013efficient}) where the word embeddings are \emph{static} (i.e., related to the single word token only), BERT learns \emph{contextualised word embeddings} which can produce different representations for the same word depending on the context around it.
-    Here, instead of using the output of the last hidden layer (as we do with RNNs and the Transformer), the authors (\cite{devlin-etal-2019-bert}) propose a \emph{sentence embedding} $y_{CLS}$ that summarizes the entire sequence of hidden states - the output vector of the model for the [CLS] token.
+    \item \emph{Fine-tuning for Sequence Classification} - Unlike in Word2Vec~\cite{mikolov2013efficient} where the word embeddings are \emph{static} (i.e., related to the single word token only), BERT learns \emph{contextualised word embeddings} which can produce different representations for the same word depending on the context around it.
+    Here, instead of using the output of the last hidden layer (as we do with RNNs and the Transformer), the authors~\cite{devlin-etal-2019-bert} propose a \emph{sentence embedding} $y_{CLS}$ that summarizes the entire sequence of hidden states - the output vector of the model for the [CLS] token.
     The reasoning is that BERT is pre-trained with the [CLS] token being prepended to the input sequence (during the NSP task) and it can be used as an aggregate representation of the entire sequence.
     Therefore, fine-tuning for text classification amounts to learning the probability distribution over the possible labels (e.g., 0/1 for a binary task) from the linearly-projected $y_{CLS}$, i.e. $\text{softmax}(y_{CLS}W_{C} + b)$, complying with the typical supervised learning paradigm.
     A slight difference, as~\cite{jurafsky2000} suggest, is that the backpropagation can affect not only the classifier but also the pretrained language model (resulting in minimal changes in practice).
@@ -470,8 +470,8 @@ We will discuss the main components of BERT and how it differs from the original
 \end{figure}
 
 \subsection{FinBERT}\label{subsec:finbert}
-FinBERT\footnote{\url{https://github.com/yya518/FinBERT}} (\cite{yang2020finbert}) is a pre-trained domain-specific language model based on
-BERT (\cite{devlin-etal-2019-bert}) (Section~\ref{subsec:bert}) that is trained on a total of $4.9B$ tokens from financial corpora:
+FinBERT\footnote{\url{https://github.com/yya518/FinBERT}}~\cite{yang2020finbert} is a pre-trained domain-specific language model based on
+BERT~\cite{devlin-etal-2019-bert} (Section~\ref{subsec:bert}) that is trained on a total of $4.9B$ tokens from financial corpora:
 \begin{enumerate*}
     \item Corporate Reports 10-K \& 10-Q (introduced in Section~\ref{subsec:financial_reports}),
     \item Earnings Call Transcripts (discussing financial performance, business updates, and future expectations), and
@@ -483,14 +483,14 @@ Furthermore, the authors demonstrate that FinBERT outperforms BERT on three fina
 \subsection{Text Summarisation}\label{subsec:text-summarisation}
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
 There are two overarching categories: extractive and abstractive text summarisation.
-The former formulates the problem as a subset selection problem by returning only the most salient text excerpts from the original document (\cite{zhong-etal-2020-extractive}), while the latter aims to generate content anew, similar to how humans would do.
+The former formulates the problem as a subset selection problem by returning only the most salient text excerpts from the original document~\cite{zhong-etal-2020-extractive}, while the latter aims to generate content anew, similar to how humans would do.
 
 We will outline some key models from the FNS21 (the previous year competition) that inspired our work below:
 \begin{itemize}
-    \item \textbf{Gokhan}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT (\cite{reimers2019sentence}).
+    \item \textbf{Gokhan}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
     However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
 
-    \item \textbf{AMUSE} (\cite{litvak-vanetik-2021-summarization}): The authors design an ETS system comprised of the following steps \begin{enumerate*}
+    \item \textbf{AMUSE}~\cite{litvak-vanetik-2021-summarization}: The authors design an ETS system comprised of the following steps \begin{enumerate*}
         \item shortening of report with an existing Genetic Algorithm~\cite{litvak-last-2013-multilingual},
         \item encoding sentences with BERT vectors, and
         \item performing binary classification with LSTMs for salient sentence extraction
@@ -500,19 +500,19 @@ We will outline some key models from the FNS21 (the previous year competition) t
         \item additional neural modelling stages for the representation and detection of relevant input text parts.
     \end{enumerate*}
 
-    \item \textbf{Hybrid model with RL} (\cite{zmandar-etal-2021-joint}): The authors train a joint extractive-abstractive summarisation model with reinforcement learning optimised for the ROUGE-2 F1 metric.
-    Their networks are based on attentive LSTMs augmented with an additional copy mechanism (\cite{vinyals2015pointer}) achieving the second highest F1 score in the FNS21 competition.
+    \item \textbf{Hybrid model with RL}~\cite{zmandar-etal-2021-joint}: The authors train a joint extractive-abstractive summarisation model with reinforcement learning optimised for the ROUGE-2 F1 metric.
+    Their networks are based on attentive LSTMs augmented with an additional copy mechanism~\cite{vinyals2015pointer} achieving the second highest F1 score in the FNS21 competition.
 
-    \item \textbf{T5-LONG-EXTRACT} (\cite{orzhenovskii-2021-t5}): The author used T5 (\cite{rayson2019t5}) for an extractive model fine--tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report’s full text.
+    \item \textbf{T5-LONG-EXTRACT}~\cite{orzhenovskii-2021-t5}: The author used T5~\cite{rayson2019t5} for an extractive model fine--tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report’s full text.
     This is the best performing algorithm in the FNS21 competition but also the first to consider transformer models from an abstractive summarisation perspective in the FNP workshops so far.
-    It serves as an inspiration for the best English FNS22 model (\cite{el-haj-etal-2022-financial}) and other contestants (\cite{khanna-etal-2022-transformer, foroutan-etal-2022-multilingual}).
+    It serves as an inspiration for the best English FNS22 model~\cite{el-haj-etal-2022-financial} and other contestants~\cite{khanna-etal-2022-transformer, foroutan-etal-2022-multilingual}.
 
 \end{itemize}
 
 In this work we will be solely exploring the extractive method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
 
 \subsection{TextRank}\label{subsec:textrank}
-TextRank (\cite{mihalcea-tarau-2004-textrank}) is a graph-based unsupervised algorithm for extractive summarisation with the following key components:
+TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algorithm for extractive summarisation with the following key components:
 \begin{enumerate}
     \item \textbf{Sentence similarity}: TextRank computes the similarity between two sentences based on either the \emph{cosine similarity}
         \footnote{
@@ -523,7 +523,7 @@ TextRank (\cite{mihalcea-tarau-2004-textrank}) is a graph-based unsupervised alg
             For example, if sentence A is ``I love apples.'' and sentence B is ``I love oranges.'', then $J(A,B)=\frac{2}{4}=\frac{1}{2}$, indicating that $A$ and $B$ share 50\% of their unique words.
         } of their sets of words,
     \item \textbf{Graph Construction}: TextRank represents sentences as nodes in a graph, and the similarity between each two sentences is represented as an edge between them.
-    \item \textbf{Sentence ranking}: The constructed graph is passed into the PageRank algorithm (\cite{page1998anatomy}) that assigns each sentence a score based on the importance of its neighbours.
+    \item \textbf{Sentence ranking}: The constructed graph is passed into the PageRank algorithm~\cite{page1998anatomy} that assigns each sentence a score based on the importance of its neighbours.
     The final summary is then assembled from the selection of the top $k$ sentences with the highest scores.
 \end{enumerate}
 Nevertheless,~\cite{Shearing2020AutomatedTS} report two considerable weaknesses of TextRank (hence the need for a better baseline - LexRank):
@@ -532,12 +532,12 @@ Nevertheless,~\cite{Shearing2020AutomatedTS} report two considerable weaknesses 
     \item \textbf{Frequent words} - There is no weighting applied regarding the frequency (or rarity) of words in the sentence, which can lead to a bias towards sentences with more frequent words.
 \end{enumerate}
 As a countermeasure, \emph{stop words} (e.g, ``a'', ``the'', ``and'', etc) can be removed and \emph{tf-idf} can be integrated into the similarity metric for a more balanced scoring mechanism.
-LexRank (\cite{Erkan2004LexRankGC}) builds up and resolves the issues of this algorithm, and we will discuss it in the next section.
+LexRank~\cite{Erkan2004LexRankGC} builds up and resolves the issues of this algorithm, and we will discuss it in the next section.
 
 \subsection{LexRank}\label{subsec:lexrank}
-LexRank (\cite{Erkan2004LexRankGC}) is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
+LexRank~\cite{Erkan2004LexRankGC} is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
 It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
-To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes (\cite{Shearing2020AutomatedTS}).
+To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes~\cite{Shearing2020AutomatedTS}.
 The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:idf},\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
 
 \begin{equation}
@@ -562,7 +562,7 @@ The authors further propose finding the most important sentences by \begin{enume
     \item applying a threshold for the creation of edges with Eq.\ref{eq:cosinesimtfidf},
     \item building an adjacency matrix and normalizing it to produce \emph{transition probabilities},
     \item computing in an iterative fashion the \emph{eigenvector centrality} until convergence, and finally
-    \item ranking sentences based on their \emph{lexical} PageRank (\cite{page1998anatomy}) score similarly to TextRank (\cite{mihalcea-tarau-2004-textrank}).
+    \item ranking sentences based on their \emph{lexical} PageRank~\cite{page1998anatomy} score similarly to TextRank~\cite{mihalcea-tarau-2004-textrank}.
 \end{enumerate*}
 
 \subsection{Evaluation Metrics}\label{subsec:evaluation-metrics}
@@ -614,7 +614,7 @@ These matrix elements can be further combined into informative classification me
 \end{table}
 
 \subsubsection{ROUGE}\label{subsubsec:rouge}
-The Recall-Oriented Understudy for Gisting Evaluation (ROUGE) (\cite{lin2004rouge}) is a popular recall-based evaluation metric for
+The Recall-Oriented Understudy for Gisting Evaluation (ROUGE)~\cite{lin2004rouge} is a popular recall-based evaluation metric for
 summarisation tasks which measures the overlapping units (i.e., n-grams) of a predicted summary $c$ and a reference summary $c^{*}$.
 Here we briefly describe some of the most common variants of ROUGE (especially in the context of the FNS Task):
 \begin{enumerate}
@@ -627,14 +627,15 @@ Here we briefly describe some of the most common variants of ROUGE (especially i
 
 While ROUGE scores are explainable and easily implementable, they have certain limitations like
 \begin{enumerate*}
-    \item inability to capture semantic similarity (\cite{akter-etal-2022-revisiting}),
-    \item insensitivity to summary coherence (\cite{christensen-etal-2013-towards}), and
-    \item lack of correlation with human evaluation (\cite{liu2010exploring})
+    \item inability to capture semantic similarity~\cite{akter-etal-2022-revisiting},
+    \item insensitivity to summary coherence~\cite{christensen-etal-2013-towards}, and
+    \item lack of correlation with human evaluation~\cite{liu2010exploring}
 \end{enumerate*}.
 Despite these limitations, ROUGE remains a widely-used evaluation measure, particularly in extractive summarization and we use it in this work as well.
 
 \begin{example}
-    We briefly demonstrate how to compute ROUGE-2 for a sentence pair $c$=\("\)Fox can run\("\) and $c^{*}$=\("\)Fox can walk\("\).
+    We briefly demonstrate how to compute ROUGE-2 for a sentence pair:
+    $c$=\("\)Fox can run\("\) and $c^{*}$=\("\)Fox can walk\("\). \\
     Here, the bigrams of $c$ are \{("Fox", "can"), (\("\)can\("\), \("\)run\("\))\} and the bigrams of $c^{*}$ are \{("Fox", "can"), (\("\)can\("\), \("\)walk\("\))\}.
     The intersection of the two sets is \{("Fox", "can")\}, which is the only bigram that appears in both $c$ and $c^{*}$.
     Therefore, ROUGE-2 recall = Overlapping bigrams / Total bigrams in reference summary = $\frac{1}{2}=0.5$.

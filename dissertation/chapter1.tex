@@ -21,7 +21,7 @@ Due to international regulations, companies are obliged to report their periodic
     For example,
 \begin{enumerate}
     \item 10-K reports filed to the SEC\footnote{\url{https://www.sec.gov}} and accessible through their Electronic Data Gathering, Analysis, and Retrieval\footnote{\url{https://www.sec.gov/edgar}} (EDGAR) system are only for US registered businesses.
-    They follow a standardised template and are plain text, which makes them particularly easy for automated large-scale research (\cite{el-haj2019retrieving}).
+    They follow a standardised template and are plain text, which makes them particularly easy for automated large-scale research~\cite{el-haj2019retrieving}.
     Also, the contents of these reports are strict, requiring solely five information sections\footnote{
     \begin{enumerate*}
         \item Business Overview
@@ -32,7 +32,7 @@ Due to international regulations, companies are obliged to report their periodic
     \end{enumerate*}
     }.
     \item UK annual reports, regulated by the UK's Financial Reporting Council (FRC), are typically the primary annual reporting method (also provided as PDF files).
-    Unlike the 10-K, they are glossy and more stakeholder-oriented and enjoy unlimited discretion over non-mandated content (\cite{el-haj2019retrieving}) (e.g., photography and company brand material, non-mandatory narrative sections, etc.).
+    Unlike the 10-K, they are glossy and more stakeholder-oriented and enjoy unlimited discretion over non-mandated content~\cite{el-haj2019retrieving} (e.g., photography and company brand material, non-mandatory narrative sections, etc.).
     However, these are more challenging for automated processing due to their variable section structure, formatting, and rich visual representations.
 \end{enumerate}
 
@@ -54,11 +54,11 @@ While it \emph{does not have a rigid document structure} like the 10-K, it typic
 As we outlined in Section~\ref{subsec:financial_reports}, UK annual reports have the following inconvenient properties with regard to large-scale text understanding.
 \begin{itemize}
     \item They are very long documents.
-    Throughout the years, their average length has been increasing significantly with the number of pages rising 57\% for the median report from 2003 to 2016 (47 to 74 pages, respectively) (\cite{lewis_young_2019}), due to additional regulations between 2006 and 2008 (\cite{el-haj2019retrieving};
+    Throughout the years, their average length has been increasing significantly with the number of pages rising 57\% for the median report from 2003 to 2016 (47 to 74 pages, respectively)~\cite{lewis_young_2019}, due to additional regulations between 2006 and 2008 (\cite{el-haj2019retrieving};
     \item They have variable nomenclature.
-    From firm to firm, naming conventions vary \enquote{dramatically}, with more than 20 unique titles for various sections (e.g., Chair's letter to shareholders, Management Commentary) (\cite{lewis_young_2019});
+    From firm to firm, naming conventions vary \enquote{dramatically}, with more than 20 unique titles for various sections (e.g., Chair's letter to shareholders, Management Commentary)~\cite{lewis_young_2019};
     \item They incorporate embedded info-graphics.
-    While domain experts hail the integration of highly interactive elements into corporate reporting (\cite{kriz2016future}), the compilation to PDF makes the task of analysing such unstructured documents automatically even harder (\cite{lewis_young_2019});
+    While domain experts hail the integration of highly interactive elements into corporate reporting~\cite{kriz2016future}, the compilation to PDF makes the task of analysing such unstructured documents automatically even harder~\cite{lewis_young_2019};
 \end{itemize}
 
 These challenges motivate the work of~\cite{elhaj2019multilingual} who \begin{enumerate*}[label=(\alph*)]
@@ -83,7 +83,7 @@ These challenges motivate the work of~\cite{elhaj2019multilingual} who \begin{en
 \subsection{NLP in Accounting and Finance}\label{subsec:nlp-in-accounting-and-finance}
 The relevance of this project should also be understood from the perspective of the development of Natural Language Processing (NLP) in the Accounting and Finance (AF) domain.
 As outlined in~\cite{elliott1998accounting}, investors’ trust in the accountability of businesses would be based no longer as much on just the financial statements, but also on more descriptive narratives that define strategy and planning of resource use.
-While some recognise the importance of understanding in-domain textual information (\cite{li2010textual}), others like~\cite{el-haj2019meaning} report that the industry is still doubtful and cynical about the NLP applications in the analysis of financial market disclosures.
+While some recognise the importance of understanding in-domain textual information~\cite{li2010textual}, others like~\cite{el-haj2019meaning} report that the industry is still doubtful and cynical about the NLP applications in the analysis of financial market disclosures.
 Furthermore, the latter also observe that AF researchers rely extensively on bag--of--words models, which are \emph{not sufficient to encode complex contextual and semantic meaning} (especially in a domain with such \emph{specialized language}).
 As for ATS~\cite{hollander-white-af} is said to be the single AF study into disclosure summarisation.
 It demonstrates that machine-generated summaries are less likely to bias positively investor decisions compared to managerial ones.
@@ -99,7 +99,7 @@ The FNS Task is part of the annual Financial Narrative Processing (FNP) Workshop
 
 For that purpose, they produce datasets of extracted narratives (with the help of the CFIE-FRSE tool) from annual reports of UK companies listed on the London Stock Exchange (LSE).
 
-In their FNS 2022 Task, there were $3,863$ such reports (Table~\ref{tab:fns22-data}), while the average length was reported at 80 pages, and the maximum of more than 250 pages (\cite{litvak-vanetik-2021-summarization}).
+In their FNS 2022 Task, there were $3,863$ such reports (Table~\ref{tab:fns22-data}), while the average length was reported at 80 pages, and the maximum of more than 250 pages~\cite{litvak-vanetik-2021-summarization}.
 
 Additionally, for every report, there were at least two gold summaries situated in the annual report itself~\footnote{
     The gold summaries being already in the annual report is not problematic because these reports are already written by domain experts who know how to summarise the financial state of a company.
@@ -123,7 +123,7 @@ The workshop's goal was to build ATS systems that generate a single summary for 
     \label{tab:fns22-data}
 \end{table}
 
-We acknowledge that due to the scarcity of publicly available financial data this third-year project could not have been possible without the kind permission of the FNP organisers to use the training and validation datasets from their FNS22 Task (\cite{fnp-2022-financial}).
+We acknowledge that due to the scarcity of publicly available financial data this third-year project could not have been possible without the kind permission of the FNP organisers to use the training and validation datasets from their FNS22 Task~\cite{fnp-2022-financial}.
 
 \subsection{Aim and Objectives}\label{subsec:aim-and-objectives}
 The summarisation of UK annual reports is a challenging task because of
@@ -132,7 +132,7 @@ The summarisation of UK annual reports is a challenging task because of
      \item the discrepancy between Accounting and Finance (AF) research in NLP and the general NLP field (Section~\ref{subsec:nlp-in-accounting-and-finance}), and
      \item the nature of long-text summarisation in terms of available training data, financial language representation, complex model architectures, and reliability of evaluation metrics (Section~\ref{sec:background}).
  \end{enumerate*}
- Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field (Section~\ref{subsec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank (\cite{mihalcea-tarau-2004-textrank}), and LexRank (\cite{Erkan2004LexRankGC}).
+ Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field (Section~\ref{subsec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank~\cite{mihalcea-tarau-2004-textrank}, and LexRank~\cite{Erkan2004LexRankGC}.
  For that purpose, several objectives had to be made:
  \begin{itemize}
      \item pre-processing noisy report narratives (Section~\ref{subsec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{subsec:sentence_extraction}).

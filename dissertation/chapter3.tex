@@ -49,7 +49,7 @@ To address these issues, we have developed a rigorous data cleaning pipeline tha
     \item removes sentences shorter than 3 words
 \end{enumerate*}.
 
-As discussed in Section~\ref{subsec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages (\cite{litvak-vanetik-2021-summarization}).
+As discussed in Section~\ref{subsec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages~\cite{litvak-vanetik-2021-summarization}.
 Each one has at least two--three gold summaries provided by the FNS22 organisers, and we compute some statistics
 \begin{enumerate*}
     \item helpful for grasping the nature of the output text, but also
@@ -79,7 +79,7 @@ We arrive at this number by observing that the median number of words in the lon
 As we were only provided with the training and the validation FNS22 datasets (Table~\ref{tab:fns22-data}),
 we decided to treat the validation set as a testing set (Table~\ref{tab:fns22-my-data})\footnote{
     We observed that two of the annual report files were empty, hence the difference of 3,361 and 3,363 (Table~\ref{tab:fns22-data} without testing set).
-} and perform our own training-validation data split on a sentence level instead due to the significant variation in report lengths (\cite{litvak-vanetik-2021-summarization}).
+} and perform our own training-validation data split on a sentence level instead due to the significant variation in report lengths~\cite{litvak-vanetik-2021-summarization}.
 \begin{table}[h]
     \centering
     \begin{tabular}{lrr r}
@@ -103,7 +103,7 @@ Therefore, we believe that the training and validation sentences are to a large 
 
 \subsection{Sentence Extraction}\label{subsec:sentence_extraction}
 We approach the annual report summarisation problem from a supervised perspective - we cast the task of Extractive Text Summarisation (ETS) as a binary classification problem defined on the sentence level.
-More formally, we can describe the annual report as $d=\{s_{1}, s_{2}, \dots, s_{n}\}$, where $d$ is a document, represented in terms of sentences $s_{i}, \  1 \leq i \leq n$ (\cite{liu2019finetuningbert}).
+More formally, we can describe the annual report as $d=\{s_{1}, s_{2}, \dots, s_{n}\}$, where $d$ is a document, represented in terms of sentences $s_{i}, \  1 \leq i \leq n$~\cite{liu2019finetuningbert}.
 
 Then, a candidate summary\footnote{
     A candidate summary is generated from a model $m_{i}$ but it is not yet a \emph{best summary}.
@@ -115,15 +115,15 @@ We argue that in order to increase the positive samples (i.e., the summarizing s
 ourselves to just one gold summary in the training process unlike~\cite{orzhenovskii-2021-t5}.
 Our goal is to achieve better latent feature extraction of summaries through the employment of all existing data, hence using \textbf{\emph{any}} gold summaries.
 However, we are aware that this approach is more likely to encounter standard ETS issues, specifically - extracted summary sentences could be retrieved from unrelated paragraphs in the report.
-This can cause the \enquote{dangling anaphora} phenomenon, i.e.\ de-contextualised extracts are stitched together and can mislead the reader due to out-of-context references (\cite{lin2009summarization}).
+This can cause the \enquote{dangling anaphora} phenomenon, i.e.\ de-contextualised extracts are stitched together and can mislead the reader due to out-of-context references~\cite{lin2009summarization}.
 
-While some authors (\cite{zmandar-etal-2021-joint}) follow the greedy ROUGE-maximisation method of matching summary
+While some authors~\cite{zmandar-etal-2021-joint} follow the greedy ROUGE-maximisation method of matching summary
 sentences to document sentences (established in~\cite{nallapati2017summarunner}), we approach the problem in a
 more practical and faster fashion.
 After manual observation of the reports against their gold summaries, it became clear that almost for all sentences
 belonging to $c^{*}_{i}$, there was an exact match with a sentence in the whole annual report $d$.
 
-This hypothesis was proven correct by one of the FNS contestants (\cite{orzhenovskii-2021-t5}) who reported that
+This hypothesis was proven correct by one of the FNS contestants~\cite{orzhenovskii-2021-t5} who reported that
 99.4\% of the summaries were included in the report as whole subsequences.
 Hence, after having pre-processed the text documents we iteratively match the sentences and generate the binary
 classification labels ($\{1,0\}$ representing \emph{summary} and \emph{non-summary}, respectively) for both
@@ -135,7 +135,7 @@ Additionally, the training and validation sets are split in a 90--10 stratified 
 \subsection{Under-sampling and Data Augmentation}\label{subsec:data_augmentation}
 Due to the fact that the annual reports are extremely long while the summaries are very short, the sentence dataset is highly imbalanced with a ratio of around 1:10.
 Therefore, we took two\footnote{
-    We also tried a third approach that is to augment sentences with the help of DINO (\cite{schick2021generating}) used for high-quality
+    We also tried a third approach that is to augment sentences with the help of DINO~\cite{schick2021generating} used for high-quality
     semantic augmentation, but we did not manage to recreate the desired output.
 } different approaches to balance the classes:
 \begin{enumerate}
@@ -152,8 +152,8 @@ Therefore, we took two\footnote{
         \end{tabular}
         \caption{90\% Random Under-sampling}\label{tab:random_under_sampling}
     \end{table}
-    \item \textbf{Data Augmentation} -- We use the \emph{back-translation} technique (\cite{hoang-etal-2018-iterative}) to generate new sentences from the minority class (i.e., summary sentences), followed by a 80\% random under-sampling of the majority class (Figure~\ref{tab:data_augmentation}).
-    For that purpose, we translate all training summary sentences from English to French and back to English with the help of the MarianMT model (\cite{junczysdowmunt2018marian})\footnote{\url{https://huggingface.co/Helsinki-NLP/opus-mt-fr-en}}.
+    \item \textbf{Data Augmentation} -- We use the \emph{back-translation} technique~\cite{hoang-etal-2018-iterative} to generate new sentences from the minority class (i.e., summary sentences), followed by a 80\% random under-sampling of the majority class (Figure~\ref{tab:data_augmentation}).
+    For that purpose, we translate all training summary sentences from English to French and back to English with the help of the MarianMT model~\cite{junczysdowmunt2018marian}\footnote{\url{https://huggingface.co/Helsinki-NLP/opus-mt-fr-en}}.
     The resulting dataset is then directly injected during the training process.
     Refer to Section~\ref{subsec:hyperparameters} for the experiments with the different data balancing techniques.
     \begin{table}[ht]
@@ -170,7 +170,7 @@ Therefore, we took two\footnote{
 \end{enumerate}
 
 \subsection{Recurrent Extractor Model}\label{subsec:rnn_model}
-As our main recurrent model we propose a GRU-based architecture (\cite{cho-etal-2014-learning}), inspired by~\cite{zmandar-etal-2021-joint} and depicted in Figure~\ref{fig:rnn_model}. \\
+As our main recurrent model we propose a GRU-based architecture~\cite{cho-etal-2014-learning}, inspired by~\cite{zmandar-etal-2021-joint} and depicted in Figure~\ref{fig:rnn_model}. \\
 
 \begin{minipage}[ht]{0.45\textwidth}
     The model consists of a word embedding layer, a fully-connected feed-forward neural network (FCFFNN), two bidirectional gated recurrent units (GRU) layers, a dot-product attention layer, and a linear projection layer with softmax activation.
@@ -343,7 +343,7 @@ From the above experiments it is hard to make any certain conclusions on the eff
     It would make more sense for its application in the over-parameterised model, though this does not seem to be the case (Fig.~\ref{fig:dropout_and_hidden_size}).
 } or the use of an attention mechanism (Section~\ref{subsec:seq2seq}).
 We believe that only one \emph{single-head attention} is not sufficient to learn all the complex relationships between words in the sentences.
-Our reasoning is that because a particular head specializes to only specific language aspects (i.e., syntactic, semantic, etc) (\cite{clark-etal-2019-bert})),
+Our reasoning is that because a particular head specializes to only specific language aspects (i.e., syntactic, semantic, etc)~\cite{clark-etal-2019-bert}),
 for future experiments it would be much more reasonable to use multiple heads instead.
 Nevertheless, there still are some practical benefits of attention to our extractive summarisation system which we will discuss in Section~\ref{sec:evaluation}.
 
