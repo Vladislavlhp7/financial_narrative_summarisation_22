@@ -35,13 +35,25 @@ Their individual evaluation is based on gold summaries $c^{*}_{1}$ and $c^{*}_{2
 candidates $c_{1}$ and $c_{2}$ are identical).
 This guarantees that we are always comparing candidate summaries based on their maximal evaluation scores.
 
-Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance}.
-We also include official results from the FNS competitions for comparison, namely the FNS21's T5-LONG-EXTRACT
-(\cite{orzhenovskii-2021-t5}), and topline MUSE (\cite{litvak-last-2013-multilingual}) (highlighted with a $**$).
-As for the FNS22, we include team LIPI's T5 model (with a $*$) (\cite{el-haj-etal-2022-financial}), which is the best English model
-in that competition edition and it is completely based on the T5-LONG-EXTRACT model.
-We must remind the reader that we were not provided with the FNS22 testing data, and we had to create our own training-validation sets (see Section~\ref{subsec:data}),
-hence our \emph{evaluation can only serve as an approximation}.
+Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Tables~\ref{tab:rouge_performance_validation} and~\ref{tab:rouge_performance}.
+While Table~\ref{tab:rouge_performance_validation} shows the results on the official validation set used as a testing set by us (Section~\ref{subsec:data}),
+Table~\ref{tab:rouge_performance} includes various FNS results on official testing sets where validation ones were not publicly available.
+The purpose of such an \emph{approximate comparison} is to assess the performance of our models and see their \emph{approximate position} in the FNS competition.
+
+
+Therefore, we include official FNS22 model results, namely:
+\begin{enumerate*}
+    \item team LIPI's T5 model (\cite{el-haj-etal-2022-financial}) (testing data is only available), which is the best English model
+          in that competition edition and also completely based on the T5-LONG-EXTRACT model, and
+    \item team LSIR's mT5 model (\cite{foroutan-etal-2022-multilingual}) (testing and validation data available), which is the best model overall for all languages in the competition
+\end{enumerate*}. Both of these are highlighted with a $\heartsuit$.
+
+As for the FNS21, we include:
+\begin{enumerate*}
+    \item T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5}),
+    \item and topline MUSE (\cite{litvak-last-2013-multilingual})
+\end{enumerate*}. Both of these are highlighted with a $\clubsuit$ and the results are based on FNS21 testing data.
+
 
 \begin{table}[ht]
     \centering
@@ -49,30 +61,50 @@ hence our \emph{evaluation can only serve as an approximation}.
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            $\star$ FinBERT-base & 0.544 & 0.382 & 0.524 \\
-            T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5})** & 0.54 & 0.38 & 0.52 \\
-            LIPI's T5 (\cite{el-haj-etal-2022-financial})* & 0.496 & 0.374 & 0.487 \\
+            $\spadesuit$ FinBERT-base & 0.544 & 0.382 & 0.524 \\
             FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
-            MUSE (\cite{litvak-last-2013-multilingual})** & 0.5 & 0.28 & 0.45 \\
-            $\star$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
+            $\spadesuit$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
             GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
             LexRank & 0.250 & 0.086 & 0.227 \\
             TaxtRank & 0.220 & 0.064 & 0.196 \\
             GRU-base & 0.220 & 0.063 & 0.201 \\
             GRU-base + attention & 0.221 & 0.062 & 0.204 \\
         \bottomrule
-    \end{tabular}\caption{ROUGE: Model performance on the FNS21 test dataset.}
+    \end{tabular}\caption{ROUGE $F1$ Scores on official validation set used as testing}
+    \label{tab:rouge_performance_validation}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
+        \midrule
+            $\spadesuit$ FinBERT-base (official validation set) & 0.544 & 0.382 & 0.524 \\
+            $\clubsuit$ T5-LONG-EXTRACT (FNS21) & 0.54 & 0.38 & 0.52 \\
+            $\heartsuit$ LIPI's T5 (official testing set) & 0.496 & 0.374 & 0.487 \\
+            $\heartsuit$ LSIR's mT5 (official testing set) & 0.489 & 0.365 & 0.479 \\
+            $\heartsuit$ LSIR's mT5 (official validation set) & 0.440 & 0.301 & 0.423 \\
+            $\clubsuit$ MUSE (FNS21) & 0.5 & 0.28 & 0.45 \\
+            $\spadesuit$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
+            LexRank (official validation set) & 0.250 & 0.086 & 0.227 \\
+            TaxtRank (official validation set) & 0.220 & 0.064 & 0.196 \\
+        \bottomrule
+    \end{tabular}\caption{ROUGE $F1$ Scores: approximate comparison with FNS results}
     \label{tab:rouge_performance}
 \end{table}
 
 We can provide the following commentary on the results:
 \begin{itemize}
-    \item The best performing model is FinBERT-base (\cite{yang2020finbert}), which is a pre-trained on financial communication documents,
-        achieving an average ROUGE-2 score of $0.382$, which \emph{outperforms the best English model in the FNS22} - LIPI's T5 (\cite{el-haj-etal-2022-financial})
-        and it is \emph{at least as good as the official best model in the FNS21} competition: the T5-LONG-EXTRACT (\cite{orzhenovskii-2021-t5}, Section~\ref{subsec:text-summarisation}).
+    \item Our best performing model, FinBERT-base (\cite{yang2020finbert}), which is a pre-trained on financial communication documents,
+        achieves an average ROUGE-2 score of $0.382$, which outperforms by $0.081$ on the validation set the best performing
+        model overall in the FNS22 competition - \emph{LSIR's mT5} (\cite{foroutan-etal-2022-multilingual}).
+        Furthermore, our FinBERT-base also seems to \emph{slightly outperform the best English model in the FNS22} - LIPI's T5 (\cite{el-haj-etal-2022-financial}) with $0.008$.
+        However, our model is tested on the official validation set, while LIPI's T5 is tested on the official testing set, hence the comparison is not entirely fair.
+        Keeping this in mind, we reach similar conclusions for the FNS21's T5-LONG-EXTRACT model (\cite{orzhenovskii-2021-t5}), which seems to have comparable results to our FinBERT-base model. \\
         Surprisingly, data augmentation does not improve the performance of FinBERT-base, and we believe this was caused by
         the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters} and potentially over-fitting.
-        Nevertheless, both models outperform the official top-line (\cite{litvak-last-2013-multilingual}) by a significant margin for ROUGE-2.
+        Nevertheless, both models clearly outperform the official top-line (\cite{litvak-last-2013-multilingual}) by a significant margin for ROUGE-2 (however, the datasets are different).
     \item The GRU-base + attention + back-translation model is the best performing model out of all recurrent neural architectures.
     While preliminary binary classification results did not show any considerable differences between the models, clearly
     \begin{enumerate*}
@@ -80,7 +112,7 @@ We can provide the following commentary on the results:
         \item the back-translation data augmentation significantly improves the practical performance of the model (i.e., the probability distribution of the summarising sentences).
     \end{enumerate*}
     \item At the same time, we acknowledge that the universal summarisation baselines: LexRank and TextRank, outperform
-        our simple GRU models, and we attribute this to both:
+        our simple GRU models (Table~\ref{tab:rouge_performance_validation}), and we attribute this to both:
     \begin{enumerate*}
         \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}),
         \item the 90\% random under-sampling of the majority class data (see Section~\ref{subsec:data}), and
@@ -93,22 +125,22 @@ After having established the quantitative performance of our models, we now turn
 For a random annual report we generated a summary using the FinBERT-base + data augmentation model and
 the GRU-base + attention model (see Figure~\ref{fig:summary_examples}
 where green colour indicates the summarising sentences, and red colour -- the non-summarising sentences).
+We chose these models over the best ones because they have slightly lower ROUGE scores, and make more mistakes, which will help us identify the issues in the summarisation process.
 We can make the following conclusions based on observation:
 \begin{enumerate}
-    \item The FinBERT-base model has \emph{around 50\% of its contents} belonging to any of the gold summaries (Figure~\ref{fig:finbert_summary}),
+    \item The FinBERT model has \emph{around 50\% of its contents} belonging to any of the gold summaries (Figure~\ref{fig:finbert_summary}),
         while all other sentences look very convincing in terms of their summarising potential (i.e., they are informative of the financial situation but also concise)
     \item At the same time, the GRU-model has the opposite characteristics:
     \begin{enumerate*}
         \item none of its sentences are in the gold summary (Figure~\ref{fig:rnn_summary}), while
-        \item all of them are very long, containing uninformative but diverse sets of words, which in turn results in higher ROUGE scores.
+        \item all of them are very long, containing uninformative but diverse sets of words, which in turn results in higher ROUGE scores
     \end{enumerate*}.
     This clearly represents the problem of using ROUGE as a metric for summarisation since it is only measures the lexical overlap, while being semantically unaware (\cite{akter-etal-2022-revisiting}).
 \end{enumerate}
-While we acknowledge that the GRU model seems to be biased towards long and noisy sentences, we must note that in the example
+While we acknowledge that the GRU model seems to be \emph{biased towards long and noisy sentences}, we must note that in the example
 only $5$ sentences have been generated to fit the word limit.
-As we demonstrated that our model is accurate at recognising the summarising sentences (Section~\ref{subsec:hyperparameters}),
-we believe that it is more of a summary generation issue (i.e., the mechanism to combine predicted sentences into a single summary)
-rather than a classification issue (see Section~\ref{subsec:limitations}).
+Therefore, we believe the summary generation process (i.e., the mechanism to combine predicted sentences into a single summary) further
+exacerbates the accuracy of the summarisation.
 
 Although, the practical results from Figure~\ref{fig:summary_examples} might seem disappointing, we must once again remind the reader that the reports are extremely
 long with an average number of sentences and words at around $2,700$ and $58,000$, respectively (\cite{litvak-vanetik-2021-summarization}).
@@ -146,8 +178,9 @@ Once our datasets are created, we
 \end{enumerate*},
 training them in a supervised manner for a binary classification task (Sections~\ref{subsec:training} and~\ref{subsec:hyperparameters}).
 We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Section~\ref{sec:evaluation}).
-Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement over an official FNS21 topline but also a
-competitive performance with the best FNS21 extractive model, although noting that the our models are tested on different data (Section~\ref{subsec:data}).
+Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement on the validation set over the best FNS22 overall model (\cite{foroutan-etal-2022-multilingual}).
+Additionally, we show that our FinBERT also achieves competitive performance with the best FNS22 English model,
+although noting that the our models are tested on different data (Section~\ref{subsec:data}).
 We also discuss the quality of the produced summaries (Section~\ref{subsec:qualitative-discussion}), and in
 Section~\ref{subsec:limitations} we describe in more depth the limitations of our system and possible solutions.
 \\
@@ -168,7 +201,7 @@ In terms of \emph{innovational aspects} of our project in the context of the FNS
 
 \subsection{Discussion of Limitations}\label{subsec:limitations}
 Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive
-performance for the FNS21 task, there are several limitations that we would like to discuss:
+performance for the FNS22 task, there are several limitations that we would like to discuss:
 \begin{itemize}
     \item \emph{Sentence embedding} - Although, we note our use of domain-specific FastText word embeddings due to their
     ability to handle noise and outperform general-domain embeddings (\cite{rahimikia2021realised}), we do not perform
@@ -179,6 +212,7 @@ performance for the FNS21 task, there are several limitations that we would like
     we were pessimistic of using it due to the loss of word order information (e.g., ``the company is good'' being represented just as ``is the company good'').
     Therefore, a limitation of our work is that we do not investigate the impact of using sentence embeddings
     (be it with positional encoding or average-pooling) on the performance of our models.
+    \item \emph{Non-exhaustive evaluation} -
     \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{sec:evaluation}).
         However, this is a very simplistic approach to summarisation that
         \begin{enumerate*}
@@ -213,7 +247,8 @@ In this section we outline some possible directions for future work.
         to extract useful information from the summary.
         \item \emph{Packaged Software} - Build a drag-and-drop application that allows users to upload a PDF file of an
         annual report, where the backend will perform the steps above and return a summary.
-        The above textual analysis features could be integrated as interactive visual elements.
-        Furthermore,
+        The suggested textual analysis features could be integrated as interactive visual elements.
+        Furthermore, through recognising company names, the system could also provide dashboard of news and stock prices
+        with the help of the company-to-ticker mapping (\cite{}).
     \end{enumerate}
 \end{itemize}
