@@ -46,13 +46,14 @@
 %% This defines the title (the \\ forces a line break)
 \title{Extractive Summarisation of\\
   UK Annual Reports}
+
 %% and author
 \author{Vladislav Yotkov}
 \stuid{10463973}
 %% and supervisor
 \principaladviser{Dr. Jonathan Shapiro}
 %% and the year of the report
-%\reportyear{2023}
+\submitdate{April 2023}
 
 %% this defines the file that contains the text of the abstract, there
 %% must be one of these by the time you submit your report.
@@ -84,7 +85,9 @@
 %\renewcommand{\bibname}{References}
 
 \usepackage{listings}
-
+\usepackage{amsthm}
+\newtheorem{example}{Example}
+\usepackage{epigraph}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{booktabs}
 \usepackage[acronym]{glossaries}
@@ -99,6 +102,8 @@
 \usetikzlibrary{positioning, fit, calc, shapes, matrix, arrows.meta}
 \usepackage{xcolor}
 \usepackage[colorlinks]{hyperref}
+\usepackage{cite}
+%\bibliographystyle{alpha}
 %\usepackage{hyperref}
 
 
@@ -106,6 +111,7 @@
 \newacronym{html}{HTML}{Hypertext Markup Language}
 \newacronym{css}{CSS}{Cascading Style Sheets}
 \newacronym{js}{JS}{JavaScript}
+\fontfamily{phv}
 
 %% End of preamble, the actual document starts here
 %%
@@ -120,6 +126,10 @@
 \input{abstract}
 \afterabstract
 
+\prefacesection{Acknowledgements}
+I would like to thank my supervisor Dr. Jonathan Shapiro and Dr. Riza Batista-Navarro for the provided advice along the way. Also, this project could not have been possible without the UK annual reports data and the computing resources provided by the Financial Narrative Processing's administration and the UoM's Computational Shared Facility, respectively. 
+\afterpreface
+
 %% Generate contents etc
 %\tableofcontents
 
@@ -129,8 +139,6 @@
 %\printglossary
 
 
-%\listoffigures
-%\listoftables
 
 %% These include the actual text
 \include{chapter1}

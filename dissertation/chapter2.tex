@@ -28,10 +28,10 @@ The results are sparse individual word vectors being orthogonal to each other wh
 
 
 Traditionally, AF research has represented an input text with the help of bag-of-words (BOW) models which can be viewed from the  \begin{enumerate*}
-    \item the binary perspective - represent a whole document $d$ as a binary vector containing ones for all words $w_{i}$ occurring in $d$ from $V$, 
-    \item the term frequency perspective - encode number of word occurrences in documents instead of binary representation (\cite{Xu2013AnAT}), and 
+    \item the binary perspective - represent a whole document $d$ as a binary vector containing ones for all words $w_{i}$ occurring in $d$ from $V$,
+    \item the term frequency perspective - encode number of word occurrences in documents instead of binary representation (\cite{Xu2013AnAT}), and
     \item the tf-idf perspective - extend the latter to penalise ubiquitous terms (\cite{SprckJones1972ASI}).
-\end{enumerate*} 
+\end{enumerate*}
 Nevertheless, these vectors are very sparse and unable to encode more complex contextual and semantic meaning.
 
 To address these shortcomings \emph{short}\footnote{i.e., with a small number of dimensions} and \emph{dense}\footnote{i.e., continuous real-numbered values instead of 0/1s} word embeddings like Word2Vec (\cite{mikolov2013efficient}) and FastText (\cite{bojanowski-etal-2017-enriching}) have been developed.
@@ -40,9 +40,9 @@ In~\cite{mikolov2013efficient} the authors manage to condense the vector space a
 
 Furthermore, the proposed models - CBOW (Continuous Bag of Words\footnote{
     CBOW naming is derived from \begin{enumerate*}
-        \item the continuous distributed representation of the context and 
-        \item the projection layer being shared across context words, i.e., the order of words does not affect the projection (similar to how bag-of-words model fails to encode word order).     
-    \end{enumerate*} 
+        \item the continuous distributed representation of the context and
+        \item the projection layer being shared across context words, i.e., the order of words does not affect the projection (similar to how bag-of-words model fails to encode word order).
+    \end{enumerate*}
 }) and Skip-gram evidently capture subtle semantic relationships and allow intuitive arithmetic operations as shown in the popular analogy: $\overrightarrow{\text{king}}\ - \overrightarrow{\text{man}} +\overrightarrow{\text{woman}}\ \approx \overrightarrow{\text{queen}}$\footnote{
     For a formal explanation on how analogies are realised in word embeddings we direct the readers to~\cite{ethayarajh-etal-2019-towards}
 }.
@@ -50,19 +50,19 @@ Furthermore, the proposed models - CBOW (Continuous Bag of Words\footnote{
 
 The intuition for the two Word2Vec models is that in CBOW, the context (i.e., the surrounding tokens) is used to predict the middle token, while in skip-gram, the input token is used to predict the context (i.e., the surrounding tokens) (Figure~\ref{fig:cbow_skipgram}).
 
-Meanwhile, internally, the context prediction is cast as a binary classification task with positive examples being the target word and its surroundings, whereas the negatives ones are generated through random sampling from the dictionary. 
-Then, the CBOW embeddings are the learned weights of a logistic regression classifier with future and history words (i.e., the context window) as the input and the goal of correctly classifying the word in-between. 
+Meanwhile, internally, the context prediction is cast as a binary classification task with positive examples being the target word and its surroundings, whereas the negatives ones are generated through random sampling from the dictionary.
+Then, the CBOW embeddings are the learned weights of a logistic regression classifier with future and history words (i.e., the context window) as the input and the goal of correctly classifying the word in-between.
 In contrast, the Skip-gram uses the middle word as an input to the classifier and predicts the individual context words around it.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{../charts/cbow_skipgram}~\caption{Word-from-context and context-from-word prediction in CBOW and Skip-gram, respectively (\cite{mikolov2013efficient})}.
+    \includegraphics[width=0.75\textwidth]{../charts/cbow_skipgram}~\caption{Word-from-context and context-from-word prediction in CBOW and Skip-gram, respectively, taken from~\cite{mikolov2013efficient}}.
     \label{fig:cbow_skipgram}
 \end{figure}
 
 A downside to the Word2Vec models is that they cannot handle out-of-vocabulary (OOV) word tokens, i.e., they cannot generate an embedding vector for words missing from the training data, which is crucial in real-life problems with \emph{noisy} input or morphologically rich languages.
 For this reason~\cite{bojanowski-etal-2017-enriching}, propose FastText as an extension to the Skip-gram model that makes use of character-level information to deal with unknown tokens.
-Here, each word is itself a bag of character n-grams which captures meaning of prefixes, suffixes, and morphemes. 
+Here, each word is itself a bag of character n-grams which captures meaning of prefixes, suffixes, and morphemes.
 Additionally, two symbols are further introduced to mark the beginning and the end of a token, and help differentiate between sub-words and short words.
 For example, the character trigrams of the word \emph{believe} are \emph{$<$be, bel, eli, lie, iev, eve, ve$>$} where the sub-word \emph{lie} is different from the word token \emph{$<$lie$>$}.
 
@@ -107,7 +107,7 @@ To resolve these issues more advanced RNN architectures like LSTMs and GRUs have
 
 The Long Short-Term Memory (LSTM) recurrent neural network has become a ubiquitous method in sequential problems (e.g., language modelling, time series forecasting).
 This is so because it allows long-term dependencies to propagate through the network with the help of control gates \- \emph{input} and \emph{forget}, which reduce the effect of the vanishing gradient issue in the vanilla RNN\footnote{
-    We direct readers to~\cite{bayer2015learning} where the authors demonstrate that the LSTM's \enquote{temporal} gradient is unaffected by the fixed weight factor $W$ of the vanilla RNN that is driving the derivative to zero. 
+    We direct readers to~\cite{bayer2015learning} where the authors demonstrate that the LSTM's \enquote{temporal} gradient is unaffected by the fixed weight factor $W$ of the vanilla RNN that is driving the derivative to zero.
     This is ensured by the additional architecture unit \- the \emph{forget} gate, which learns to  control the gradient flow in the network.
 }.
 
@@ -137,7 +137,7 @@ Then, for a single word $x_i$, its respective \emph{annotation} (i.e., condensed
         \includegraphics[width=1\columnwidth]{../charts/bi-lstm}
         \caption{Unfolded bi-directional LSTM}
         \label{fig:bilstm}
-    \end{subfigure}~\caption{Unfolded recurrent architectures (\cite{zhiyong2018bilstm})}
+    \end{subfigure}~\caption{Unfolded recurrent architectures, taken from~\cite{zhiyong2018bilstm}}
     \label{fig:recurrent_unfolded}
 \end{figure}
 
@@ -242,7 +242,7 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
     } self-attention to allow capturing of global context.
     This mechanism has two key components (Fig.\ref{fig:attention_dot_product}):
     \begin{itemize}
-        \item \emph{The scaled dot-product} (Eq.\ref{fig:attention}) computes the attention weights (see Section~\ref{subsec:seq2seq}) to be used for generating a weighted representation of the input sequence.
+        \item \emph{The scaled dot-product} (Eq.\ref{eq:attention}) computes the attention weights (see Section~\ref{subsec:seq2seq}) to be used for generating a weighted representation of the input sequence.
         Each token from the input sequence is represented as a $q$-query, $k$-key, and $v$-value vector (packed together into linearly-projected\footnote{
             The query vectors, key vectors, and value vectors are linearly projected from the input token embeddings using separate learnable weight matrices.
         } $Q$, $K$, $V$ matrices, respectively).
@@ -251,13 +251,9 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
         This mechanism allows the Transformer to learn relationships between any two tokens and hence the significant computational load $O(n^2)$.
         Nevertheless, since these computations can be performed independently for each token, the entire input sequence can be processed simultaneously unlike in RNN architectures.
 
-        \begin{figure}
-            \begin{equation}
-                \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\label{eq:equation2}
-            \end{equation}
-            \caption{Attention calculation (Query, Key, Value)}
-            \label{fig:attention}
-        \end{figure}
+        \begin{equation}\label{eq:attention}
+            \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V\label{eq:equation2}
+        \end{equation}
 
         \item \emph{The multi-head attention} (\cite{vaswani2017attention}) is a mechanism that allows the Transformer to learn multiple representations of the input sequence.
         This is achieved by stacking multiple attention heads (each with its own $Q$, $K$, $V$ matrices) and concatenating their outputs (Figure~\ref{fig:attention_dot_product}).
@@ -274,7 +270,7 @@ The Transformer (\cite{vaswani2017attention}) is another sequence-to-sequence ar
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.75\columnwidth]{../charts/attention}~\caption{Scaled dot-product and multi-head attention (\cite{vaswani2017attention})}
+    \includegraphics[width=0.75\columnwidth]{../charts/attention}~\caption{Scaled dot-product and multi-head attention, taken from \cite{vaswani2017attention}}
     \label{fig:attention_dot_product}
 \end{figure}
 
@@ -623,12 +619,7 @@ summarisation tasks which measures the overlapping units (i.e., n-grams) of a pr
 Here we briefly describe some of the most common variants of ROUGE (especially in the context of the FNS Task):
 \begin{enumerate}
     \item \textbf{ROUGE-N} measures the overlap of $n$-grams (sequences of $n$ words) between $c$ and $c^{*}$.
-    For example, ROUGE-1 and ROUGE-2\footnote{
-        We briefly demonstrate how to compute ROUGE-2 for a sentence pair $c$="Fox can run" and $c^{*}$="Fox can walk".
-        Here, the bigrams of $c$ are \{("Fox", "can"), ("can", "run")\} and the bigrams of $c^{*}$ are \{("Fox", "can"), ("can", "walk")\}.
-        The intersection of the two sets is \{("Fox", "can")\}, which is the only bigram that appears in both $c$ and $c^{*}$.
-        Therefore, ROUGE-2 recall = Overlapping bigrams / Total bigrams in reference summary = $\frac{1}{2}=0.5$.
-    } (the official FNS metric) correspond to the overlap measurement of unigrams and bigrams, respectively.
+    For example, ROUGE-1 and ROUGE-2 (the official FNS metric) correspond to the overlap measurement of unigrams and bigrams, respectively.
     \item \textbf{ROUGE-L} uses the longest common subsequence (LCS) to measure the similarity between $c$ and $c^{*}$.
     The LCS is the longest sequence of words that appears in both summaries \emph{in the same order}, but \emph{not necessarily consecutively}.
     Thus, ROUGE-L is less sensitive to word order compared to ROUGE-N and can capture longer-range dependencies.
@@ -642,6 +633,12 @@ While ROUGE scores are explainable and easily implementable, they have certain l
 \end{enumerate*}.
 Despite these limitations, ROUGE remains a widely-used evaluation measure, particularly in extractive summarization and we use it in this work as well.
 
+\begin{example}
+    We briefly demonstrate how to compute ROUGE-2 for a sentence pair $c$=\("\)Fox can run\("\) and $c^{*}$=\("\)Fox can walk\("\).
+    Here, the bigrams of $c$ are \{("Fox", "can"), (\("\)can\("\), \("\)run\("\))\} and the bigrams of $c^{*}$ are \{("Fox", "can"), (\("\)can\("\), \("\)walk\("\))\}.
+    The intersection of the two sets is \{("Fox", "can")\}, which is the only bigram that appears in both $c$ and $c^{*}$.
+    Therefore, ROUGE-2 recall = Overlapping bigrams / Total bigrams in reference summary = $\frac{1}{2}=0.5$.
+\end{example}
 
 
 \begin{figure}[h]

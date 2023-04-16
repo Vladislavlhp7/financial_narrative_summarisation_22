@@ -307,8 +307,7 @@ For a machine translated sentence $s^m_i$ and its original sentence $s_i$, we \h
 \begin{enumerate*}
     \item $s^m_i$ contain a similar amount of noise as $s_i$ (due to the pdf-to-text conversion process),
     \item $s^m_i$ does not introduce enough variation to $s_i$ (i.e., $s^m_i$ and $s_i$ are too similar), and
-    \item while financial language itself is very domain-specific, it is not very semantically diverse (i.e., metaphors, idioms, etc.
-    are limited in use)
+    \item while financial language itself is very domain-specific, it is not very semantically diverse (i.e., metaphors, idioms, etc. are limited in use)
 \end{enumerate*}.
 
 % GRU vs LSTM + hidden size 64 vs 256
@@ -350,9 +349,9 @@ Nevertheless, there still are some practical benefits of attention to our extrac
 
 Overall, four variations of the RNN model engage our focus based on the results above and our design decisions (Figure~\ref{fig:summary_recall_data_augmentation_effect}):
 \begin{enumerate}
-    \item GRU-base with 90\% under--sampling \\
-    \item GRU-base with 90\% under--sampling + attention \\
-    \item GRU-base with 80\% under--sampling + data augmentation \\
+    \item GRU-base with 90\% under--sampling
+    \item GRU-base with 90\% under--sampling + attention
+    \item GRU-base with 80\% under--sampling + data augmentation
     \item GRU-base with 80\% under--sampling + data augmentation + attention
 \end{enumerate}
 Because our binary classification metrics do not demonstrate any significant differences between them, we will

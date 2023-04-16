@@ -7,7 +7,7 @@ Finally, we concatenate them to form the summary $c_{i}$ in natural order (i.e.,
 but also trim it to the maximum length of $1,000$ words (Section~\ref{subsec:fns}).
 
 In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$
-based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-$F_{1}$\footnote{
+based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-2\footnote{
     \begin{itemize}
         \item We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
               It can be accessed at: \url{https://github.com/pltrdy/rouge}
@@ -17,14 +17,9 @@ based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-$F_{1}$\foo
 For the FNS task due to the extractive nature of our approach we will evaluate our models based on
 the ROUGE-L--maximising $c^{*}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
 
-\begin{figure}[h]
-    \centering
-    \begin{equation}\label{eq:rouge_max}
-        r = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} R(c, c^{*}_{i})
-    \end{equation}
-    \caption{Candidate summary evaluation as a gold summary ROUGE-maximisation}
-    \label{fig:rouge_max}
-\end{figure}
+\begin{equation}\label{eq:rouge_max}
+    r = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} R(c, c^{*}_{i})
+\end{equation}
 
 The intuition is that by extracting multiple sentences from the report, our generated candidate summary can
 retain sentences from \emph{any} of the gold summaries.
@@ -61,8 +56,9 @@ As for the FNS21, we include:
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            $\spadesuit$ FinBERT-base & 0.544 & 0.382 & 0.524 \\
+            $\spadesuit$ FinBERT-base & \textbf{0.544} & \textbf{0.382} & \textbf{0.524} \\
             FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
+            $\heartsuit$ LSIR's mT5 & 0.440 & 0.301 & 0.423 \\
             $\spadesuit$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
             GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
             LexRank & 0.250 & 0.086 & 0.227 \\
@@ -70,7 +66,7 @@ As for the FNS21, we include:
             GRU-base & 0.220 & 0.063 & 0.201 \\
             GRU-base + attention & 0.221 & 0.062 & 0.204 \\
         \bottomrule
-    \end{tabular}\caption{ROUGE $F1$ Scores on official validation set used as testing}
+    \end{tabular}\caption{ROUGE $F1$ Scores on official validation set (used as testing in our models)}
     \label{tab:rouge_performance_validation}
 \end{table}
 
@@ -80,7 +76,7 @@ As for the FNS21, we include:
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            $\spadesuit$ FinBERT-base (official validation set) & 0.544 & 0.382 & 0.524 \\
+            $\spadesuit$ FinBERT-base (official validation set) & \textbf{0.544} & \textbf{0.382} & \textbf{0.524} \\
             $\clubsuit$ T5-LONG-EXTRACT (FNS21) & 0.54 & 0.38 & 0.52 \\
             $\heartsuit$ LIPI's T5 (official testing set) & 0.496 & 0.374 & 0.487 \\
             $\heartsuit$ LSIR's mT5 (official testing set) & 0.489 & 0.365 & 0.479 \\
@@ -165,6 +161,7 @@ Meanwhile, we are constrained to producing a summary of at most $40$ sentences (
     \label{fig:summary_examples}
 \end{figure}
 
+\newpage
 
 \section{Conclusion}\label{sec:conclusion}
 \subsection{Summary of Achievements}\label{subsec:summary}
