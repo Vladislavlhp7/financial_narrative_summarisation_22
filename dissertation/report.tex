@@ -5,6 +5,17 @@
 \usepackage[a4paper, total={6.5in, 8in}]{geometry}
 \usepackage{csquotes}
 
+\usepackage{titlesec}
+\titleformat{\chapter}[display]{\normalfont\bfseries}{}{0pt}{\Huge}
+
+\let\subparagraph\paragraph
+\let\paragraph\subsubsection
+\let\subsubsection\subsection
+\let\subsection\section
+\let\section\chapter
+
+\let\chaptername\relax
+
 
 %% Any characters from a % to the end of line are comments.
 
@@ -80,7 +91,7 @@
 % helvetica
 \fontfamily{phv}
 
-\usepackage[acronym,toc,section=section]{glossaries}
+\usepackage[acronym,toc]{glossaries}
 \newglossarystyle{glossary_style}
 {
     \setglossarystyle{long3colheader}%
@@ -148,4 +159,5 @@ I would like to thank my supervisor Dr. Jonathan Shapiro and Dr. Riza Batista-Na
 %% Appendices start here
 %\appendix
 \include{appendix1}
+
 \end{document}

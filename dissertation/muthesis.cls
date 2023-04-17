@@ -515,13 +515,13 @@ of \degreetitle.
        \newpage
         \iftablespage
                 \addvspace{10pt}
-                \addcontentsline{toc}{section}{\listtablename}\listoftables
+%                \addcontentsline{toc}{section}{\listtablename}\listoftables
 %                \newpage
         \let\cleardoublepage\clearpage
         \fi
         \iffigurespage
                 \addvspace{10pt}
-                \addcontentsline{toc}{section}{\listfigurename}
+%                \addcontentsline{toc}{section}{\listfigurename}
                 \listoffigures
 %                \newpage
         \let\cleardoublepage\clearpage
@@ -530,7 +530,7 @@ of \degreetitle.
                 \addvspace{10pt}
                 \glsaddallunused
                 \printglossary[style=glossary_style, type=\acronymtype]
-                \addcontentsline{toc}{section}{List of Acronyms}
+%                \addcontentsline{toc}{section}{List of Acronyms}
 %                \newpage
         \fi
         }
