@@ -159,7 +159,7 @@ Once our datasets are created, we
 \end{enumerate*},
 training them in a supervised manner for a binary classification task (Sections~\ref{subsec:training} and~\ref{subsec:hyperparameters}).
 We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Section~\ref{sec:evaluation}).
-Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement on the validation set over the best FNS22 overall model~\cite{foroutan-etal-2022-multilingual}.
+Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement on the validation set over the best overall FNS22 model~\cite{foroutan-etal-2022-multilingual}.
 Additionally, we show that our FinBERT also achieves competitive performance with the best FNS22 English model,
 although noting that the our models are tested on different data (Section~\ref{subsec:data}).
 We also discuss the quality of the produced summaries (Section~\ref{subsec:qualitative-discussion}), and in
@@ -195,8 +195,7 @@ performance for the FNS22 task, there are several limitations that we would like
     (be it with positional encoding or average-pooling) on the performance of our models.
     \item \emph{Non-exhaustive evaluation} - Due to the FNS models being proprietary, and also evaluated on the official testing set,
     we are unable to make a more comprehensive comparison with the other models.
-    This situation is further exacerbated by the validation results not being reported for all of these models.
-    Therefore, in an ideal scenario we would further quantitatively and qualitatively evaluate our performance.
+    However, in an ideal scenario we would perform further quantitative and qualitative evaluation of our performance.
     \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{sec:evaluation}).
         However, this is a very simplistic approach to summarisation that
         \begin{enumerate*}[label=(\alph*)]
@@ -204,7 +203,7 @@ performance for the FNS22 task, there are several limitations that we would like
             \item trims the last sentence to fit the $1,000$ word limit, and it
             \item does not account for the \emph{informativeness} of the individual sentences
         \end{enumerate*}.
-        To address the incoherence issues, we can try resolving the correferences in the either through a
+        To address the incoherence issues, we can try resolving the coreferences in the either through a
         graph-based approach on the generated summary~\cite{sonawane2016coreference}, or by introducing a more complex
         encoder architecture that represents and attends to entities as well as sentences~\cite{Huang2021ExtractiveSC}.
         Regarding the trimming heuristic, a natural improvement can be to use text compression techniques for the final predicted sentence~\cite{ghalandari2022efficient, KNIGHT200291}.
