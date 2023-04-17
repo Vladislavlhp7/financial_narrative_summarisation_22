@@ -511,15 +511,19 @@ We will outline some key models from the FNS21 (the previous year competition) t
 
 Additionally, we briefly describe the FNS22 competitors' approaches, against which we perform our evaluation in Section~\ref{subsec:quantitative-evaluation}:
 \begin{itemize}
-    \item \textbf{Gokhan}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
-    However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
+    \item \textbf{Team LIPI's T5~\cite{pant-chopra-2022-multilingual}}: This model is entirely based on the FNS21's T5-LONG-EXTRACT
+    approach~\cite{orzhenovskii-2021-t5} and achieves the best ROUGE-2 score of $0.374$ on the English testing set.
+    Unfortunately, results on the validation set are made available.
 
-    \item \textbf{AMUSE}~\cite{litvak-vanetik-2021-summarization}:
+    \item \textbf{Narrative Extractor~\cite{shukla-etal-2022-dimsum}}:
 
-    \item \textbf{Hybrid model with RL}~\cite{zmandar-etal-2021-joint}:
+    \item \textbf{Team LSIR's mT5}~\cite{foroutan-etal-2022-multilingual}:
 
-    \item \textbf{T5-LONG-EXTRACT}~\cite{orzhenovskii-2021-t5}:
-
+    \item \textbf{Longformer-Encoder-Decoder (LED)~\cite{khanna-etal-2022-transformer}}: The authors use a general
+    transformer-based encoder-decoder model building on the LongFormer~\cite{Beltagy2020LongformerTL} for an efficient calculation of long-range attention.
+    They fine-tune the model on the FNS21 dataset to generate in an abstractive manner the start of summarising paragraphs, which are then extracted from the original text similaraly to~\cite{orzhenovskii-2021-t5}.
+    While their LED model performs well in recognising the beginning of the summary, it struggles with identifying the end,
+    and hence their summarisation suffers from a lower ROUGE-2 score of $0.302$ on the English validation set.
 \end{itemize}
 
 In this work we will be solely exploring the extractive method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
