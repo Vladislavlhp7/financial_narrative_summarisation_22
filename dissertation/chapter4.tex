@@ -48,25 +48,19 @@ Therefore, the final evaluation score for a model $m$ is the average ROUGE-2 sco
 where $|C|$ is the number of candidate summaries $c_{i}$.
 
 \subsection{Quantitative Evaluation}\label{subsec:quantitative-evaluation}
-Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Tables~\ref{tab:rouge_performance_validation} and~\ref{tab:rouge_performance}.
-While Table~\ref{tab:rouge_performance_validation} shows the results on the official validation set used as a testing set by us (Section~\ref{subsec:data}),
-Table~\ref{tab:rouge_performance} includes various FNS results on official testing sets where validation ones were not publicly available.
-The purpose of such an \emph{approximate comparison} is to assess the performance of our models and see their \emph{approximate position} in the FNS competition.
+Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance_validation}, which
+shows the results on the official validation set used as a testing set for our models.
+We again wish to remind the reader that we were not provided with the FNS22 testing set (Section~\ref{subsec:data}).
 
-Therefore, we include official FNS22 model results, namely:
-\begin{enumerate*}
-    \item team LIPI's T5 model~\cite{el-haj-etal-2022-financial} (testing data is only available), which is the best English model
-          in that competition edition and also completely based on the T5-LONG-EXTRACT model, and
-    \item team LSIR's mT5 model~\cite{foroutan-etal-2022-multilingual} (testing and validation data available), which is the best model overall for all languages in the competition
-\end{enumerate*}.
-Both of these are highlighted with a $\heartsuit$.
-
-As for the FNS21, we include:
-\begin{enumerate*}
-    \item T5-LONG-EXTRACT~\cite{orzhenovskii-2021-t5},
-    \item and topline MUSE~\cite{litvak-last-2013-multilingual}
-\end{enumerate*}.
-Both of these are highlighted with a $\clubsuit$ and the results are based on FNS21 testing data.
+Therefore, in our comparison we include the following FNS22 models, namely:
+\begin{enumerate}
+    \item team LIPI's T5 model~\cite{el-haj-etal-2022-financial} (testing data is only available), which is the completely based on the T5-LONG-EXTRACT and also the best English model in that edition;
+    \item team LSIR's mT5 model~\cite{foroutan-etal-2022-multilingual}, which is the best model overall for all languages in the competition (multilingual for English, Spanish, and Greek);
+    \item the Longformer-Encoder-Decoder (LED)~\cite{khanna-etal-2022-transformer}
+    \item the Top-K Narrative Extractor (NE) ~\cite{shukla-etal-2022-dimsum}  ranking in the top three models overall for Spanish and Greek;
+\end{enumerate}.
+We have the official English validation results for all but the LIPI's T5, for which we are going to use their testing evaluations (we are aware that this comparison is somewhat unfair).
+We will highlight the FNS models with a $\heartsuit$, and our top-performing ones with a $\spadesuit$ for ease of reference.
 
 \begin{table}[ht]
     \centering
@@ -74,10 +68,13 @@ Both of these are highlighted with a $\clubsuit$ and the results are based on FN
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            $\spadesuit$ FinBERT-base & \textbf{0.544} & \textbf{0.382} & \textbf{0.524} \\
+            $\heartsuit$ Top-K NE & \textbf{0.546} & \textbf{0.425} & - \\
+            $\spadesuit$ FinBERT-base & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
+            $\heartsuit$ LIPI's T5 (\emph{official testing set}) & 0.496 & 0.374 & 0.487 \\
             FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
             $\heartsuit$ LSIR's mT5 & 0.440 & 0.301 & 0.423 \\
-            $\spadesuit$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
+            $\heartsuit$ LED & 0.442 & 0.302 & 0.434 \\
+            $\spadesuit$ GRU-base + attention + back-translation & \emph{0.276} & \emph{0.106} & \emph{0.249} \\
             GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
             LexRank & 0.250 & 0.086 & 0.227 \\
             TaxtRank & 0.220 & 0.064 & 0.196 \\
@@ -88,49 +85,33 @@ Both of these are highlighted with a $\clubsuit$ and the results are based on FN
     \label{tab:rouge_performance_validation}
 \end{table}
 
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{lccc}
-        \toprule
-        \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
-        \midrule
-            $\spadesuit$ FinBERT-base (official validation set) & \textbf{0.544} & \textbf{0.382} & \textbf{0.524} \\
-            $\clubsuit$ T5-LONG-EXTRACT (FNS21) & 0.54 & 0.38 & 0.52 \\
-            $\heartsuit$ LIPI's T5 (official testing set) & 0.496 & 0.374 & 0.487 \\
-            $\heartsuit$ LSIR's mT5 (official testing set) & 0.489 & 0.365 & 0.479 \\
-            $\heartsuit$ LSIR's mT5 (official validation set) & 0.440 & 0.301 & 0.423 \\
-            $\clubsuit$ MUSE (FNS21) & 0.5 & 0.28 & 0.45 \\
-            $\spadesuit$ GRU-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
-            LexRank (official validation set) & 0.250 & 0.086 & 0.227 \\
-            TaxtRank (official validation set) & 0.220 & 0.064 & 0.196 \\
-        \bottomrule
-    \end{tabular}\caption{ROUGE $F1$ Scores: approximate comparison with FNS results}
-    \label{tab:rouge_performance}
-\end{table}
-
 We can provide the following commentary on the results:
 \begin{itemize}
     \item Our best performing model, FinBERT-base~\cite{yang2020finbert}, which is a pre-trained on financial communication documents,
         achieves an average ROUGE-2 score of $0.382$, which outperforms by $0.081$ on the validation set the best performing
         model overall in the FNS22 competition - \emph{LSIR's mT5}~\cite{foroutan-etal-2022-multilingual}.
-        Furthermore, our FinBERT-base also seems to \emph{slightly outperform the best English model in the FNS22} - LIPI's T5~\cite{el-haj-etal-2022-financial} with $0.008$.
-        However, our model is tested on the official validation set, while LIPI's T5 is tested on the official testing set, hence the comparison is not entirely fair.
-        Keeping this in mind, we reach similar conclusions for the FNS21's T5-LONG-EXTRACT model~\cite{orzhenovskii-2021-t5}, which seems to have comparable results to our FinBERT-base model. \\
-        Surprisingly, data augmentation does not improve the performance of FinBERT-base, and we believe this was caused by
-        the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters} and potentially over-fitting.
-        Nevertheless, both models clearly outperform the official top-line~\cite{litvak-last-2013-multilingual} by a significant margin for ROUGE-2 (however, the datasets are different).
+        Furthermore, our FinBERT-base also seems to \emph{slightly outperform the best English model in the FNS22} - LIPI's T5~\cite{el-haj-etal-2022-financial} with $0.008$,
+        though this comparison is not entirely fair as we are not using the same datasets.
+        Regarding the other FNS models, we observe that our FinBERT-base beats the LED~\cite{khanna-etal-2022-transformer} with a similar margin as the LSIR's mT5.
+        However, the Top-K remains with the highest ROUGE-1 and ROUGE-2 $F1$ measures.
+        Surprisingly, data augmentation does not improve the performance of our FinBERT-base, and we believe this was caused by
+        the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters}, which can be leading to over-fitting.
+        Nevertheless, both models clearly outperform the official baselines: LexRank~\cite{Erkan2004LexRankGC} and TextRank~\cite{mihalcea-tarau-2004-textrank}.
     \item The GRU-base + attention + back-translation model is the best performing model out of all recurrent neural architectures.
     While preliminary binary classification results did not show any considerable differences between the models, clearly
     \begin{enumerate*}[label=(\alph*)]
         \item the attention mechanism helps the model to better recognise the summarising sentences (i.e., attends to the most descriptive linguistic features), and
-        \item the back-translation data augmentation significantly improves the practical performance of the model (i.e., the probability distribution of the summarising sentences).
+        \item the back-translation data augmentation significantly improves the practical performance of the model (i.e., the probability distribution of the summarising sentences),
+              which is clearly not the case for our FinBERT model.
     \end{enumerate*}
+    Additionally, we must note that except of the Top-K NE~\cite{shukla-etal-2022-dimsum}, all other FNS models are transformer-based,
+    hence they have more complex architectures and attention mechanisms than our GRU-based models with single-head attention (Sections~\ref{subsec:transformers} and~\ref{subsec:rnn_model}).
     \item At the same time, we acknowledge that the universal summarisation baselines: LexRank and TextRank, outperform
         our simple GRU models (Table~\ref{tab:rouge_performance_validation}), and we attribute this to both:
     \begin{enumerate*}[label=(\alph*)]
         \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}),
         \item the 90\% random under-sampling of the majority class data (see Section~\ref{subsec:data}), and
-        \item the summary generation process of selecting the top $k$ sentences based on their sorted probabilities (see discussion in Sections~\ref{subsec:qualitative-discussion} and~\ref{subsec:limitations}).
+        \item the summary generation process of selecting the top-$k$ sentences based on their sorted probabilities (see discussion in Sections~\ref{subsec:qualitative-discussion} and~\ref{subsec:limitations}).
     \end{enumerate*}
 \end{itemize}
 
