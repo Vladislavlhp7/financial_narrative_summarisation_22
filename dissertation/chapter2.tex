@@ -487,7 +487,7 @@ The former formulates the problem as a subset selection problem by returning onl
 
 We will outline some key models from the FNS21 (the previous year competition) that inspired our work below:
 \begin{itemize}
-    \item \textbf{Gokhan}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
+    \item \textbf{Extractive SentenceBERT \cite{gokhan-etal-2021-extractive})}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
     However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
 
     \item \textbf{AMUSE}~\cite{litvak-vanetik-2021-summarization}: The authors design an ETS system comprised of the following steps \begin{enumerate*}
@@ -495,7 +495,7 @@ We will outline some key models from the FNS21 (the previous year competition) t
         \item encoding sentences with BERT vectors, and
         \item performing binary classification with LSTMs for salient sentence extraction
     \end{enumerate*}.
-    They suggest that further work should incorporate \begin{enumerate*}
+    They suggest that further work should incorporate \begin{enumerate*}[label=(\alph*)]
         \item efficient preliminary sentence removal, and
         \item additional neural modelling stages for the representation and detection of relevant input text parts.
     \end{enumerate*}
@@ -504,29 +504,41 @@ We will outline some key models from the FNS21 (the previous year competition) t
     Their networks are based on attentive LSTMs augmented with an additional copy mechanism~\cite{vinyals2015pointer} achieving the second highest F1 score in the FNS21 competition.
 
     \item \textbf{T5-LONG-EXTRACT}~\cite{orzhenovskii-2021-t5}: The author used T5~\cite{rayson2019t5} for an extractive model fine--tuned to generate the beginning of an abstractive summary and find the closest match of the output in the report's full text.
-    This is the best performing algorithm in the FNS21 competition but also the first to consider transformer models from an abstractive summarisation perspective in the FNP workshops so far.
+    This is the best performing algorithm in the FNS21 competition but also the first to consider transformer models from an extractive-abstractive perspective in the FNP workshops so far.
     It serves as an inspiration for the best English FNS22 model~\cite{el-haj-etal-2022-financial} and other contestants~\cite{khanna-etal-2022-transformer, foroutan-etal-2022-multilingual}.
-
 \end{itemize}
 
 Additionally, we briefly describe the FNS22 competitors' approaches, against which we perform our evaluation in Section~\ref{subsec:quantitative-evaluation}:
 \begin{itemize}
     \item \textbf{Team LIPI's T5~\cite{pant-chopra-2022-multilingual}}: This model is entirely based on the FNS21's T5-LONG-EXTRACT
-    approach~\cite{orzhenovskii-2021-t5} and achieves the best ROUGE-2 score of $0.374$ on the English testing set.
-    Unfortunately, results on the validation set are made available.
+    approach~\cite{orzhenovskii-2021-t5} and achieves the best ROUGE-2 $F1$ score of $0.374$ on the English testing set.
+    Unfortunately, results on the validation set are not made available.
 
-    \item \textbf{Narrative Extractor~\cite{shukla-etal-2022-dimsum}}:
-
-    \item \textbf{Team LSIR's mT5}~\cite{foroutan-etal-2022-multilingual}:
+    \item \textbf{Top-K Narrative Extractor~\cite{shukla-etal-2022-dimsum}}: The authors implement a narrative
+    classification method recognising unique report sections, their titles (see Section~\ref{subsec:uk-annual-reports})), and the Table of Content.
+    They further propose an algorithm for word allocation to assemble various sentences from different sections into a single summary.
+    To fit in the $1,000$ word limit, they use a Top-k summarizer, which extracts the first $k$ words from a given text.
+    Their system achieves a ROUGE-2 $F1$ score of $0.425$ on the English validation set, while ranking in the top three
+    overall for Spanish and Greek report summarisation.
 
     \item \textbf{Longformer-Encoder-Decoder (LED)~\cite{khanna-etal-2022-transformer}}: The authors use a general
     transformer-based encoder-decoder model building on the LongFormer~\cite{Beltagy2020LongformerTL} for an efficient calculation of long-range attention.
     They fine-tune the model on the FNS21 dataset to generate in an abstractive manner the start of summarising paragraphs, which are then extracted from the original text similaraly to~\cite{orzhenovskii-2021-t5}.
     While their LED model performs well in recognising the beginning of the summary, it struggles with identifying the end,
     and hence their summarisation suffers from a lower ROUGE-2 score of $0.302$ on the English validation set.
+
+    \item \textbf{Team LSIR's mT5}~\cite{foroutan-etal-2022-multilingual}: The authors propose the usage of a multilingual
+    pre-trained text-to-text transformer~\cite{raffel2020exploring} to generate the start of a report's summary in the same way
+    as~\cite{orzhenovskii-2021-t5, khanna-etal-2022-transformer}.
+    This system is ranked best overall for the three languages, while achieving a ROUGE-2 $F1$ score of $0.365$ on the English validation set.
+    The authors also explore unsupervised methods based on the multilingual BERT model~\cite{devlin-etal-2019-bert} generating
+    representations for blocks (i.e., spans) of 64 tokens for each summary and report.
+    They further cluster the summary blocks with k-means and compute the cosine similarity between them and the report blocks.
+    While this unsupervised method does not perform best for English, it proves to be very effective for Spanish and Greek, where
+    the number of reports is significantly smaller than the one in English.
 \end{itemize}
 
-In this work we will be solely exploring the extractive method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
+In this work we will be solely exploring the extractive summarisation method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
 
 \subsection{TextRank}\label{subsec:textrank}
 TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algorithm for extractive summarisation with the following key components:
