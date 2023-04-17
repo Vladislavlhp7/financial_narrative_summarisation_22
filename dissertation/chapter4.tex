@@ -1,5 +1,11 @@
 \section{Evaluation}\label{sec:evaluation}
+In this section we will describe the evaluation process of our models.
+For that purpose, we will describe how we use the ROUGE metrics (Section~\ref{subsubsec:rouge}) to compute the
+similarity between the gold and candidate summaries, and how we arrive at the final evaluation aggregation (Section~\ref{subsec:evaluation-mechanism}).
+Afterwards, we will provide the results of our evaluation (Section~\ref{subsec:quantitative-evaluation}), where we compare our models to the baselines and official FNS models.
+Finally, we will discuss the qualitative limitations of our produced summaries (Section~\ref{subsec:qualitative-discussion}) before we conclude our work in Section~\ref{sec:conclusion}.
 
+\subsection{Evaluation Mechanism}\label{subsec:evaluation-mechanism}
 To assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the GRUs and FinBERT, respectively).
 Afterwards, we feed them into our model computing the output summary probabilities $p_{j}^{i}$, and then we select the
 top-$k$ sentences ($k=40$, Section~\ref{subsec:data}) based on the highest sentence probabilities $p_{j}^{i}$.
@@ -15,11 +21,16 @@ based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-2\footnote{
     \end{itemize}
 } metric(\cite{lin2004rouge}).
 For the FNS task due to the extractive nature of our approach we will evaluate our models based on
-the ROUGE-L--maximising $c^{*}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
+the ROUGE-L-maximising\footnote{
+    We say ROUGE-L-maximising for conciseness, because ROUGE is a metric with precision and recall components, which are combined into a single $F1$ score.
+    It is precisely the $F1$ score that we maximise.
+    However, we are aware this introduces more complexity to our naming convention, hence we will use the term ROUGE-L-maximising.
+} $c^{*}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
 
 \begin{equation}\label{eq:rouge_max}
-    r = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} R(c, c^{*}_{i})
+    c^{**} = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} \text{ROUGE-L}(c, c^{*}_{i})
 \end{equation}
+where $C^{*}$ is the set of gold summaries for a given report $d$, and $c^{**}_{i}$ is the gold summary with maximal ROUGE-L score with the candidate summary $c$.
 
 The intuition is that by extracting multiple sentences from the report, our generated candidate summary can
 retain sentences from \emph{any} of the gold summaries.
@@ -30,6 +41,15 @@ Their individual evaluation is based on gold summaries $c^{*}_{1}$ and $c^{*}_{2
 candidates $c_{1}$ and $c_{2}$ are identical).
 This guarantees that we are always comparing candidate summaries based on their maximal evaluation scores.
 
+Therefore, the final evaluation score for a model $m$ is the average ROUGE-2 score\footnote{
+    Here, once again we mean the $F1$-measure of ROUGE-2.
+} between the candidate summaries $c_{i}$ and their corresponding \emph{ROUGE-L-maximising gold summaries} $c^{**}_{i}$, i.e.,
+\begin{equation}\label{eq:rouge_final}
+    r_{m} = \frac{1}{|C|} \sum_{i=1}^{|C|} \text{ROUGE-2}(c, c^{**}_{i})
+\end{equation}
+where $|C|$ is the number of candidate summaries $c_{i}$.
+
+\subsection{Quantitative Evaluation}\label{subsec:quantitative-evaluation}
 Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Tables~\ref{tab:rouge_performance_validation} and~\ref{tab:rouge_performance}.
 While Table~\ref{tab:rouge_performance_validation} shows the results on the official validation set used as a testing set by us (Section~\ref{subsec:data}),
 Table~\ref{tab:rouge_performance} includes various FNS results on official testing sets where validation ones were not publicly available.
@@ -41,13 +61,15 @@ Therefore, we include official FNS22 model results, namely:
     \item team LIPI's T5 model~\cite{el-haj-etal-2022-financial} (testing data is only available), which is the best English model
           in that competition edition and also completely based on the T5-LONG-EXTRACT model, and
     \item team LSIR's mT5 model~\cite{foroutan-etal-2022-multilingual} (testing and validation data available), which is the best model overall for all languages in the competition
-\end{enumerate*}. Both of these are highlighted with a $\heartsuit$.
+\end{enumerate*}.
+Both of these are highlighted with a $\heartsuit$.
 
 As for the FNS21, we include:
 \begin{enumerate*}
     \item T5-LONG-EXTRACT~\cite{orzhenovskii-2021-t5},
     \item and topline MUSE~\cite{litvak-last-2013-multilingual}
-\end{enumerate*}. Both of these are highlighted with a $\clubsuit$ and the results are based on FNS21 testing data.
+\end{enumerate*}.
+Both of these are highlighted with a $\clubsuit$ and the results are based on FNS21 testing data.
 
 
 \begin{table}[ht]
