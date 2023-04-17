@@ -509,6 +509,19 @@ We will outline some key models from the FNS21 (the previous year competition) t
 
 \end{itemize}
 
+Additionally, we briefly describe the FNS22 competitors' approaches, against which we perform our evaluation in Section~\ref{subsec:quantitative-evaluation}:
+\begin{itemize}
+    \item \textbf{Gokhan}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
+    However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
+
+    \item \textbf{AMUSE}~\cite{litvak-vanetik-2021-summarization}:
+
+    \item \textbf{Hybrid model with RL}~\cite{zmandar-etal-2021-joint}:
+
+    \item \textbf{T5-LONG-EXTRACT}~\cite{orzhenovskii-2021-t5}:
+
+\end{itemize}
+
 In this work we will be solely exploring the extractive method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
 
 \subsection{TextRank}\label{subsec:textrank}

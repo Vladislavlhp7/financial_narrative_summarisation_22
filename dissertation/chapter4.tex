@@ -121,13 +121,13 @@ We can provide the following commentary on the results:
         Nevertheless, both models clearly outperform the official top-line~\cite{litvak-last-2013-multilingual} by a significant margin for ROUGE-2 (however, the datasets are different).
     \item The GRU-base + attention + back-translation model is the best performing model out of all recurrent neural architectures.
     While preliminary binary classification results did not show any considerable differences between the models, clearly
-    \begin{enumerate*}
+    \begin{enumerate*}[label=(\alph*)]
         \item the attention mechanism helps the model to better recognise the summarising sentences (i.e., attends to the most descriptive linguistic features), and
         \item the back-translation data augmentation significantly improves the practical performance of the model (i.e., the probability distribution of the summarising sentences).
     \end{enumerate*}
     \item At the same time, we acknowledge that the universal summarisation baselines: LexRank and TextRank, outperform
         our simple GRU models (Table~\ref{tab:rouge_performance_validation}), and we attribute this to both:
-    \begin{enumerate*}
+    \begin{enumerate*}[label=(\alph*)]
         \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}),
         \item the 90\% random under-sampling of the majority class data (see Section~\ref{subsec:data}), and
         \item the summary generation process of selecting the top $k$ sentences based on their sorted probabilities (see discussion in Sections~\ref{subsec:qualitative-discussion} and~\ref{subsec:limitations}).
@@ -147,7 +147,7 @@ We can make the following conclusions based on observation:
     \item The FinBERT model has \emph{around 50\% of its contents} belonging to any of the gold summaries (Figure~\ref{fig:finbert_summary}),
         while all other sentences look very convincing in terms of their summarising potential (i.e., they are informative of the financial situation but also concise)
     \item At the same time, the GRU-model has the opposite characteristics:
-    \begin{enumerate*}
+    \begin{enumerate*}[label=(\alph*)]
         \item none of its sentences are in the gold summary (Figure~\ref{fig:rnn_summary}), while
         \item all of them are very long, containing uninformative but diverse sets of words, which in turn results in higher ROUGE scores
     \end{enumerate*}.
@@ -172,7 +172,7 @@ In this project we have explored the problem of summarising UK annual reports.
 To deal with the significant amount of noise in the plain text of these glossy documents, we have built a rigorous pre-processing pipeline (Section~\ref{subsec:data}).
 We have further implemented a sentence extraction phase where we generate binary labels ($1$ being summary, $0$ - non-summary) from the reports and their multiple gold summaries (Section~\ref{subsec:sentence_extraction}).
 Once our datasets are created, we
-\begin{enumerate*}[label=\Alph*]
+\begin{enumerate*}[label=(\alph*)]
     \item design a Recurrent Neural Network (RNN) architecture (Section~\ref{subsec:rnn_model}), and
     \item fine-tune a financial Transformer model - FinBERT (Section~\ref{subsec:finbert})
 \end{enumerate*},

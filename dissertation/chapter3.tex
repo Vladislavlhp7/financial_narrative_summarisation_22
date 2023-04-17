@@ -3,7 +3,7 @@
 \subsection{Data}\label{subsec:data}
 The data for the FNS22 task is a collection of narrative parts of annual reports, converted from PDF to plain text.
 As discussed in Section~\ref{subsec:fns} due to the rich visual representations in the PDFs, the resulting text suffers from various problems like
-\begin{enumerate*}
+\begin{enumerate*}[label=(\alph*)]
     \item \emph{spacing inconsistencies} - mixing of tab-space word delimiters, over-segmentation (i.e., a split into incoherent chunks) and under-segmentation (i.e., merging of unrelated words),
     \item \emph{symbol encoding issues} - introduction of unreadable non-alphanumeric characters, and
     \item \emph{formatting issues} - words having different casing, hyphenation at the end of a line, etc
@@ -41,7 +41,7 @@ As discussed in Section~\ref{subsec:fns} due to the rich visual representations 
 \end{figure}
 
 To address these issues, we have developed a rigorous data cleaning pipeline that achieves the following key objectives:
-\begin{enumerate*}
+\begin{enumerate*}[label=(\alph*)]
     \item handles space-tab mixing via hand-crafted rules (derived from observation\footnote{
       E.g., for some of the lines, characters were separated by spaces and words with tabs, hence the need for a custom rule.
     }),
@@ -51,7 +51,7 @@ To address these issues, we have developed a rigorous data cleaning pipeline tha
 
 As discussed in Section~\ref{subsec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages~\cite{litvak-vanetik-2021-summarization}.
 Each one has at least two--three gold summaries provided by the FNS22 organisers, and we compute some statistics
-\begin{enumerate*}
+\begin{enumerate*}[label=(\alph*)]
     \item helpful for grasping the nature of the output text, but also
     \item useful for the evaluation of the summarisation models
 \end{enumerate*}.
@@ -92,7 +92,7 @@ we decided to treat the validation set as a testing set (Table~\ref{tab:fns22-my
     \caption{Training-Validation-Testing Data Split}
     \label{tab:fns22-my-data}
 \end{table}
-Specifically, we use a 90--10 \emph{stratified split} (i.e., the label distribution is retained in both sets) for training and validation, respectively.
+Specifically, we use a 90--10 \emph{stratified split} (i.e., the label distribution is retained in both sets) for training and validation, respectively (similar to~\cite{stepisnik-perdih-etal-2022-sentiment}).
 We are aware that a validation and a training sentence can come from the same report, but we claim that this is not problematic for the following reasons:
 \begin{enumerate}
     \item Sentences are \emph{de-contextualised} (i.e., without references or dependencies to others, taken out of context) and \emph{shuffled}.
@@ -179,7 +179,7 @@ As our main recurrent model we propose a GRU-based architecture~\cite{cho-etal-2
 
     The word embedding layer is used to convert the pre-processed input sentence into a vector representation.
     One of our implementation innovations is that we use FinText's FastText word embeddings~\cite{rahimikia2021realised} because they
-    \begin{enumerate*}
+    \begin{enumerate*}[label=(\alph*)]
         \item are character-based and thus can handle noisy or out-of-vocabulary words, and
         \item are pre-trained on large corpora of financial news, achieving considerable in-domain performance improvements over general-purpose embeddings
     \end{enumerate*}.
@@ -314,12 +314,12 @@ For a machine translated sentence $s^m_i$ and its original sentence $s_i$, we \h
 
 % GRU vs LSTM + hidden size 64 vs 256
 In our proposed architecture we choose a bidirectional GRU (Bi-GRU) instead of a Bi-LSTM because
-\begin{enumerate*}
+\begin{enumerate*}[label=(\alph*)]
     \item GRUs have a simpler structure than LSTMs and are easier to train (Section~\ref{subsec:rnn}), and
     \item our experiments show that GRUs outperform LSTMs with 1\% in terms of Summary Recall
 \end{enumerate*}.
 Furthermore, in terms of the hidden units, we select 64 over 256 because:
-\begin{enumerate*}
+\begin{enumerate*}[label=(\alph*)]
     \item the architecture has $143,938$ and $2,050,306$ parameters, respectively (i.e., $256$ would result in an over-parameterised model),
     \item almost 4\% increase in Summary Recall (Fig.~\ref{fig:64vs256_summary_recall}),
     although a 2\% decrease in Test Accuracy (Fig.~\ref{fig:test_accuracy_dropout_and_hidden_size}), if we use $64$ hidden units.
