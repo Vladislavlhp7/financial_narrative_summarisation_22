@@ -14,18 +14,16 @@ but also trim it to the maximum length of $1,000$ words (Section~\ref{subsec:fns
 
 In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$
 based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-2\footnote{
-    \begin{itemize}
-        \item We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
-              It can be accessed at: \url{https://github.com/pltrdy/rouge}
-        \item The FNS evaluation metric is the $F1$-score of ROUGE-2, and we will use it for the final evaluation.
-    \end{itemize}
+        We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
+        It can be accessed at: \url{https://github.com/pltrdy/rouge}. \\
+        The FNS evaluation metric is the $F1$-score of ROUGE-2, and we will use it for the final evaluation.
 } metric(\cite{lin2004rouge}).
 For the FNS task due to the extractive nature of our approach we will evaluate our models based on
 the ROUGE-L-maximising\footnote{
     We say ROUGE-L-maximising for conciseness, because ROUGE is a metric with precision and recall components, which are combined into a single $F1$ score.
     It is precisely the $F1$ score that we maximise.
     However, we are aware this introduces more complexity to our naming convention, hence we will use the term ROUGE-L-maximising.
-} $c^{*}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
+} $c^{**}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
 
 \begin{equation}\label{eq:rouge_max}
     c^{**} = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} \text{ROUGE-L}(c, c^{*}_{i})
@@ -39,7 +37,7 @@ The practical implications are that two models, $m_{1}$ and $m_{2}$ can produce 
 $c_{1}$ and $c_{2}$, respectively.
 Their individual evaluation is based on gold summaries $c^{*}_{1}$ and $c^{*}_{2}$ (which can be the same when the
 candidates $c_{1}$ and $c_{2}$ are identical).
-This guarantees that we are always comparing candidate summaries based on their maximal evaluation scores.
+This guarantees that we are always comparing candidate summaries based on their maximal evaluation scores (i.e., their maximal summarising potential).
 
 Therefore, the final evaluation score for a model $m$ is the average ROUGE-2 score\footnote{
     Here, once again we mean the $F1$-measure of ROUGE-2.
