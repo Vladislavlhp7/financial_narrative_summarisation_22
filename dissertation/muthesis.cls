@@ -529,8 +529,8 @@ of \degreetitle.
         \iffigurespage
                 \addvspace{10pt}
                 \glsaddallunused
-                \addcontentsline{toc}{section}{List of Acronyms}
                 \printglossary[style=glossary_style, type=\acronymtype]
+                \addcontentsline{toc}{section}{List of Acronyms}
 %                \newpage
         \fi
         }
