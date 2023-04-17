@@ -23,12 +23,12 @@ the ROUGE-L-maximising\footnote{
     We say ROUGE-L-maximising for conciseness, because ROUGE is a metric with precision and recall components, which are combined into a single $F1$ score.
     It is precisely the $F1$ score that we maximise.
     However, we are aware this introduces more complexity to our naming convention, hence we will use the term ROUGE-L-maximising.
-} $c^{**}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
+} $c^{*\max}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
 
 \begin{equation}\label{eq:rouge_max}
-    c^{**} = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} \text{ROUGE-L}(c, c^{*}_{i})
+    c^{*\max} = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} \text{ROUGE-L}(c, c^{*}_{i})
 \end{equation}
-where $C^{*}$ is the set of gold summaries for a given report $d$, and $c^{**}_{i}$ is the gold summary with maximal ROUGE-L score with the candidate summary $c$.
+where $C^{*}$ is the set of gold summaries for a given report $d$, and $c^{*\max}_{i}$ is the gold summary with maximal ROUGE-L score with the candidate summary $c$.
 
 The intuition is that by extracting multiple sentences from the report, our generated candidate summary can
 retain sentences from \emph{any} of the gold summaries.
@@ -41,9 +41,9 @@ This guarantees that we are always comparing candidate summaries based on their 
 
 Therefore, the final evaluation score for a model $m$ is the average ROUGE-2 score\footnote{
     Here, once again we mean the $F1$-measure of ROUGE-2.
-} between the candidate summaries $c_{i}$ and their corresponding \emph{ROUGE-L-maximising gold summaries} $c^{**}_{i}$, i.e.,
+} between the candidate summaries $c_{i}$ and their corresponding \emph{ROUGE-L-maximising gold summaries} $c^{*\max}_{i}$, i.e.,
 \begin{equation}\label{eq:rouge_final}
-    r_{m} = \frac{1}{|C|} \sum_{i=1}^{|C|} \text{ROUGE-2}(c, c^{**}_{i})
+    r_{m} = \frac{1}{|C|} \sum_{i=1}^{|C|} \text{ROUGE-2}(c_{i}, c^{*\max}_{i})
 \end{equation}
 where $|C|$ is the number of candidate summaries $c_{i}$.
 
