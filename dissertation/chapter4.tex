@@ -116,10 +116,12 @@ We can provide the following commentary on the results:
     \end{enumerate*}
 \end{itemize}
 
+\newpage
+
 \subsection{Qualitative Discussion}\label{subsec:qualitative-discussion}
 After having established the quantitative performance of our models, we now turn to the qualitative discussion of the results.
 For a random annual report we generated a summary using the FinBERT-base + data augmentation model and
-the GRU-base + attention model (see Figure~\ref{fig:summary_examples}
+the GRU-base + attention model (see Figures~\ref{fig:rnn_summary},~\ref{fig:finbert_summary}).
 where green colour indicates the summarising sentences, and red colour -- the non-summarising sentences).
 We chose these models over the best ones because they have slightly lower ROUGE scores, and make more mistakes, which will help us identify the issues in the summarisation process.
 We can make the following conclusions based on observation:
@@ -138,19 +140,21 @@ only $5$ sentences have been generated to fit the word limit.
 Therefore, we believe the summary generation process (i.e., the mechanism to combine predicted sentences into a single summary) further
 exacerbates the accuracy of the summarisation.
 
-Although, the practical results from Figure~\ref{fig:summary_examples} might seem disappointing, we must once again remind the reader that the reports are extremely
+Although, the practical results from Figures~\ref{fig:rnn_summary} might seem disappointing, we must once again remind the reader that the reports are extremely
 long with an average number of sentences and words at around $2,700$ and $58,000$, respectively~\cite{litvak-vanetik-2021-summarization}.
 Meanwhile, we are constrained to producing a summary of at most $40$ sentences (Section~\ref{subsec:data}) or $1,000$ words (Section~\ref{subsec:fns}).
 
-%\newpage
+\newpage
 
 \section{Conclusion}\label{sec:conclusion}
+In this section we summarise the main contributions and discuss the limitations of our work.
+
 \subsection{Summary of Achievements}\label{subsec:summary}
 In this project we have explored the problem of summarising UK annual reports.
 To deal with the significant amount of noise in the plain text of these glossy documents, we have built a rigorous pre-processing pipeline (Section~\ref{subsec:data}).
 We have further implemented a sentence extraction phase where we generate binary labels ($1$ being summary, $0$ - non-summary) from the reports and their multiple gold summaries (Section~\ref{subsec:sentence_extraction}).
 Once our datasets are created, we
-\begin{enumerate*}
+\begin{enumerate*}[label=\Alph*]
     \item design a Recurrent Neural Network (RNN) architecture (Section~\ref{subsec:rnn_model}), and
     \item fine-tune a financial Transformer model - FinBERT (Section~\ref{subsec:finbert})
 \end{enumerate*},
@@ -171,7 +175,7 @@ In terms of \emph{innovational aspects} of our project in the context of the FNS
     the annual report is used~\cite{orzhenovskii-2021-t5}, we over-sample the summarising sentences (minority class)
     by back-translating from French.
     \item~\emph{Fine-tune FinBERT~\cite{yang2020finbert} for extractive summarisation} - Transformer-based models have become increasingly
-    popular in the next edition of the FNP Workshop (FNP22)~\cite{khanna-etal-2022-transformer, pant-chopra-2022-multilingual},
+    popular in the FNP22 Workshop~\cite{khanna-etal-2022-transformer, pant-chopra-2022-multilingual},
     where some have used FinBERT for classifying definitions~\cite{ghosh-etal-2022-finrad},
     detecting hypernyms~\cite{peng-etal-2022-discovering}, and classifying financial sentiments~\cite{stepisnik-perdih-etal-2022-sentiment}.
     However, we are the first to adapt FinBERT for extractive summarisation.
@@ -190,10 +194,13 @@ performance for the FNS22 task, there are several limitations that we would like
     we were pessimistic of using it due to the loss of word order information (e.g., ``the company is good'' being represented just as ``is the company good'').
     Therefore, a limitation of our work is that we do not investigate the impact of using sentence embeddings
     (be it with positional encoding or average-pooling) on the performance of our models.
-    \item \emph{Non-exhaustive evaluation} -
+    \item \emph{Non-exhaustive evaluation} - Due to the FNS models being proprietary, and also evaluated on the official testing set,
+    we are unable to make a more comprehensive comparison with the other models.
+    This situation is further exacerbated by the validation results not being reported for all of these models.
+    Therefore, in an ideal scenario we would further quantitatively and qualitatively evaluate our performance.
     \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{sec:evaluation}).
         However, this is a very simplistic approach to summarisation that
-        \begin{enumerate*}
+        \begin{enumerate*}[label=(\alph*)]
             \item introduces incoherence issues (like the \emph{dangling anaphora phenomenon} from Section~\ref{subsec:sentence_extraction}),
             \item trims the last sentence to fit the $1,000$ word limit, and it
             \item does not account for the \emph{informativeness} of the individual sentences
@@ -211,22 +218,23 @@ performance for the FNS22 task, there are several limitations that we would like
 \end{itemize}
 
 \subsection{Future Work}\label{subsec:future-work}
-In this section we outline some possible directions for future work.
-\begin{itemize}
-    \item \emph{PDF-to-Summary Pipeline} - While in our project we only consider the narrative summarisation of
-    financial reports already converted to plain text, we propose the following pipeline for an ambitious project:
-    \begin{enumerate}
-        \item \emph{PDF-to-Text} - Integrate into the summarisation system a PDF-to-Text conversion tool for annual
-        reports like the CFIE-FRSE\footnote{\url{https://github.com/drelhaj/CFIE-FRSE}}~\cite{elhaj2019multilingual}, which
-        also extracts the text into 8 generic section headers (Section~\ref{subsec:uk-annual-reports}).
-        \item \emph{Text-to-Summary} - Implement a more advanced summarisation technique like the ones discussed on the previous point.
-        \item \emph{Summary-to-Analysis} - Apply NLP techniques like sentiment analysis~\cite{araci2019finbert}, named entity recognition
-       ~\cite{zhang2022finbertmrc}, and detection of forward-looking sentences~\cite{stihec-etal-2021-preliminary},
-        to extract useful information from the summary.
-        \item \emph{Packaged Software} - Build a drag-and-drop application that allows users to upload a PDF file of an
-        annual report, where the backend will perform the steps above and return a summary.
-        The suggested textual analysis features could be integrated as interactive visual elements.
-        Furthermore, through recognising company names, the system could also provide dashboard of news and stock prices
-        with the help of the company-to-ticker mapping (\cite{}).
-    \end{enumerate}
-\end{itemize}
+While in our project we only consider the narrative summarisation of
+financial reports already converted to plain text, we propose the following pipeline as a direction for future work:
+\begin{enumerate}
+    \item \emph{PDF-to-Text} - Integrate into the summarisation system a PDF-to-Text conversion tool for annual
+    reports like the CFIE-FRSE\footnote{\url{https://github.com/drelhaj/CFIE-FRSE}}~\cite{elhaj2019multilingual}, which
+    also extracts the text into 8 generic section headers (Section~\ref{subsec:uk-annual-reports}).
+    \item \emph{Text-to-Summary} - Implement an extractive method that addresses the limitations from Section~\ref{subsec:limitations},
+    or alternatively, an abstractive method producing \emph{lay summaries} for non-expert users~\cite{vinzelberg2023lay, Guo2020AutomatedLL}.
+    \item \emph{Text-to-Analysis} - Apply NLP techniques like sentiment analysis~\cite{araci2019finbert}, named entity recognition
+   ~\cite{zhang2022finbertmrc}, and detection of forward-looking sentences~\cite{stihec-etal-2021-preliminary},
+    to extract useful information from the summary and the text.
+    Additionally, important financial disclosure characteristics as amount, tone, and transparency~\cite{li2010textual, Li2011TextualAO}
+    would be beneficial for AF researchers and users.
+    \item \emph{Packaged Software} - Build a drag-and-drop software application that allows users to upload a PDF file of an
+    annual report, where the backend will perform the steps above and return a summary.
+    The suggested textual analysis features could be integrated as interactive visual elements.
+    Furthermore, through recognising company names, the system could also provide dashboard of news and stock prices
+    with the help of the company-to-identifier mapping~\cite{el-haj2019retrieving}
+    (i.e., getting the company ticker, e.g., \emph{NASDAQ: AAPL} for Apple Inc).
+\end{enumerate}

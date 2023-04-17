@@ -106,7 +106,6 @@
 %\bibliographystyle{alpha}
 %\usepackage{hyperref}
 
-
 \makeglossaries
 \newacronym{html}{HTML}{Hypertext Markup Language}
 \newacronym{css}{CSS}{Cascading Style Sheets}
@@ -115,6 +114,13 @@
 
 %% End of preamble, the actual document starts here
 %%
+%\renewcommand{\theenumi}{\Alph{enumi}}
+\newglossaryentry{pdf}{
+  name={PDF},
+  description={Portable Document Format},
+  first={Portable Document Format (PDF)},
+  sort={PDF}
+}
 
 \begin{document}
 
@@ -137,7 +143,6 @@ I would like to thank my supervisor Dr. Jonathan Shapiro and Dr. Riza Batista-Na
 %\clearpage
 %\printglossary[type=\acronymtype]
 %\printglossary
-
 
 
 %% These include the actual text

@@ -516,12 +516,17 @@ TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algor
 \begin{enumerate}
     \item \textbf{Sentence similarity}: TextRank computes the similarity between two sentences based on either the \emph{cosine similarity}
         \footnote{
-            Cosine similarity is defined as the dot product of two vectors divided by the product of their norms, i.e., $\cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}$.
-        } of their vectors (e.g., bag-of-words, Word2Vec, FastText, etc.) or the \emph{Jaccard similarity}
+            Cosine similarity is defined as the dot product of two vectors divided by the product of their norms.
+        } (Eq.\ref{eq:cosine_similarity}) of their vectors (e.g., bag-of-words, Word2Vec, FastText, etc.) or the \emph{Jaccard similarity}
         \footnote{
-            Jaccard similarity is defined as the size of the intersection  divided by the size of the union of two sets, i.e., $J(A,B)= \frac{|A\cup B|}{|A\cap B|}$.
-            For example, if sentence A is ``I love apples.'' and sentence B is ``I love oranges.'', then $J(A,B)=\frac{2}{4}=\frac{1}{2}$, indicating that $A$ and $B$ share 50\% of their unique words.
-        } of their sets of words,
+            Jaccard similarity is defined as the size of the intersection divided by the size of the union of two sets.
+        } of their sets of words (Eq.\ref{eq:jaccard_similarity} and Example~\ref{ex:jaccard}),
+    \begin{equation}\label{eq:cosine_similarity}
+        $\cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}$
+    \end{equation}
+    \begin{equation}\label{eq:jaccard_similarity}
+        J(A,B)= \frac{|A\cup B|}{|A\cap B|}
+    \end{equation}
     \item \textbf{Graph Construction}: TextRank represents sentences as nodes in a graph, and the similarity between each two sentences is represented as an edge between them.
     \item \textbf{Sentence ranking}: The constructed graph is passed into the PageRank algorithm~\cite{page1998anatomy} that assigns each sentence a score based on the importance of its neighbours.
     The final summary is then assembled from the selection of the top $k$ sentences with the highest scores.
@@ -533,6 +538,15 @@ Nevertheless,~\cite{Shearing2020AutomatedTS} report two considerable weaknesses 
 \end{enumerate}
 As a countermeasure, \emph{stop words} (e.g, ``a'', ``the'', ``and'', etc) can be removed and \emph{tf-idf} can be integrated into the similarity metric for a more balanced scoring mechanism.
 LexRank~\cite{Erkan2004LexRankGC} builds up and resolves the issues of this algorithm, and we will discuss it in the next section.
+
+\begin{example}\label{ex:jaccard}
+    If sentence A is ``I love apples'' and sentence B is ``I love oranges'', then
+    \[
+        J(A,B)=\frac{2}{4}=\frac{1}{2},
+    \]
+    which indicates that $A$ and $B$ share 50\% of their unique words.
+\end{example}
+
 
 \subsection{LexRank}\label{subsec:lexrank}
 LexRank~\cite{Erkan2004LexRankGC} is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
