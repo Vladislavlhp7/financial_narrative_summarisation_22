@@ -108,7 +108,7 @@ To resolve these issues more advanced RNN architectures like LSTMs and GRUs have
 The Long Short-Term Memory (LSTM) recurrent neural network has become a ubiquitous method in sequential problems (e.g., language modelling, time series forecasting).
 This is so because it allows long-term dependencies to propagate through the network with the help of control gates \- \emph{input} and \emph{forget}, which reduce the effect of the vanishing gradient issue in the vanilla RNN\footnote{
     We direct readers to~\cite{bayer2015learning} where the authors demonstrate that the LSTM's \enquote{temporal} gradient is unaffected by the fixed weight factor $W$ of the vanilla RNN that is driving the derivative to zero.
-    This is ensured by the additional architecture unit \- the \emph{forget} gate, which learns to  control the gradient flow in the network.
+    This is ensured by the additional architecture unit - the \emph{forget} gate, which learns to  control the gradient flow in the network.
 }.
 
 A more simple variant of the LSTM is the Gated Recurrent Unit (GRU) which combines the \emph{input} and \emph{forget} gates into an \emph{update} gate for a model with fewer parameters and faster training~\cite{cahuantzi2021gru}.
@@ -522,7 +522,7 @@ TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algor
             Jaccard similarity is defined as the size of the intersection divided by the size of the union of two sets.
         } of their sets of words (Eq.\ref{eq:jaccard_similarity} and Example~\ref{ex:jaccard}),
     \begin{equation}\label{eq:cosine_similarity}
-        $\cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}$
+        \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}
     \end{equation}
     \begin{equation}\label{eq:jaccard_similarity}
         J(A,B)= \frac{|A\cup B|}{|A\cap B|}

@@ -1,7 +1,7 @@
 % !TEX TS-program = pdflatexmk
 %\InputIfFileExists{a4-mancs.sty}{}{}
 
-\documentclass[12pt,BSc,wordcount,twoside]{muthesis}
+\documentclass[12pt,BSc,wordcount,twoside, openany, oneside]{muthesis}
 \usepackage[a4paper, total={6.5in, 8in}]{geometry}
 \usepackage{csquotes}
 
@@ -39,11 +39,6 @@
 \usepackage{pslatex} % Use Postscript fonts
 \renewcommand{\thesection}{\arabic{section}}
 
-%% The best way to latex just one chapter is to uncomment lines such as
-%% the next:
-%\includeonly{chapter1}
-
-%% This defines the title (the \\ forces a line break)
 \title{Extractive Summarisation of\\
   UK Annual Reports}
 
@@ -55,42 +50,12 @@
 %% and the year of the report
 \submitdate{April 2023}
 
-%% this defines the file that contains the text of the abstract, there
-%% must be one of these by the time you submit your report.
-%\abstractfile{abstract.tex}
-
-%% this defines the file that contains the acknowledgements (it can be
-%% omitted if you don't feel like thanking anyone
-% \thanksfile{merci.tex}
-
-%% Uncomment the following lines if you want to include the date as a
-%% header in draft versions. See the documentation for fancyhdr for
-%% more ways of modifying headers (texdoc fancyhdr will show you the
-%% docs) 
-
-%\usepackage{fancyhdr}
-%\pagestyle{fancy}
-%\lhead{}  % left head
-%\chead{Draft: \today} % centre head
-%\lfoot{}
-%\cfoot{\thepage}
-%\rfoot{}
-
-%% The following line sets up the use of PostScript fonts rather
-%% than the standard bitmapped fonts.
-%\usepackage{pslatex}
-
-%% Uncomment the following line if you want to change the name of the
-%% Bibliography to References
-%\renewcommand{\bibname}{References}
-
 \usepackage{listings}
 \usepackage{amsthm}
 \newtheorem{example}{Example}
 \usepackage{epigraph}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{booktabs}
-\usepackage[acronym]{glossaries}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{amsmath}
@@ -101,26 +66,57 @@
 \usetikzlibrary{shapes.geometric}
 \usetikzlibrary{positioning, fit, calc, shapes, matrix, arrows.meta}
 \usepackage{xcolor}
-\usepackage[colorlinks]{hyperref}
+\usepackage{hyperref}
+%\usepackage[colorlinks]{hyperref}
 \usepackage{cite}
-%\bibliographystyle{alpha}
-%\usepackage{hyperref}
 
-\makeglossaries
-\newacronym{html}{HTML}{Hypertext Markup Language}
-\newacronym{css}{CSS}{Cascading Style Sheets}
-\newacronym{js}{JS}{JavaScript}
+% page numbering
+\pagenumbering{arabic}
+%\usepackage{fancyhdr}
+%\fancyhf{}
+%\cfoot{\thepage}
+%\pagestyle{fancy}
+
+% helvetica
 \fontfamily{phv}
 
-%% End of preamble, the actual document starts here
-%%
-%\renewcommand{\theenumi}{\Alph{enumi}}
-\newglossaryentry{pdf}{
-  name={PDF},
-  description={Portable Document Format},
-  first={Portable Document Format (PDF)},
-  sort={PDF}
+\usepackage[acronym,toc]{glossaries}
+\newglossarystyle{glossary_style}
+{
+    \setglossarystyle{long3colheader}%
+    \renewcommand*{\glossaryheader}{}%
+    \renewcommand{\glossentry}[2]{%
+        \textbf{\glsentryitem{##1}\glstarget{##1}{\glossentryname{##1}}}
+        & \glossentrydesc{##1}
+        & ##2
+        \tabularnewline}%
 }
+
+\makeglossaries
+\newacronym{af}{AF}{Accounting and Finance}
+\newacronym{ats}{ATS}{Automatic Text Summarisation}
+\newacronym{cbow}{CBOW}{Continuous Bag of Words}
+\newacronym{csf}{CSF}{Computational Shared Facility}
+\newacronym{esg}{ESG}{Environmental, Social, and Governance}
+\newacronym{esma}{ESMA}{European Securities and Markets Authority}
+\newacronym{ets}{ETS}{Extractive Text Summarisation}
+\newacronym{fcffnn}{FCFFNN}{Fully-Connected Feed-Forward Neural Network}
+\newacronym{fnp}{FNP}{Financial Narrative Processing}
+\newacronym{fnp21}{FNP21}{Financial Narrative Processing 2021}
+\newacronym{fnp22}{FNP22}{Financial Narrative Processing 2022}
+\newacronym{fns21}{FNS21}{Financial Narrative Summarisation 2021}
+\newacronym{fns22}{FNS22}{Financial Narrative Summarisation 2022}
+\newacronym{frc}{FRC}{Financial Reporting Council}
+\newacronym{gru}{GRU}{Gated Recurrent Unit}
+\newacronym{ifrs}{IFRS}{International Financial Reporting Standards}
+\newacronym{lcs}{LCS}{Longest Common Subsequence}
+\newacronym{lstm}{LSTM}{Long Short-Term Memory}
+\newacronym{mlm}{MLM}{Masked Language Model}
+\newacronym{nlp}{NLP}{Natural Language Processing}
+\newacronym{ns}{NSP}{Next Sentence Prediction}
+\newacronym{rouge}{ROUGE}{Recall-Oriented Understudy for Gisting Evaluation}
+\newacronym{sec}{SEC}{Securities and Exchange Commission}
+\newacronym{tfidf}{Tf-Idf}{Term Frequency - Inverse Document Frequency}
 
 \begin{document}
 
@@ -136,16 +132,7 @@
 I would like to thank my supervisor Dr. Jonathan Shapiro and Dr. Riza Batista-Navarro for the provided advice along the way. Also, this project could not have been possible without the UK annual reports data and the computing resources provided by the Financial Narrative Processing's administration and the UoM's Computational Shared Facility, respectively. 
 \afterpreface
 
-%% Generate contents etc
-%\tableofcontents
-
-%% Generate Acronym list
-%\clearpage
-%\printglossary[type=\acronymtype]
-%\printglossary
-
-
-%% These include the actual text
+% These include the actual text
 \include{chapter1}
 \include{chapter2}
 \include{chapter3}
