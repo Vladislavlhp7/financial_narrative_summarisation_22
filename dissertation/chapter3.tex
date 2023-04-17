@@ -1,8 +1,8 @@
-\section{Methodology}\label{sec:methodology}
+\chapter{Methodology}\label{ch:methodology}
 
-\subsection{Data}\label{subsec:data}
+\section{Data}\label{sec:data}
 The data for the FNS22 task is a collection of narrative parts of annual reports, converted from PDF to plain text.
-As discussed in Section~\ref{subsec:fns} due to the rich visual representations in the PDFs, the resulting text suffers from various problems like
+As discussed in Section~\ref{sec:fns} due to the rich visual representations in the PDFs, the resulting text suffers from various problems like
 \begin{enumerate*}[label=(\alph*)]
     \item \emph{spacing inconsistencies} - mixing of tab-space word delimiters, over-segmentation (i.e., a split into incoherent chunks) and under-segmentation (i.e., merging of unrelated words),
     \item \emph{symbol encoding issues} - introduction of unreadable non-alphanumeric characters, and
@@ -49,7 +49,7 @@ To address these issues, we have developed a rigorous data cleaning pipeline tha
     \item removes sentences shorter than 3 words
 \end{enumerate*}.
 
-As discussed in Section~\ref{subsec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages~\cite{litvak-vanetik-2021-summarization}.
+As discussed in Section~\ref{sec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages~\cite{litvak-vanetik-2021-summarization}.
 Each one has at least two--three gold summaries provided by the FNS22 organisers, and we compute some statistics
 \begin{enumerate*}[label=(\alph*)]
     \item helpful for grasping the nature of the output text, but also
@@ -99,9 +99,9 @@ We are aware that a validation and a training sentence can come from the same re
     \item Sentences contain a \emph{great deal of textual noise} due to the PDF-to-text conversion.
     \item Annual reports are \emph{numerous} but also \emph{extremely long} (i.e., containing a lot of sentences).
 \end{enumerate}
-Therefore, we believe that the training and validation sentences are to a large extent independent, and as for the process of sentence extraction, we refer you to Section~\ref{subsec:sentence_extraction} for an in-depth discussion.
+Therefore, we believe that the training and validation sentences are to a large extent independent, and as for the process of sentence extraction, we refer you to Section~\ref{sec:sentence_extraction} for an in-depth discussion.
 
-\subsection{Sentence Extraction}\label{subsec:sentence_extraction}
+\section{Sentence Extraction}\label{sec:sentence_extraction}
 We approach the annual report summarisation problem from a supervised perspective - we cast the task of Extractive Text Summarisation (ETS) as a binary classification problem defined on the sentence level.
 More formally, we can describe the annual report as $d=\{s_{1}, s_{2}, \dots, s_{n}\}$, where $d$ is a document, represented in terms of sentences $s_{i}, \  1 \leq i \leq n$~\cite{liu2019finetuningbert}.
 
@@ -132,7 +132,7 @@ the training and testing datasets.
 We perform the sentence extraction as discussed above to produce a dataset (training and validation combined) of $3,554,800$ and $361,703$ sentences for classes 0 and 1, respectively.
 Additionally, the training and validation sets are split in a 90--10 stratified fashion.
 
-\subsection{Under-sampling and Data Augmentation}\label{subsec:data_augmentation}
+\section{Under-sampling and Data Augmentation}\label{sec:data_augmentation}
 Due to the fact that the annual reports are extremely long while the summaries are very short, the sentence dataset is highly imbalanced with a ratio of around 1:10.
 Therefore, we took two\footnote{
     We also tried a third approach that is to augment sentences with the help of DINO~\cite{schick2021generating} used for high-quality
@@ -155,7 +155,7 @@ Therefore, we took two\footnote{
     \item \textbf{Data Augmentation} -- We use the \emph{back-translation} technique~\cite{hoang-etal-2018-iterative} to generate new sentences from the minority class (i.e., summary sentences), followed by a 80\% random under-sampling of the majority class (Figure~\ref{tab:data_augmentation}).
     For that purpose, we translate all training summary sentences from English to French and back to English with the help of the MarianMT model~\cite{junczysdowmunt2018marian}\footnote{\url{https://huggingface.co/Helsinki-NLP/opus-mt-fr-en}}.
     The resulting dataset is then directly injected during the training process.
-    Refer to Section~\ref{subsec:hyperparameters} for the experiments with the different data balancing techniques.
+    Refer to Section~\ref{sec:hyperparameters} for the experiments with the different data balancing techniques.
     \begin{table}[ht]
         \centering
         \begin{tabular}{lcccc}
@@ -171,7 +171,7 @@ Therefore, we took two\footnote{
 
 \newpage
 
-\subsection{Recurrent Extractor Model}\label{subsec:rnn_model}
+\section{Recurrent Extractor Model}\label{sec:rnn_model}
 As our main recurrent model we propose a GRU-based architecture~\cite{cho-etal-2014-learning}, inspired by~\cite{zmandar-etal-2021-joint} and depicted in Figure~\ref{fig:rnn_model}. \\
 
 \begin{minipage}[ht]{0.45\textwidth}
@@ -186,7 +186,7 @@ As our main recurrent model we propose a GRU-based architecture~\cite{cho-etal-2
 
     We use the FCFFNN layer to \emph{map the vectorized sentences to a higher-level representation} (similar to~\cite{saikh2020deep}) capturing more complex features or patterns from the input text, but also to \emph{reduce the dimensionality} of the input.
 
-    Two stacked GRU layers are used to \emph{extract the latent recurrent features} from the compressed vector representation in both directions - forward and backward (refer to Section~\ref{subsec:rnn} for details).
+    Two stacked GRU layers are used to \emph{extract the latent recurrent features} from the compressed vector representation in both directions - forward and backward (refer to Section~\ref{sec:rnn} for details).
 \end{minipage}\hfill
 \noindent\begin{minipage}[ht]{0.5\textwidth}
     \centering
@@ -223,12 +223,12 @@ compute a new weighted context-aware representation from the extracted features 
 The final layer is a fully-connected feed-forward neural network (FCFFNN) with a softmax activation function, which is
 used to \emph{map the latent features to a binary classification} of the input sentence.
 
-\subsection{Training}\label{subsec:training}
+\section{Training}\label{sec:training}
 We trained both models on Tesla V100-SXM2-16GB\footnote{
     We extend our gratitude to the University of Manchester's Computational Shared Facility (CSF) for kindly agreeing to provide us with the computational resources for this research.
 } and provide the following specifications:
 \begin{enumerate}
-    \item \textbf{RNN architectures} - below we provide the common general details, however for an in-depth discussion on the hyperparameter tuning, see Section~\ref{subsec:hyperparameters}.
+    \item \textbf{RNN architectures} - below we provide the common general details, however for an in-depth discussion on the hyperparameter tuning, see Section~\ref{sec:hyperparameters}.
         \begin{itemize}
             \item \textbf{Loss function:} Binary cross-entropy loss
             \item \textbf{Optimizer:} Adam~\cite{kingma2017adam}
@@ -248,7 +248,7 @@ We trained both models on Tesla V100-SXM2-16GB\footnote{
 \end{enumerate}
 
 
-\subsection{RNN: Hyperparameter Tuning}\label{subsec:hyperparameters}
+\section{RNN: Hyperparameter Tuning}\label{sec:hyperparameters}
 We have experimented with a number of hyperparameters for our recurrent model, including the use of a FCFFNN,
 the recurrence type, the hidden units, the effect of applying attention, the dropout rate, the learning rate, and the effect of data augmentation.
 
@@ -285,9 +285,9 @@ As for the Test Accuracy, we believe that the small decrease is insignificant an
     \label{fig:FCFFNN}
 \end{figure}
 
-We also explore the effect of using back-translated data (Section~\ref{subsec:data_augmentation}) on the model performance.
+We also explore the effect of using back-translated data (Section~\ref{sec:data_augmentation}) on the model performance.
 Results shown in Fig.~\ref{fig:data_augmentation_effect} suggest that the data augmentation does not improve the $F1$-score or the summary recall with a statistically significant margin.
-At the same time, it seems to be amplifying the effect of the scaled dot-product attention (Section~\ref{subsec:seq2seq}, Figure~\ref{fig:summary_recall_data_augmentation_effect}).
+At the same time, it seems to be amplifying the effect of the scaled dot-product attention (Section~\ref{sec:seq2seq}, Figure~\ref{fig:summary_recall_data_augmentation_effect}).
 \begin{figure}[ht]
     \begin{subfigure}{0.49\textwidth}
         \centering \includegraphics[width=1\columnwidth]{../charts/Summary Recall comparison}
@@ -307,15 +307,16 @@ At the same time, it seems to be amplifying the effect of the scaled dot-product
 While we are disappointed by these results, we believe that there can be a number of reasons for this.
 For a machine translated sentence $s^m_i$ and its original sentence $s_i$, we \hypertarget{data_augment_hypothesis}{\emph{hypothesise}} that:
 \begin{enumerate}
-    \item $s^m_i$ contain a similar amount of noise as $s_i$ (due to the pdf-to-text conversion process),
-    \item $s^m_i$ does not introduce enough variation to $s_i$ (i.e., $s^m_i$ and $s_i$ are too similar), and
-    \item while financial language itself is very domain-specific, it is not very semantically diverse (i.e., metaphors, idioms, etc. are limited in use)
-\end{enumerate}.
+    \item $s^m_i$ contain a similar amount of noise as $s_i$ (due to the pdf-to-text conversion process);
+    \item $s^m_i$ does not introduce enough variation to $s_i$ (i.e., $s^m_i$ and $s_i$ are too similar);
+    \item while financial language itself is very domain-specific, it is not very semantically diverse (i.e., metaphors, idioms, etc.
+    are limited in use);
+\end{enumerate}
 
 % GRU vs LSTM + hidden size 64 vs 256
 In our proposed architecture we choose a bidirectional GRU (Bi-GRU) instead of a Bi-LSTM because
 \begin{enumerate*}[label=(\alph*)]
-    \item GRUs have a simpler structure than LSTMs and are easier to train (Section~\ref{subsec:rnn}), and
+    \item GRUs have a simpler structure than LSTMs and are easier to train (Section~\ref{sec:rnn}), and
     \item our experiments show that GRUs outperform LSTMs with 1\% in terms of Summary Recall
 \end{enumerate*}.
 Furthermore, in terms of the hidden units, we select 64 over 256 because:
@@ -343,11 +344,11 @@ Furthermore, in terms of the hidden units, we select 64 over 256 because:
 
 From the above experiments it is hard to make any certain conclusions on the effect of dropout\footnote{
     It would make more sense for its application in the over-parameterised model, though this does not seem to be the case (Fig.~\ref{fig:dropout_and_hidden_size}).
-} or the use of an attention mechanism (Section~\ref{subsec:seq2seq}).
+} or the use of an attention mechanism (Section~\ref{sec:seq2seq}).
 We believe that only one \emph{single-head attention} is not sufficient to learn all the complex relationships between words in the sentences.
 Our reasoning is that because a particular head specializes to only specific language aspects (i.e., syntactic, semantic, etc)~\cite{clark-etal-2019-bert}),
 for future experiments it would be much more reasonable to use multiple heads instead.
-Nevertheless, there still are some practical benefits of attention to our extractive summarisation system which we will discuss in Section~\ref{sec:evaluation}.
+Nevertheless, there still are some practical benefits of attention to our extractive summarisation system which we will discuss in Section~\ref{ch:evaluation}.
 
 Overall, four variations of the RNN model engage our focus based on the results above and our design decisions (Figure~\ref{fig:summary_recall_data_augmentation_effect}):
 \begin{enumerate}
@@ -357,4 +358,4 @@ Overall, four variations of the RNN model engage our focus based on the results 
     \item GRU-base with 80\% under--sampling + data augmentation + attention
 \end{enumerate}
 Because our binary classification metrics do not demonstrate any significant differences between them, we will
-test their performance with ROUGE during the evaluation phase (Section~\ref{sec:evaluation}).
+test their performance with ROUGE during the evaluation phase (Section~\ref{ch:evaluation}).

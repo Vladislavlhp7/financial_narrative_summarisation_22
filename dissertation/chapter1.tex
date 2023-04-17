@@ -1,13 +1,13 @@
-\section{Introduction}\label{sec:introduction}
+\chapter{Introduction}\label{ch:introduction}
 \epigraph{``Son,'' my father said to me, ``someday this will all be yours.''}{Kurt Vonnegut, Jr.}
 
 In this section, we explain what financial reports are and specifically focus on UK annual reports.
 We outline the main the challenges the latter present for large-scale Natural Language Processing (NLP) research.
 Furthermore, we show that the Accounting \& Finance (AF) research and industry have not adopted the latest NLP techniques
 and we introduce the Financial Narrative Processing (FNP) workshops as a response to this problem.
-Finally, we state our aims and objectives for this third-year project before we outline the background and related work in Section~\ref{sec:background}.
+Finally, we state our aims and objectives for this third-year project before we outline the background and related work in Section~\ref{ch:background}.
 
-\subsection{Financial Reports} \label{subsec:financial_reports}
+\section{Financial Reports} \label{sec:financial_reports}
 Due to international regulations, companies are obliged to report their periodic performance (annual, bi-annual, quarterly) to various regulatory authorities\footnote{Regulation authorities worldwide:
     \begin{itemize}
         \item Securities and Exchange Commission (SEC) in the USA
@@ -35,7 +35,7 @@ Due to international regulations, companies are obliged to report their periodic
     However, these are more challenging for automated processing due to their variable section structure, formatting, and rich visual representations.
 \end{enumerate}
 
-\subsection{UK annual reports}\label{subsec:uk-annual-reports}
+\section{UK annual reports}\label{sec:uk-annual-reports}
 The annual report is the primary corporate disclosure legally required for public companies by regulatory authorities.
 While it \emph{does not have a rigid document structure} like the 10-K, it typically has a \emph{narrative component}\footnote{The narrative component of a UK annual report typically consists of
 \begin{enumerate*}
@@ -50,7 +50,7 @@ While it \emph{does not have a rigid document structure} like the 10-K, it typic
 \end{enumerate*}
 } and the financial statements (at the rear).
 
-As we outlined in Section~\ref{subsec:financial_reports}, UK annual reports have the following inconvenient properties with regard to large-scale text understanding.
+As we outlined in Section~\ref{sec:financial_reports}, UK annual reports have the following inconvenient properties with regard to large-scale text understanding.
 \begin{itemize}
     \item They are very long documents.
     Throughout the years, their average length has been increasing significantly with the number of pages rising 57\% for the median report from 2003 to 2016 (47 to 74 pages, respectively)~\cite{lewis_young_2019}, due to additional regulations between 2006 and 2008 (\cite{el-haj2019retrieving};
@@ -79,7 +79,7 @@ These challenges motivate the work of~\cite{elhaj2019multilingual} who \begin{en
     } extraction tool that converts a text-based PDF annual report to simple text.
 \end{enumerate*}
 
-\subsection{NLP in Accounting and Finance}\label{subsec:nlp-in-accounting-and-finance}
+\section{NLP in Accounting and Finance}\label{sec:nlp-in-accounting-and-finance}
 The relevance of this project should also be understood from the perspective of the development of Natural Language Processing (NLP) in the Accounting and Finance (AF) domain.
 As outlined in~\cite{elliott1998accounting}, investors' trust in the accountability of businesses would be based no longer as much on just the financial statements, but also on more descriptive narratives that define strategy and planning of resource use.
 While some recognise the importance of understanding in-domain textual information~\cite{li2010textual}, others like~\cite{el-haj2019meaning} report that the industry is still doubtful and cynical about the NLP applications in the analysis of financial market disclosures.
@@ -88,7 +88,7 @@ As for ATS~\cite{hollander-white-af} is said to be the single AF study into disc
 It demonstrates that machine-generated summaries are less likely to bias positively investor decisions compared to managerial ones.
 Therefore, this only confirms the existence of a wide gap in NLP applications in Accounting research, which further motivates our work.
 
-\subsection{Financial Narrative Summarisation (FNS) Task} \label{subsec:fns}
+\section{Financial Narrative Summarisation (FNS) Task} \label{sec:fns}
 The FNS Task is part of the annual Financial Narrative Processing (FNP) Workshop~\footnote{\url{https://wp.lancs.ac.uk/cfie/}} organised by Lancaster University since 2018, which aims to:
 \begin{itemize}
     \item encourage the advancement of financial text mining \& narrative processing
@@ -124,20 +124,20 @@ The workshop's goal was to build ATS systems that generate a single summary for 
 
 We acknowledge that due to the scarcity of publicly available financial data this third-year project could not have been possible without the kind permission of the FNP organisers to use the training and validation datasets from their FNS22 Task~\cite{fnp-2022-financial}.
 
-\subsection{Aim and Objectives}\label{subsec:aim-and-objectives}
+\section{Aim and Objectives}\label{sec:aim-and-objectives}
 The summarisation of UK annual reports is a challenging task because of
  \begin{enumerate*}
-     \item the various inconveniences of the reports around their large-scale understanding (Section~\ref{subsec:uk-annual-reports}),
-     \item the discrepancy between Accounting and Finance (AF) research in NLP and the general NLP field (Section~\ref{subsec:nlp-in-accounting-and-finance}), and
-     \item the nature of long-text summarisation in terms of available training data, financial language representation, complex model architectures, and reliability of evaluation metrics (Section~\ref{sec:background}).
+     \item the various inconveniences of the reports around their large-scale understanding (Section~\ref{sec:uk-annual-reports}),
+     \item the discrepancy between Accounting and Finance (AF) research in NLP and the general NLP field (Section~\ref{sec:nlp-in-accounting-and-finance}), and
+     \item the nature of long-text summarisation in terms of available training data, financial language representation, complex model architectures, and reliability of evaluation metrics (Section~\ref{ch:background}).
  \end{enumerate*}
- Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field (Section~\ref{subsec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank~\cite{mihalcea-tarau-2004-textrank}, and LexRank~\cite{Erkan2004LexRankGC}.
+ Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field (Section~\ref{sec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank~\cite{mihalcea-tarau-2004-textrank}, and LexRank~\cite{Erkan2004LexRankGC}.
  For that purpose, several objectives had to be made:
  \begin{itemize}
-     \item pre-processing noisy report narratives (Section~\ref{subsec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{subsec:sentence_extraction}).
-     \item researching and incorporating the public financial state-of-the-art word embeddings (Section~\ref{subsec:word-embeddings}) for an effective text representation.
-     \item building an extractive neural model and tuning its hyperparameters for optimal classification capabilities (Section~\ref{subsec:hyperparameters}).
-     \item researching approaches on dealing with imbalanced datasets and implementing a data augmentation technique for a more discriminative learning process (Section~\ref{subsec:data_augmentation}).
-     \item exploring the capabilities of a pre-trained financial transformer (Section~\ref{subsec:finbert}).
-     \item evaluating all summarisation models with the help of the FNS metric - ROUGE-2 (Section~\ref{sec:evaluation}).
+     \item pre-processing noisy report narratives (Section~\ref{sec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{sec:sentence_extraction}).
+     \item researching and incorporating the public financial state-of-the-art word embeddings (Section~\ref{sec:word-embeddings}) for an effective text representation.
+     \item building an extractive neural model and tuning its hyperparameters for optimal classification capabilities (Section~\ref{sec:hyperparameters}).
+     \item researching approaches on dealing with imbalanced datasets and implementing a data augmentation technique for a more discriminative learning process (Section~\ref{sec:data_augmentation}).
+     \item exploring the capabilities of a pre-trained financial transformer (Section~\ref{sec:finbert}).
+     \item evaluating all summarisation models with the help of the FNS metric - ROUGE-2 (Section~\ref{ch:evaluation}).
  \end{itemize}

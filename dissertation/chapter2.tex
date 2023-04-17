@@ -1,6 +1,6 @@
-\section{Background}\label{sec:background}
+\chapter{Background}\label{ch:background}
 
-\subsection{Supervised Learning}\label{subsec:supervised_learning}
+\section{Supervised Learning}\label{sec:supervised_learning}
 Supervised learning is a machine learning paradigm where a training set $X$ with data points $x$ is provided, along with the corresponding set $Y$ with labels $y$.
 Then the goal is to learn a function $f$ that maps $X$ to $Y$, i.e., $f: X \rightarrow Y$, which makes predictions $f(x)$ as close as possible to the true labels $y$~\cite{sammut2011encyclopedia}.
 The difference between $f(x)$ and $y$ is quantified by a loss function $L$, which is being minimized during the training process by updating the model parameters with respect to the gradient of the loss~\cite{Goodfellow-et-al-2016}.
@@ -9,16 +9,16 @@ In this case, the task can be cast as a binary classification problem, where the
 
 
 
-\subsection{Tf-Idf}\label{subsec:tfidf}
+\section{Tf-Idf}\label{sec:tfidf}
 Tf-Idf (Term Frequency - Inverse Document Frequency) is a statistical technique intended to reflect the importance of a word to a document in a corpus.
 The term frequency is the number of occurrences of term $t$ in document $d$~\cite{luhn1957termfreq}, but it is not enough to capture the importance of a term due to \emph{all terms being considered equally important}~\cite{manning_raghavan_schutze_2008}.
 Meanwhile, the \emph{document frequency ($df_{t}$)} is the number of documents in the corpus containing the term $t$, which evaluates how \emph{common} and \emph{unimportant} a term is~\cite{leskovec_rajaraman_ullman_2020}.
 Therefore, \emph{idf} becomes $\frac{N}{\text{df}_{t}}$, where $N$ is the corpus size, and then the tf-idf term weight $w_{t,d}$ is calculated as the product of the two - $\text{tf}_{t,d} \cdot \text{idf}_{t,d}$~\cite{jurafsky2000}.
 The latter represents now the importance of a term $t$ but normalised by its \emph{commonness}.
 Tf-Idf is often used as a weighting factor in information retrieval and text mining.
-It has also been successfully integrated in summarisation methods like LexRank~\cite{Erkan2004LexRankGC} (Section~\ref{subsec:lexrank}) and in FNS competitive systems~\cite{litvak2021tiber, el-haj-ogden-2022-financial}.
+It has also been successfully integrated in summarisation methods like LexRank~\cite{Erkan2004LexRankGC} (Section~\ref{sec:lexrank}) and in FNS competitive systems~\cite{litvak2021tiber, el-haj-ogden-2022-financial}.
 
-\subsection{Word Embeddings}\label{subsec:word-embeddings}
+\section{Word Embeddings}\label{sec:word-embeddings}
 Historically, to represent a token (i.e., word) $w_{i}$ in a vocabulary $V$ numerically, we define a one-hot-encoding vector of all zeroes except of a one at the index of the word $w_{i}$ in $V$ (i.e., $i$).
 
 The results are sparse individual word vectors being orthogonal to each other which \begin{enumerate*}
@@ -79,7 +79,7 @@ In the same paper, the authors propose using the same algorithms (i.e., CBOW, Sk
 They report a substantial increase in performance in and sensitivity to detecting financial jargon and relationships.
 In our project we acknowledge that a purpose-built financial word embedding (trained on proprietary data) will be more beneficial and more suited for the task of text summarisation of annual financial reports, which is why we select FinText as our preferred model.
 
-\subsection{Recurrent Neural Networks (RNNs)}\label{subsec:rnn}
+\section{Recurrent Neural Networks (RNNs)}\label{sec:rnn}
 The vanilla RNN is a basic type of RNN architecture designed for processing sequential data.
 It learns temporal patterns from the initial data by looping over the hidden layers which allow information to persist (i.e., they serve as a network memory)~\cite{olah2015understandingLSTM}.
 The key component is the recurrent hidden state $h_i$ (Figure~\ref{fig:rnn}) updated at each time step using input data and the previous hidden state (Eq.\ref{eq:rnn_hidden}).
@@ -141,14 +141,14 @@ Then, for a single word $x_i$, its respective \emph{annotation} (i.e., condensed
     \label{fig:recurrent_unfolded}
 \end{figure}
 
-\subsection{Encoder-Decoder and Attention}\label{subsec:seq2seq}
+\section{Encoder-Decoder and Attention}\label{sec:seq2seq}
 However, to deal with many-to-many sequence-to-sequence problems (e.g., machine translation, speech recognition, abstractive text summarisation) a new type of neural architecture is necessary~\cite{sutskever2014sequence}.
 and~\cite{cho-etal-2014-learning} introduced the Encoder-Decoder network (Figure~\ref{fig:encoderdecoder}) with \begin{enumerate*}
     \item the encoder being an RNN that maps an input sequence $(x_1, x_2, \dots, x_n)$ to a continuous fixed-length context vector $c$ and
     \item the decoder, also an RNN, taking this vector and producing an output sequence $(y_1, y_2, \dots, y_m)$
 \end{enumerate*}.
 They train the two RNNs jointly, maximising the conditional probability of the target sequence given a source sequence, i.e., $p(y_1, \ldots, y_{T'} | x_1, \ldots, x_T)$.
-For the selection of the neural model the authors had naturally chosen LSTM and GRU, respectively, due to the resolution of the vanishing gradient problem (as discussed in Section~\ref{subsec:rnn}) and for the time being~\cite{sutskever2014sequence} managed to achieve state-of-the-art results in machine translation.
+For the selection of the neural model the authors had naturally chosen LSTM and GRU, respectively, due to the resolution of the vanishing gradient problem (as discussed in Section~\ref{sec:rnn}) and for the time being~\cite{sutskever2014sequence} managed to achieve state-of-the-art results in machine translation.
 
 
 % Encoder-decoder schema
@@ -211,7 +211,7 @@ For the selection of the neural model the authors had naturally chosen LSTM and 
 
 It is in~\cite{bahdanau2016neural} where the authors suppose that the fixed-length vector results in a bottleneck such that the longer the sequences, the worse the compression performance is for neural networks.
 Meanwhile, they propose to replace the fixed-length vector with a variable-length one which searches for the most relevant information from the source sequence.
-This is achieved through an alignment model which accepts as input the produced annotations from the encoder $h_1,\ldots, h_T$ (see Section~\ref{subsec:rnn} for details on how these are generated).
+This is achieved through an alignment model which accepts as input the produced annotations from the encoder $h_1,\ldots, h_T$ (see Section~\ref{sec:rnn} for details on how these are generated).
 Then the context vector $c_{i}$ which is now distinct for each input word (unlike in~\cite{cho-etal-2014-learning,sutskever2014sequence}) becomes a weighted sum\footnote{
     And hence it is known as the \emph{additive attention}.
 } of the annotations $h_{j}$ (Eq.\ref{eq:context}) and each weight $\alpha_{ij}$ is calculated as the normalized attention score (Eq.\ref{eq:attention_score}).
@@ -228,7 +228,7 @@ Intuitively, as noted in~\cite{galassi2020attention}, this attention mechanism c
     e_{ij} = a(s_{i-1}, h_j)
 \end{equation}
 
-\subsection{Transformers}\label{subsec:transformers}
+\section{Transformers}\label{sec:transformers}
 
 The Transformer~\cite{vaswani2017attention} is another sequence-to-sequence architecture which follows the overall encoder-decoder architecture~\cite{sutskever2014sequence}, but differs in the following aspects:
 \begin{enumerate}
@@ -242,7 +242,7 @@ The Transformer~\cite{vaswani2017attention} is another sequence-to-sequence arch
     } self-attention to allow capturing of global context.
     This mechanism has two key components (Fig.\ref{fig:attention_dot_product}):
     \begin{itemize}
-        \item \emph{The scaled dot-product} (Eq.\ref{eq:attention}) computes the attention weights (see Section~\ref{subsec:seq2seq}) to be used for generating a weighted representation of the input sequence.
+        \item \emph{The scaled dot-product} (Eq.\ref{eq:attention}) computes the attention weights (see Section~\ref{sec:seq2seq}) to be used for generating a weighted representation of the input sequence.
         Each token from the input sequence is represented as a $q$-query, $k$-key, and $v$-value vector (packed together into linearly-projected\footnote{
             The query vectors, key vectors, and value vectors are linearly projected from the input token embeddings using separate learnable weight matrices.
         } $Q$, $K$, $V$ matrices, respectively).
@@ -315,7 +315,7 @@ The Transformer~\cite{vaswani2017attention} is another sequence-to-sequence arch
     \label{fig:transformer}
 \end{figure}
 
-\subsection{BERT}\label{subsec:bert}
+\section{BERT}\label{sec:bert}
 BERT (Bidirectional Encoder Representations from Transformers) is a Transformer-based language model that was proposed by Google AI in 2018~\cite{devlin-etal-2019-bert}.
 It revolutionised the field of NLP by introducing a new pre-training paradigm that outperformed previous state-of-the-art models on a wide range of NLP tasks while being easily applicable to autoregressive generation problems (e.g., abstractive summarization and machine translation).
 We will discuss the main components of BERT and how it differs from the original Transformer model.
@@ -469,25 +469,25 @@ We will discuss the main components of BERT and how it differs from the original
     \label{fig:bert_input}
 \end{figure}
 
-\subsection{FinBERT}\label{subsec:finbert}
+\section{FinBERT}\label{sec:finbert}
 FinBERT\footnote{\url{https://github.com/yya518/FinBERT}}~\cite{yang2020finbert} is a pre-trained domain-specific language model based on
-BERT~\cite{devlin-etal-2019-bert} (Section~\ref{subsec:bert}) that is trained on a total of $4.9B$ tokens from financial corpora:
+BERT~\cite{devlin-etal-2019-bert} (Section~\ref{sec:bert}) that is trained on a total of $4.9B$ tokens from financial corpora:
 \begin{enumerate*}
-    \item Corporate Reports 10-K \& 10-Q (introduced in Section~\ref{subsec:financial_reports}),
+    \item Corporate Reports 10-K \& 10-Q (introduced in Section~\ref{sec:financial_reports}),
     \item Earnings Call Transcripts (discussing financial performance, business updates, and future expectations), and
     \item Analyst Reports (providing an in-depth textual analysis of the company and an earnings forecast)
 \end{enumerate*}.
-This makes FinBERT a natural choice for our experiments, as the language of the training data is very similar to the one of the UK annual reports (Section~\ref{subsec:uk-annual-reports}).
+This makes FinBERT a natural choice for our experiments, as the language of the training data is very similar to the one of the UK annual reports (Section~\ref{sec:uk-annual-reports}).
 Furthermore, the authors demonstrate that FinBERT outperforms BERT on three financial sentiment classification tasks, which is why we select to fine-tune it on our extractive summarisation task.
 
-\subsection{Text Summarisation}\label{subsec:text-summarisation}
+\section{Text Summarisation}\label{sec:text-summarisation}
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
 There are two overarching categories: extractive and abstractive text summarisation.
 The former formulates the problem as a subset selection problem by returning only the most salient text excerpts from the original document~\cite{zhong-etal-2020-extractive}, while the latter aims to generate content anew, similar to how humans would do.
 
 We will outline some key models from the FNS21 (the previous year competition) that inspired our work below:
 \begin{itemize}
-    \item \textbf{Extractive SentenceBERT \cite{gokhan-etal-2021-extractive})}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
+    \item \textbf{Extractive SentenceBERT~\cite{gokhan-etal-2021-extractive})}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
     However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
 
     \item \textbf{AMUSE}~\cite{litvak-vanetik-2021-summarization}: The authors design an ETS system comprised of the following steps \begin{enumerate*}
@@ -508,14 +508,14 @@ We will outline some key models from the FNS21 (the previous year competition) t
     It serves as an inspiration for the best English FNS22 model~\cite{el-haj-etal-2022-financial} and other contestants~\cite{khanna-etal-2022-transformer, foroutan-etal-2022-multilingual}.
 \end{itemize}
 
-Additionally, we briefly describe the FNS22 competitors' approaches, against which we perform our evaluation in Section~\ref{subsec:quantitative-evaluation}:
+Additionally, we briefly describe the FNS22 competitors' approaches, against which we perform our evaluation in Section~\ref{sec:quantitative-evaluation}:
 \begin{itemize}
     \item \textbf{Team LIPI's T5~\cite{pant-chopra-2022-multilingual}}: This model is entirely based on the FNS21's T5-LONG-EXTRACT
     approach~\cite{orzhenovskii-2021-t5} and achieves the best ROUGE-2 $F1$ score of $0.374$ on the English testing set.
     Unfortunately, results on the validation set are not made available.
 
     \item \textbf{Top-K Narrative Extractor~\cite{shukla-etal-2022-dimsum}}: The authors implement a narrative
-    classification method recognising unique report sections, their titles (see Section~\ref{subsec:uk-annual-reports})), and the Table of Content.
+    classification method recognising unique report sections, their titles (see Section~\ref{sec:uk-annual-reports})), and the Table of Content.
     They further propose an algorithm for word allocation to assemble various sentences from different sections into a single summary.
     To fit in the $1,000$ word limit, they use a Top-k summarizer, which extracts the first $k$ words from a given text.
     Their system achieves a ROUGE-2 $F1$ score of $0.425$ on the English validation set, while ranking in the top three
@@ -540,7 +540,7 @@ Additionally, we briefly describe the FNS22 competitors' approaches, against whi
 
 In this work we will be solely exploring the extractive summarisation method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
 
-\subsection{TextRank}\label{subsec:textrank}
+\section{TextRank}\label{sec:textrank}
 TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algorithm for extractive summarisation with the following key components:
 \begin{enumerate}
     \item \textbf{Sentence similarity}: TextRank computes the similarity between two sentences based on either the \emph{cosine similarity}
@@ -560,7 +560,7 @@ TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algor
     \item \textbf{Sentence ranking}: The constructed graph is passed into the PageRank algorithm~\cite{page1998anatomy} that assigns each sentence a score based on the importance of its neighbours.
     The final summary is then assembled from the selection of the top $k$ sentences with the highest scores.
 \end{enumerate}
-Nevertheless,~\cite{Shearing2020AutomatedTS} report two considerable weaknesses of TextRank (hence the need for a better baseline - LexRank):
+Nevertheless, ~\cite{Shearing2020AutomatedTS} report two considerable weaknesses of TextRank (hence the need for a better baseline - LexRank):
 \begin{enumerate}
     \item \textbf{Extraneous words} - TextRank does not penalise the extraneous words (i.e., words that do not add any essential information to the sentence) which can artificially increase the PageRank score (i.e., the importance) of a sentence.
     \item \textbf{Frequent words} - There is no weighting applied regarding the frequency (or rarity) of words in the sentence, which can lead to a bias towards sentences with more frequent words.
@@ -577,7 +577,7 @@ LexRank~\cite{Erkan2004LexRankGC} builds up and resolves the issues of this algo
 \end{example}
 
 
-\subsection{LexRank}\label{subsec:lexrank}
+\section{LexRank}\label{sec:lexrank}
 LexRank~\cite{Erkan2004LexRankGC} is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
 It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
 To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes~\cite{Shearing2020AutomatedTS}.
@@ -608,8 +608,8 @@ The authors further propose finding the most important sentences by \begin{enume
     \item ranking sentences based on their \emph{lexical} PageRank~\cite{page1998anatomy} score similarly to TextRank~\cite{mihalcea-tarau-2004-textrank}.
 \end{enumerate*}
 
-\subsection{Evaluation Metrics}\label{subsec:evaluation-metrics}
-\subsubsection{Confusion Matrix}\label{subsubsec:confusion-matrix}
+\section{Evaluation Metrics}\label{sec:evaluation-metrics}
+\subsection{Confusion Matrix}\label{subsec:confusion-matrix}
 The confusion matrix is an essential tool to visualise and help assessing the performance of trained classifiers against
 the true labels $y_{i}$.
 
@@ -656,7 +656,7 @@ These matrix elements can be further combined into informative classification me
     \label{tab:confusion_matrix}
 \end{table}
 
-\subsubsection{ROUGE}\label{subsubsec:rouge}
+\subsection{ROUGE}\label{subsec:rouge}
 The Recall-Oriented Understudy for Gisting Evaluation (ROUGE)~\cite{lin2004rouge} is a popular recall-based evaluation metric for
 summarisation tasks which measures the overlapping units (i.e., n-grams) of a predicted summary $c$ and a reference summary $c^{*}$.
 Here we briefly describe some of the most common variants of ROUGE (especially in the context of the FNS Task):

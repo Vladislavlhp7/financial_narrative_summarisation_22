@@ -1,16 +1,16 @@
-\section{Evaluation}\label{sec:evaluation}
+\chapter{Evaluation}\label{ch:evaluation}
 In this section we will describe the evaluation process of our models.
-For that purpose, we will describe how we use the ROUGE metrics (Section~\ref{subsubsec:rouge}) to compute the
-similarity between the gold and candidate summaries, and how we arrive at the final evaluation aggregation (Section~\ref{subsec:evaluation-mechanism}).
-Afterwards, we will provide the results of our evaluation (Section~\ref{subsec:quantitative-evaluation}), where we compare our models to the baselines and official FNS models.
-Finally, we will discuss the qualitative limitations of our produced summaries (Section~\ref{subsec:qualitative-discussion}) before we conclude our work in Section~\ref{sec:conclusion}.
+For that purpose, we will describe how we use the ROUGE metrics (Section~\ref{subsec:rouge}) to compute the
+similarity between the gold and candidate summaries, and how we arrive at the final evaluation aggregation (Section~\ref{sec:evaluation-mechanism}).
+Afterwards, we will provide the results of our evaluation (Section~\ref{sec:quantitative-evaluation}), where we compare our models to the baselines and official FNS models.
+Finally, we will discuss the qualitative limitations of our produced summaries (Section~\ref{sec:qualitative-discussion}) before we conclude our work in Section~\ref{ch:conclusion}.
 
-\subsection{Evaluation Mechanism}\label{subsec:evaluation-mechanism}
+\section{Evaluation Mechanism}\label{sec:evaluation-mechanism}
 To assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the GRUs and FinBERT, respectively).
 Afterwards, we feed them into our model computing the output summary probabilities $p_{j}^{i}$, and then we select the
-top-$k$ sentences ($k=40$, Section~\ref{subsec:data}) based on the highest sentence probabilities $p_{j}^{i}$.
+top-$k$ sentences ($k=40$, Section~\ref{sec:data}) based on the highest sentence probabilities $p_{j}^{i}$.
 Finally, we concatenate them to form the summary $c_{i}$ in natural order (i.e., the order in the input text),
-but also trim it to the maximum length of $1,000$ words (Section~\ref{subsec:fns}).
+but also trim it to the maximum length of $1,000$ words (Section~\ref{sec:fns}).
 
 In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$
 based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-2\footnote{
@@ -23,7 +23,7 @@ the ROUGE-L-maximising\footnote{
     We say ROUGE-L-maximising for conciseness, because ROUGE is a metric with precision and recall components, which are combined into a single $F1$ score.
     It is precisely the $F1$ score that we maximise.
     However, we are aware this introduces more complexity to our naming convention, hence we will use the term ROUGE-L-maximising.
-} $c^{*\max}_{i}$ gold summary (Section~\ref{subsubsec:rouge}), i.e.,
+} $c^{*\max}_{i}$ gold summary (Section~\ref{subsec:rouge}), i.e.,
 
 \begin{equation}\label{eq:rouge_max}
     c^{*\max} = \underset{c^{*} \in C^{*}}{\operatorname{argmax}} \text{ROUGE-L}(c, c^{*}_{i})
@@ -47,10 +47,10 @@ Therefore, the final evaluation score for a model $m$ is the average ROUGE-2 sco
 \end{equation}
 where $|C|$ is the number of candidate summaries $c_{i}$.
 
-\subsection{Quantitative Evaluation}\label{subsec:quantitative-evaluation}
+\section{Quantitative Evaluation}\label{sec:quantitative-evaluation}
 Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance_validation}, which
 shows the results on the official validation set used as a testing set for our models.
-We again wish to remind the reader that we were not provided with the FNS22 testing set (Section~\ref{subsec:data}).
+We again wish to remind the reader that we were not provided with the FNS22 testing set (Section~\ref{sec:data}).
 
 Therefore, in our comparison we include the following FNS22 models, namely:
 \begin{enumerate}
@@ -95,7 +95,7 @@ We can provide the following commentary on the results:
         Regarding the other FNS models, we observe that our FinBERT-base beats the LED~\cite{khanna-etal-2022-transformer} with a similar margin as the LSIR's mT5.
         However, the Top-K remains with the highest ROUGE-1 and ROUGE-2 $F1$ measures.
         Surprisingly, data augmentation does not improve the performance of our FinBERT-base, and we believe this was caused by
-        the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{subsec:hyperparameters}, which can be leading to over-fitting.
+        the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{sec:hyperparameters}, which can be leading to over-fitting.
         Nevertheless, both models clearly outperform the official baselines: LexRank~\cite{Erkan2004LexRankGC} and TextRank~\cite{mihalcea-tarau-2004-textrank}.
     \item The GRU-base + attention + back-translation model is the best performing model out of all recurrent neural architectures.
     While preliminary binary classification results did not show any considerable differences between the models, clearly
@@ -105,19 +105,19 @@ We can provide the following commentary on the results:
               which is clearly not the case for our FinBERT model.
     \end{enumerate*}
     Additionally, we must note that except of the Top-K NE~\cite{shukla-etal-2022-dimsum}, all other FNS models are transformer-based,
-    hence they have more complex architectures and attention mechanisms than our GRU-based models with single-head attention (Sections~\ref{subsec:transformers} and~\ref{subsec:rnn_model}).
+    hence they have more complex architectures and attention mechanisms than our GRU-based models with single-head attention (Sections~\ref{sec:transformers} and~\ref{sec:rnn_model}).
     \item At the same time, we acknowledge that the universal summarisation baselines: LexRank and TextRank, outperform
         our simple GRU models (Table~\ref{tab:rouge_performance_validation}), and we attribute this to both:
     \begin{enumerate*}[label=(\alph*)]
         \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}),
-        \item the 90\% random under-sampling of the majority class data (see Section~\ref{subsec:data}), and
-        \item the summary generation process of selecting the top-$k$ sentences based on their sorted probabilities (see discussion in Sections~\ref{subsec:qualitative-discussion} and~\ref{subsec:limitations}).
+        \item the 90\% random under-sampling of the majority class data (see Section~\ref{sec:data}), and
+        \item the summary generation process of selecting the top-$k$ sentences based on their sorted probabilities (see discussion in Sections~\ref{sec:qualitative-discussion} and~\ref{sec:limitations}).
     \end{enumerate*}
 \end{itemize}
 
 \newpage
 
-\subsection{Qualitative Discussion}\label{subsec:qualitative-discussion}
+\section{Qualitative Discussion}\label{sec:qualitative-discussion}
 After having established the quantitative performance of our models, we now turn to the qualitative discussion of the results.
 For a random annual report we generated a summary using the FinBERT-base + data augmentation model and
 the GRU-base + attention model (see Figures~\ref{fig:rnn_summary},~\ref{fig:finbert_summary}).
@@ -141,29 +141,29 @@ exacerbates the accuracy of the summarisation.
 
 Although, the practical results from Figures~\ref{fig:rnn_summary} might seem disappointing, we must once again remind the reader that the reports are extremely
 long with an average number of sentences and words at around $2,700$ and $58,000$, respectively~\cite{litvak-vanetik-2021-summarization}.
-Meanwhile, we are constrained to producing a summary of at most $40$ sentences (Section~\ref{subsec:data}) or $1,000$ words (Section~\ref{subsec:fns}).
+Meanwhile, we are constrained to producing a summary of at most $40$ sentences (Section~\ref{sec:data}) or $1,000$ words (Section~\ref{sec:fns}).
 
 \newpage
 
-\section{Conclusion}\label{sec:conclusion}
+\chapter{Conclusion}\label{ch:conclusion}
 In this section we summarise the main contributions and discuss the limitations of our work.
 
-\subsection{Summary of Achievements}\label{subsec:summary}
+\section{Summary of Achievements}\label{sec:summary}
 In this project we have explored the problem of summarising UK annual reports.
-To deal with the significant amount of noise in the plain text of these glossy documents, we have built a rigorous pre-processing pipeline (Section~\ref{subsec:data}).
-We have further implemented a sentence extraction phase where we generate binary labels ($1$ being summary, $0$ - non-summary) from the reports and their multiple gold summaries (Section~\ref{subsec:sentence_extraction}).
+To deal with the significant amount of noise in the plain text of these glossy documents, we have built a rigorous pre-processing pipeline (Section~\ref{sec:data}).
+We have further implemented a sentence extraction phase where we generate binary labels ($1$ being summary, $0$ - non-summary) from the reports and their multiple gold summaries (Section~\ref{sec:sentence_extraction}).
 Once our datasets are created, we
 \begin{enumerate*}[label=(\alph*)]
-    \item design a Recurrent Neural Network (RNN) architecture (Section~\ref{subsec:rnn_model}), and
-    \item fine-tune a financial Transformer model - FinBERT (Section~\ref{subsec:finbert})
+    \item design a Recurrent Neural Network (RNN) architecture (Section~\ref{sec:rnn_model}), and
+    \item fine-tune a financial Transformer model - FinBERT (Section~\ref{sec:finbert})
 \end{enumerate*},
-training them in a supervised manner for a binary classification task (Sections~\ref{subsec:training} and~\ref{subsec:hyperparameters}).
-We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Section~\ref{sec:evaluation}).
+training them in a supervised manner for a binary classification task (Sections~\ref{sec:training} and~\ref{sec:hyperparameters}).
+We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Section~\ref{ch:evaluation}).
 Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement on the validation set over the best overall FNS22 model~\cite{foroutan-etal-2022-multilingual}.
 Additionally, we show that our FinBERT also achieves competitive performance with the best FNS22 English model,
-although noting that the our models are tested on different data (Section~\ref{subsec:data}).
-We also discuss the quality of the produced summaries (Section~\ref{subsec:qualitative-discussion}), and in
-Section~\ref{subsec:limitations} we describe in more depth the limitations of our system and possible solutions.
+although noting that the our models are tested on different data (Section~\ref{sec:data}).
+We also discuss the quality of the produced summaries (Section~\ref{sec:qualitative-discussion}), and in
+Section~\ref{sec:limitations} we describe in more depth the limitations of our system and possible solutions.
 \\
 In terms of \emph{innovational aspects} of our project in the context of the FNS challenge, we are the first to our knowledge that:
 \begin{itemize}
@@ -180,7 +180,7 @@ In terms of \emph{innovational aspects} of our project in the context of the FNS
     However, we are the first to adapt FinBERT for extractive summarisation.
 \end{itemize}
 
-\subsection{Discussion of Limitations}\label{subsec:limitations}
+\section{Discussion of Limitations}\label{sec:limitations}
 Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive
 performance for the FNS22 task, there are several limitations that we would like to discuss:
 \begin{itemize}
@@ -196,10 +196,10 @@ performance for the FNS22 task, there are several limitations that we would like
     \item \emph{Non-exhaustive evaluation} - Due to the FNS models being proprietary, and also evaluated on the official testing set,
     we are unable to make a more comprehensive comparison with the other models.
     However, in an ideal scenario we would perform further quantitative and qualitative evaluation of our performance.
-    \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{sec:evaluation}).
+    \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{ch:evaluation}).
         However, this is a very simplistic approach to summarisation that
         \begin{enumerate*}[label=(\alph*)]
-            \item introduces incoherence issues (like the \emph{dangling anaphora phenomenon} from Section~\ref{subsec:sentence_extraction}),
+            \item introduces incoherence issues (like the \emph{dangling anaphora phenomenon} from Section~\ref{sec:sentence_extraction}),
             \item trims the last sentence to fit the $1,000$ word limit, and it
             \item does not account for the \emph{informativeness} of the individual sentences
         \end{enumerate*}.
@@ -215,14 +215,14 @@ performance for the FNS22 task, there are several limitations that we would like
         \emph{optimal candidate summary} should be \emph{greedily maximising the global summary-level ROUGE-2} score.
 \end{itemize}
 
-\subsection{Future Work}\label{subsec:future-work}
+\section{Future Work}\label{sec:future-work}
 While in our project we only consider the narrative summarisation of
 financial reports already converted to plain text, we propose the following pipeline as a direction for future work:
 \begin{enumerate}
     \item \emph{PDF-to-Text} - Integrate into the summarisation system a PDF-to-Text conversion tool for annual
     reports like the CFIE-FRSE\footnote{\url{https://github.com/drelhaj/CFIE-FRSE}}~\cite{elhaj2019multilingual}, which
-    also extracts the text into 8 generic section headers (Section~\ref{subsec:uk-annual-reports}).
-    \item \emph{Text-to-Summary} - Implement an extractive method that addresses the limitations from Section~\ref{subsec:limitations},
+    also extracts the text into 8 generic section headers (Section~\ref{sec:uk-annual-reports}).
+    \item \emph{Text-to-Summary} - Implement an extractive method that addresses the limitations from Section~\ref{sec:limitations},
     or alternatively, an abstractive method producing \emph{lay summaries} for non-expert users~\cite{vinzelberg2023lay, Guo2020AutomatedLL}.
     \item \emph{Text-to-Analysis} - Apply NLP techniques like sentiment analysis~\cite{araci2019finbert}, named entity recognition
    ~\cite{zhang2022finbertmrc}, and detection of forward-looking sentences~\cite{stihec-etal-2021-preliminary},
