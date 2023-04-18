@@ -515,7 +515,8 @@ of \degreetitle.
        \newpage
         \iftablespage
                 \addvspace{10pt}
-%                \addcontentsline{toc}{section}{\listtablename}\listoftables
+%                \addcontentsline{toc}{section}{\listtablename}
+                \listoftables
 %                \newpage
         \let\cleardoublepage\clearpage
         \fi
