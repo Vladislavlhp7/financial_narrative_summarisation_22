@@ -1,4 +1,7 @@
 \chapter{Background}\label{ch:background}
+In this chapter we provide the necessary background knowledge for the reader to understand our proposed solution in Chapter~\ref{ch:methodology}.
+We will describe key concepts in modern extractive summarisation, such as word embeddings, Recurrent Neural Networks, attention mechanism and Transformer architecture.
+We also describe various official FNS and baseline models which we use as benchmarks in our evaluation phase (Section~\ref{sec:quantitative-evaluation}).
 
 \section{Supervised Learning}\label{sec:supervised_learning}
 Supervised learning is a machine learning paradigm where a training set $X$ with data points $x$ is provided, along with the corresponding set $Y$ with labels $y$.
@@ -6,7 +9,6 @@ Then the goal is to learn a function $f$ that maps $X$ to $Y$, i.e., $f: X \righ
 The difference between $f(x)$ and $y$ is quantified by a loss function $L$, which is being minimized during the training process by updating the model parameters with respect to the gradient of the loss~\cite{Goodfellow-et-al-2016}.
 In the context of extractive summarisation, supervised learning can be used to identify the most important sentences in a document, which can then be used to generate a summary.
 In this case, the task can be cast as a binary classification problem, where the sentence labels are either $1$ (summarising) or $0$ (non-summarising)~\cite{manning_raghavan_schutze_2008}.
-
 
 
 \section{Tf-Idf}\label{sec:tfidf}
@@ -515,7 +517,7 @@ Additionally, we briefly describe the FNS22 competitors' approaches, against whi
     Unfortunately, results on the validation set are not made available.
 
     \item \textbf{Top-K Narrative Extractor~\cite{shukla-etal-2022-dimsum}}: The authors implement a narrative
-    classification method recognising unique report sections, their titles (see Section~\ref{sec:uk-annual-reports})), and the Table of Content.
+    classification method recognising unique report sections, their titles (see Section~\ref{sec:uk-annual-reports}), and the Table of Content.
     They further propose an algorithm for word allocation to assemble various sentences from different sections into a single summary.
     To fit in the $1,000$ word limit, they use a Top-k summarizer, which extracts the first $k$ words from a given text.
     Their system achieves a ROUGE-2 $F1$ score of $0.425$ on the English validation set, while ranking in the top three

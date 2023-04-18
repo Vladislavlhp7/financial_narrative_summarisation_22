@@ -1,11 +1,11 @@
 \chapter{Introduction}\label{ch:introduction}
 \epigraph{``Son,'' my father said to me, ``someday this will all be yours.''}{Kurt Vonnegut, Jr.}
 
-In this section, we explain what financial reports are and specifically focus on UK annual reports.
+In this chapter, we explain what financial reports are and specifically focus on UK annual reports.
 We outline the main the challenges the latter present for large-scale Natural Language Processing (NLP) research.
 Furthermore, we show that the Accounting \& Finance (AF) research and industry have not adopted the latest NLP techniques
 and we introduce the Financial Narrative Processing (FNP) workshops as a response to this problem.
-Finally, we state our aims and objectives for this third-year project before we outline the background and related work in Section~\ref{ch:background}.
+Finally, we state our aims and objectives for this third-year project before we outline the background and related work in Chapter~\ref{ch:background}.
 
 \section{Financial Reports} \label{sec:financial_reports}
 Due to international regulations, companies are obliged to report their periodic performance (annual, bi-annual, quarterly) to various regulatory authorities\footnote{Regulation authorities worldwide:
@@ -98,7 +98,7 @@ The FNS Task is part of the annual Financial Narrative Processing (FNP) Workshop
 
 For that purpose, they produce datasets of extracted narratives (with the help of the CFIE-FRSE tool) from annual reports of UK companies listed on the London Stock Exchange (LSE).
 
-In their FNS 2022 Task, there were $3,863$ such reports (Table~\ref{tab:fns22-data}), while the average length was reported at 80 pages, and the maximum of more than 250 pages~\cite{litvak-vanetik-2021-summarization}.
+In their FNS 2022 Task, there were $3,863$ such reports in English (Table~\ref{tab:fns22-data}), while the average length was reported at 80 pages, and the maximum of more than 250 pages~\cite{litvak-vanetik-2021-summarization}.
 
 Additionally, for every report, there were at least two gold summaries situated in the annual report itself~\footnote{
     The gold summaries being already in the annual report is not problematic because these reports are already written by domain experts who know how to summarise the financial state of a company.
@@ -106,7 +106,7 @@ Additionally, for every report, there were at least two gold summaries situated 
     At this moment, one can begin to doubt the point of applying ATS techniques, but due to the \emph{lack of rigid document structure}, \emph{it is not trivial to automatically find these text excerpts with heuristic methods}.
     Furthermore, we can formulate this challenge as finding the latent features of a summarising (i.e., \enquote{to-be-in-the-summary}) sentence, highlighted as one of the fundamental advantages of NLP in AF research (\cite{lewis_young_2019}, \cite{el-haj2019meaning}).
 }
-The workshop's goal was to build ATS systems that generate a single summary for an annual report, no longer than $1,000$ words (almost just as long as the gold summaries on average).
+The workshop's goal was to build ATS systems that generate a single summary for an annual report, no longer than $1,000$ words (shorter than the gold summaries on average).
 
 \begin{table}[h]
     \centering
@@ -129,9 +129,10 @@ The summarisation of UK annual reports is a challenging task because of
  \begin{enumerate*}
      \item the various inconveniences of the reports around their large-scale understanding (Section~\ref{sec:uk-annual-reports}),
      \item the discrepancy between Accounting and Finance (AF) research in NLP and the general NLP field (Section~\ref{sec:nlp-in-accounting-and-finance}), and
-     \item the nature of long-text summarisation in terms of available training data, financial language representation, complex model architectures, and reliability of evaluation metrics (Section~\ref{ch:background}).
+     \item the nature of long-text summarisation in terms of available training data, financial language representation, complex model architectures, and reliability of evaluation metrics (Chapter~\ref{ch:background}).
  \end{enumerate*}
- Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field (Section~\ref{sec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank~\cite{mihalcea-tarau-2004-textrank}, and LexRank~\cite{Erkan2004LexRankGC}.
+ Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field
+(Section~\ref{sec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank~\cite{mihalcea-tarau-2004-textrank}, and LexRank~\cite{Erkan2004LexRankGC}.
  For that purpose, several objectives had to be made:
  \begin{itemize}
      \item pre-processing noisy report narratives (Section~\ref{sec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{sec:sentence_extraction}).

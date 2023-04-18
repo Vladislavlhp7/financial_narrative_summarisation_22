@@ -1,9 +1,9 @@
 \chapter{Evaluation}\label{ch:evaluation}
-In this section we will describe the evaluation process of our models.
+In this chapter we will describe the evaluation process of our models.
 For that purpose, we will describe how we use the ROUGE metrics (Section~\ref{subsec:rouge}) to compute the
 similarity between the gold and candidate summaries, and how we arrive at the final evaluation aggregation (Section~\ref{sec:evaluation-mechanism}).
 Afterwards, we will provide the results of our evaluation (Section~\ref{sec:quantitative-evaluation}), where we compare our models to the baselines and official FNS models.
-Finally, we will discuss the qualitative limitations of our produced summaries (Section~\ref{sec:qualitative-discussion}) before we conclude our work in Section~\ref{ch:conclusion}.
+Finally, we will discuss the qualitative limitations of our produced summaries (Section~\ref{sec:qualitative-discussion}) before we conclude our work in Chapter~\ref{ch:conclusion}.
 
 \section{Evaluation Mechanism}\label{sec:evaluation-mechanism}
 To assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the GRUs and FinBERT, respectively).
@@ -146,7 +146,7 @@ Meanwhile, we are constrained to producing a summary of at most $40$ sentences (
 \newpage
 
 \chapter{Conclusion}\label{ch:conclusion}
-In this section we summarise the main contributions and discuss the limitations of our work.
+In this section we summarise the main contributions of our work, highlighting its innovational aspects and discussing its limitations.
 
 \section{Summary of Achievements}\label{sec:summary}
 In this project we have explored the problem of summarising UK annual reports.
@@ -158,7 +158,7 @@ Once our datasets are created, we
     \item fine-tune a financial Transformer model - FinBERT (Section~\ref{sec:finbert})
 \end{enumerate*},
 training them in a supervised manner for a binary classification task (Sections~\ref{sec:training} and~\ref{sec:hyperparameters}).
-We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Section~\ref{ch:evaluation}).
+We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Chapter~\ref{ch:evaluation}).
 Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement on the validation set over the best overall FNS22 model~\cite{foroutan-etal-2022-multilingual}.
 Additionally, we show that our FinBERT also achieves competitive performance with the best FNS22 English model,
 although noting that the our models are tested on different data (Section~\ref{sec:data}).
@@ -196,7 +196,7 @@ performance for the FNS22 task, there are several limitations that we would like
     \item \emph{Non-exhaustive evaluation} - Due to the FNS models being proprietary, and also evaluated on the official testing set,
     we are unable to make a more comprehensive comparison with the other models.
     However, in an ideal scenario we would perform further quantitative and qualitative evaluation of our performance.
-    \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Section~\ref{ch:evaluation}).
+    \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Chapter~\ref{ch:evaluation}).
         However, this is a very simplistic approach to summarisation that
         \begin{enumerate*}[label=(\alph*)]
             \item introduces incoherence issues (like the \emph{dangling anaphora phenomenon} from Section~\ref{sec:sentence_extraction}),
