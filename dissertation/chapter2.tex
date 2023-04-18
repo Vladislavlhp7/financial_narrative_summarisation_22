@@ -678,6 +678,14 @@ Here we briefly describe some of the most common variants of ROUGE (especially i
     \begin{equation}\label{eq:rouge_formula}
         ROUGE-N = \frac{\sum_{S \in R} \sum_{n-gram \in S} count_{match}(n-gram)}{\sum_{S \in R} \sum_{n-gram \in S} count(n-gram)}
     \end{equation}
+    \begin{example}\label{ex:rouge}
+        We briefly demonstrate how to compute ROUGE-2 for a sentence pair:\\
+        $c$ = ``Fox can run'' and $c^{*}$ = ``Fox can walk''.\\
+        Here, the bigrams of $c$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``run''})\}$. \\
+        Meanwhile, the bigrams of $c^{*}$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``walk''})\}$.\\
+        The intersection of the two sets is $\{(\text{``Fox''}, \text{``can''})\}$, which is the only bigram that appears in both $c$ and $c^{*}$.\\
+        Therefore, $\text{ROUGE-2 recall} = \frac{\text{Overlapping bigrams}}{\text{Total bigrams in reference summary}} = \frac{1}{2}=0.5$.
+    \end{example}
     \item \textbf{ROUGE-L} uses the longest common subsequence (LCS) to measure the similarity between $c$ and $c^{*}$.
     The LCS is the longest sequence of words that appears in both summaries \emph{in the same order}, but \emph{not necessarily consecutively}.
     Thus, ROUGE-L is less sensitive to word order compared to ROUGE-N and can capture longer-range dependencies.
@@ -690,12 +698,3 @@ While ROUGE scores are explainable and easily implementable, they have certain l
     \item lack of correlation with human evaluation~\cite{liu2010exploring}
 \end{enumerate*}.
 Despite these limitations, ROUGE remains a widely-used evaluation measure, particularly in extractive summarization and we use it in this work as well.
-
-\begin{example}\label{ex:rouge}
-    We briefly demonstrate how to compute ROUGE-2 for a sentence pair:\\
-    $c$ = ``Fox can run'' and $c^{*}$ = ``Fox can walk''.\\
-    Here, the bigrams of $c$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``run''})\}$. \\
-    Meanwhile, the bigrams of $c^{*}$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``walk''})\}$.\\
-    The intersection of the two sets is $\{(\text{``Fox''}, \text{``can''})\}$, which is the only bigram that appears in both $c$ and $c^{*}$.\\
-    Therefore, $\text{ROUGE-2 recall} = \frac{\text{Overlapping bigrams}}{\text{Total bigrams in reference summary}} = \frac{1}{2}=0.5$.
-\end{example}
