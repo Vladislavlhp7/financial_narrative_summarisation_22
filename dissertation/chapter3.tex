@@ -1,5 +1,7 @@
 \chapter{Methodology}\label{ch:methodology}
-In this chapter
+In this chapter we describe the FNS text reports and the issues they present (Section~\ref{sec:data}).
+We specify how we pre-process the data, and formulate our summarisation problem as a sentence extraction task (Section~\ref{sec:sentence_extraction}).
+We further outline how we deal with the data imbalance problem (Section~\ref{sec:data_augmentation}).
 
 \section{Data}\label{sec:data}
 The data for the FNS22 task is a collection of narrative parts of annual reports, converted from PDF to plain text.
@@ -102,7 +104,7 @@ We are aware that a validation and a training sentence can come from the same re
 \end{enumerate}
 Therefore, we believe that the training and validation sentences are to a large extent independent, and as for the process of sentence extraction, we refer you to Section~\ref{sec:sentence_extraction} for an in-depth discussion.
 
-\section{Sentence Extraction}\label{sec:sentence_extraction}
+\section{Summarisation Problem Formulation}\label{sec:sentence_extraction}
 We approach the annual report summarisation problem from a supervised perspective - we cast the task of Extractive Text Summarisation (ETS) as a binary classification problem defined on the sentence level.
 More formally, we can describe the annual report as $d=\{s_{1}, s_{2}, \dots, s_{n}\}$, where $d$ is a document, represented in terms of sentences $s_{i}, \  1 \leq i \leq n$~\cite{liu2019finetuningbert}.
 
@@ -131,7 +133,7 @@ classification labels ($\{1,0\}$ representing \emph{summary} and \emph{non-summa
 the training and testing datasets.
 
 We perform the sentence extraction as discussed above to produce a dataset (training and validation combined) of $3,554,800$ and $361,703$ sentences for classes 0 and 1, respectively.
-Additionally, the training and validation sets are split in a 90--10 stratified fashion.
+Additionally, the training and validation sets are split in a 90--10 stratified fashion (similarly to~\cite{stepisnik-perdih-etal-2022-sentiment}).
 
 \section{Under-sampling and Data Augmentation}\label{sec:data_augmentation}
 Due to the fact that the annual reports are extremely long while the summaries are very short, the sentence dataset is highly imbalanced with a ratio of around 1:10.
@@ -362,7 +364,7 @@ We trained both models on Tesla V100-SXM2-16GB\footnote{
 \end{enumerate}
 
 
-\section{RNN: Hyperparameter Tuning}\label{sec:hyperparameters}
+\section{Recurrent Extractor: Hyperparameter Tuning}\label{sec:hyperparameters}
 We have experimented with a number of hyperparameters for our recurrent model, including the use of a FCFFNN,
 the recurrence type, the hidden units, the effect of applying attention, the dropout rate, the learning rate, and the effect of data augmentation.
 

@@ -1,9 +1,9 @@
 \chapter{Evaluation}\label{ch:evaluation}
-In this chapter we will describe the evaluation process of our models.
-For that purpose, we will describe how we use the ROUGE metrics (Section~\ref{subsec:rouge}) to compute the
+In this chapter we outline the evaluation process of our models.
+For that purpose, we describe how we use the ROUGE metrics (Section~\ref{subsec:rouge}) to compute the
 similarity between the gold and candidate summaries, and how we arrive at the final evaluation aggregation (Section~\ref{sec:evaluation-mechanism}).
-Afterwards, we will provide the results of our evaluation (Section~\ref{sec:quantitative-evaluation}), where we compare our models to the baselines and official FNS models.
-Finally, we will discuss the qualitative limitations of our produced summaries (Section~\ref{sec:qualitative-discussion}) before we conclude our work in Chapter~\ref{ch:conclusion}.
+Afterwards, we provide the results of our evaluation (Section~\ref{sec:quantitative-evaluation}), where we compare our models to the baselines and official FNS models.
+Finally, we discuss the qualitative limitations of our produced summaries (Section~\ref{sec:qualitative-discussion}) before we conclude our work in Chapter~\ref{ch:conclusion}.
 
 \section{Evaluation Mechanism}\label{sec:evaluation-mechanism}
 To assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the GRUs and FinBERT, respectively).
