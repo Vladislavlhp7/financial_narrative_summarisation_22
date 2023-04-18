@@ -13,12 +13,32 @@ In this case, the task can be cast as a binary classification problem, where the
 
 \section{Tf-Idf}\label{sec:tfidf}
 Tf-Idf (Term Frequency - Inverse Document Frequency) is a statistical technique intended to reflect the importance of a word to a document in a corpus.
-The term frequency is the number of occurrences of term $t$ in document $d$~\cite{luhn1957termfreq}, but it is not enough to capture the importance of a term due to \emph{all terms being considered equally important}~\cite{manning_raghavan_schutze_2008}.
-Meanwhile, the \emph{document frequency ($df_{t}$)} is the number of documents in the corpus containing the term $t$, which evaluates how \emph{common} and \emph{unimportant} a term is~\cite{leskovec_rajaraman_ullman_2020}.
-Therefore, \emph{idf} becomes $\frac{N}{\text{df}_{t}}$, where $N$ is the corpus size, and then the tf-idf term weight $w_{t,d}$ is calculated as the product of the two - $\text{tf}_{t,d} \cdot \text{idf}_{t,d}$~\cite{jurafsky2000}.
-The latter represents now the importance of a term $t$ but normalised by its \emph{commonness}.
-Tf-Idf is often used as a weighting factor in information retrieval and text mining.
-It has also been successfully integrated in summarisation methods like LexRank~\cite{Erkan2004LexRankGC} (Section~\ref{sec:lexrank}) and in FNS competitive systems~\cite{litvak2021tiber, el-haj-ogden-2022-financial}.
+It is often used as a weighting factor in information retrieval and text mining.
+The term frequency (Eq.\ref{eq:tf}) is the number of occurrences of term $t$ in document $d$~\cite{luhn1957termfreq},
+but it is not enough to capture the importance of a term due to \emph{all terms being considered equally important}~\cite{manning_raghavan_schutze_2008}.
+Meanwhile, the \emph{document frequency ($df_{t}$)} is the number of documents in the corpus containing the term $t$,
+which evaluates how \emph{common} and \emph{unimportant} a term is~\cite{leskovec_rajaraman_ullman_2020}.
+Therefore, \emph{idf} becomes $\frac{|D|}{\text{df}_{t}}$, where $|D|$ is the corpus size.
+It is also sometimes written in log-form as in Equation~\ref{eq:idf} due to the $|D|$ being large.
+Then the tf-idf term weight $w_{t,d}$ is calculated as the product of the two elements (Eq.\ref{eq:tfidf})~\cite{jurafsky2000}.
+This formulation now represents the importance of a term $t$ normalised by its \emph{commonness}.
+The tf-idf has also been successfully integrated in summarisation methods like LexRank~\cite{Erkan2004LexRankGC} (Section~\ref{sec:lexrank})
+and in FNS competitive systems~\cite{litvak2021tiber, el-haj-ogden-2022-financial}.
+
+% tft,d = log10(count(t,d) +1)
+\begin{equation} \label{eq:tf}
+    \text{tf}(t, d) = \log \left( \text{count}(t, d) + 1 \right)
+\end{equation}
+
+\begin{equation}\label{eq:idf}
+    \text{idf}(t, D) = \log \frac{|D|}{|\{d \in D : t \in d\}|}
+\end{equation}
+
+\begin{equation}\label{eq:tfidf}
+    \text{tf-idf}(t, d, D) = \text{tf}(t, d) \cdot \text{idf}(t, D)
+\end{equation}
+
+where $t$ is a term, $d$ is a document within a collection of documents/sentences $D$.
 
 \section{Word Embeddings}\label{sec:word-embeddings}
 Historically, to represent a token (i.e., word) $w_{i}$ in a vocabulary $V$ numerically, we define a one-hot-encoding vector of all zeroes except of a one at the index of the word $w_{i}$ in $V$ (i.e., $i$).
@@ -108,7 +128,7 @@ To resolve these issues more advanced RNN architectures like LSTMs and GRUs have
 \end{equation}
 
 The Long Short-Term Memory (LSTM) recurrent neural network has become a ubiquitous method in sequential problems (e.g., language modelling, time series forecasting).
-This is so because it allows long-term dependencies to propagate through the network with the help of control gates \- \emph{input} and \emph{forget}, which reduce the effect of the vanishing gradient issue in the vanilla RNN\footnote{
+This is so because it allows long-term dependencies to propagate through the network with the help of the control gates \- \emph{input} and \emph{forget}, which reduce the effect of the vanishing gradient issue in the vanilla RNN\footnote{
     We direct readers to~\cite{bayer2015learning} where the authors demonstrate that the LSTM's \enquote{temporal} gradient is unaffected by the fixed weight factor $W$ of the vanilla RNN that is driving the derivative to zero.
     This is ensured by the additional architecture unit - the \emph{forget} gate, which learns to  control the gradient flow in the network.
 }.
@@ -552,12 +572,19 @@ TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algor
         \footnote{
             Jaccard similarity is defined as the size of the intersection divided by the size of the union of two sets.
         } of their sets of words (Eq.\ref{eq:jaccard_similarity} and Example~\ref{ex:jaccard}),
-    \begin{equation}\label{eq:cosine_similarity}
-        \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}
-    \end{equation}
-    \begin{equation}\label{eq:jaccard_similarity}
-        J(A,B)= \frac{|A\cup B|}{|A\cap B|}
-    \end{equation}
+        \begin{equation}\label{eq:cosine_similarity}
+            \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}
+        \end{equation}
+        \begin{equation}\label{eq:jaccard_similarity}
+            J(A,B)= \frac{|A\cup B|}{|A\cap B|}
+        \end{equation}
+        \begin{example}\label{ex:jaccard}
+            If sentence A is ``I love apples'' and sentence B is ``I love oranges'', then
+            \[
+                J(A,B)=\frac{2}{4}=\frac{1}{2},
+            \]
+            which indicates that $A$ and $B$ share 50\% of their unique words.
+        \end{example}
     \item \textbf{Graph Construction}: TextRank represents sentences as nodes in a graph, and the similarity between each two sentences is represented as an edge between them.
     \item \textbf{Sentence ranking}: The constructed graph is passed into the PageRank algorithm~\cite{page1998anatomy} that assigns each sentence a score based on the importance of its neighbours.
     The final summary is then assembled from the selection of the top $k$ sentences with the highest scores.
@@ -570,29 +597,12 @@ Nevertheless, ~\cite{Shearing2020AutomatedTS} report two considerable weaknesses
 As a countermeasure, \emph{stop words} (e.g, ``a'', ``the'', ``and'', etc) can be removed and \emph{tf-idf} can be integrated into the similarity metric for a more balanced scoring mechanism.
 LexRank~\cite{Erkan2004LexRankGC} builds up and resolves the issues of this algorithm, and we will discuss it in the next section.
 
-\begin{example}\label{ex:jaccard}
-    If sentence A is ``I love apples'' and sentence B is ``I love oranges'', then
-    \[
-        J(A,B)=\frac{2}{4}=\frac{1}{2},
-    \]
-    which indicates that $A$ and $B$ share 50\% of their unique words.
-\end{example}
-
 
 \section{LexRank}\label{sec:lexrank}
 LexRank~\cite{Erkan2004LexRankGC} is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
 It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
 To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes~\cite{Shearing2020AutomatedTS}.
 The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:idf},\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
-
-\begin{equation}
-    \text{idf}(t, D) = \log \frac{|D|}{|\{d \in D : t \in d\}|} \label{eq:idf}
-\end{equation}
-
-\begin{equation}
-    \text{tf-idf}(t, d, D) = \text{tf}(t, d) \cdot \text{idf}(t, D)
-    \label{eq:tfidf}
-\end{equation}
 
 \begin{equation}
     \text{tf\_idf\_cosine\_similarity}(s_1, s_2) = \frac{\sum_{t \in T} \text{tf-idf}(t, s_1, D) \cdot \text{tf-idf}(t, s_2, D)}{ \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_1, D)^2} \cdot \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_2, D)^2}}

@@ -85,7 +85,7 @@ As outlined in~\cite{elliott1998accounting}, investors' trust in the accountabil
 While some recognise the importance of understanding in-domain textual information~\cite{li2010textual}, others like~\cite{el-haj2019meaning} report that the industry is still doubtful and cynical about the NLP applications in the analysis of financial market disclosures.
 Furthermore, the latter also observe that AF researchers rely extensively on bag--of--words models, which are \emph{not sufficient to encode complex contextual and semantic meaning} (especially in a domain with such \emph{specialized language}).
 As for ATS~\cite{hollander-white-af} is said to be the single AF study into disclosure summarisation.
-It demonstrates that machine-generated summaries are less likely to bias positively investor decisions compared to managerial ones.
+Its authors demonstrate that machine-generated summaries are less likely to bias positively investor decisions compared to managerial ones.
 Therefore, this only confirms the existence of a wide gap in NLP applications in Accounting research, which further motivates our work.
 
 \section{Financial Narrative Summarisation (FNS) Task} \label{sec:fns}
@@ -118,7 +118,7 @@ The workshop's goal was to build ATS systems that generate a single summary for 
         Gold summaries & 9,873 & 1,250 & 1,673 & 12,796 \\
         \bottomrule
     \end{tabular}
-    \caption{FNS22 Data Split}
+    \caption{FNS22 Data Split~\cite{el-haj-etal-2022-financial}}
     \label{tab:fns22-data}
 \end{table}
 
@@ -134,11 +134,11 @@ The summarisation of UK annual reports is a challenging task because of
  Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field
 (Section~\ref{sec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank~\cite{mihalcea-tarau-2004-textrank}, and LexRank~\cite{Erkan2004LexRankGC}.
  For that purpose, several objectives had to be made:
- \begin{itemize}
-     \item pre-processing noisy report narratives (Section~\ref{sec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{sec:sentence_extraction}).
-     \item researching and incorporating the public financial state-of-the-art word embeddings (Section~\ref{sec:word-embeddings}) for an effective text representation.
-     \item building an extractive neural model and tuning its hyperparameters for optimal classification capabilities (Section~\ref{sec:hyperparameters}).
-     \item researching approaches on dealing with imbalanced datasets and implementing a data augmentation technique for a more discriminative learning process (Section~\ref{sec:data_augmentation}).
-     \item exploring the capabilities of a pre-trained financial transformer (Section~\ref{sec:finbert}).
-     \item evaluating all summarisation models with the help of the FNS metric - ROUGE-2 (Section~\ref{ch:evaluation}).
- \end{itemize}
+ \begin{enumerate}
+     \item pre-processing noisy report narratives (Section~\ref{sec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{sec:sentence_extraction});
+     \item researching and incorporating the public financial state-of-the-art word embeddings (Section~\ref{sec:word-embeddings}) for an effective text representation;
+     \item building an extractive neural model and tuning its hyperparameters for optimal classification capabilities (Section~\ref{sec:hyperparameters});
+     \item researching approaches on dealing with imbalanced datasets and implementing a data augmentation technique for a more discriminative learning process (Section~\ref{sec:data_augmentation});
+     \item exploring the capabilities of a pre-trained financial transformer (Section~\ref{sec:finbert});
+     \item evaluating all summarisation models with the help of the FNS metric - ROUGE-2 (Section~\ref{ch:evaluation});
+ \end{enumerate}
