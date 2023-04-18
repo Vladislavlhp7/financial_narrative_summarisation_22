@@ -92,16 +92,12 @@ We have the official English validation results for all but the LIPI's T5, for w
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-%            GRU-base + attention & 0.221 & 0.062 & 0.204 \\
-%            GRU-base & 0.220 & 0.063 & 0.201 \\
             TaxtRank & 0.220 & 0.064 & 0.196 \\
             LexRank & 0.250 & 0.086 & 0.227 \\
         \midrule
-%            GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
             FinRNN-base + attention + back-translation & \emph{0.276} & \emph{0.106} & \emph{0.249} \\
             LSIR's mT5 & 0.440 & 0.301 & 0.423 \\
             LED & 0.442 & 0.302 & 0.434 \\
-%            FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
             LIPI's T5 (\emph{official testing set}) & 0.496 & 0.374 & 0.487 \\
             FinBERT-base & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
             Top-K NE & \textbf{0.546} & \textbf{0.425} & - \\
