@@ -17,7 +17,7 @@ based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-2\footnote{
         We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
         It can be accessed at: \url{https://github.com/pltrdy/rouge}. \\
         The FNS evaluation metric is the $F1$-score of ROUGE-2, and we will use it for the final evaluation.
-} metric(\cite{lin2004rouge}).
+} metric~\cite{lin2004rouge}.
 For the FNS task due to the extractive nature of our approach we will evaluate our models based on
 the ROUGE-L-maximising\footnote{
     We say ROUGE-L-maximising for conciseness, because ROUGE is a metric with precision and recall components, which are combined into a single $F1$ score.
@@ -74,8 +74,8 @@ We have the official English validation results for all but the T5~\cite{el-haj-
         \midrule
             FinRNN-base + attention & 0.221 & 0.062 & 0.204 \\
             FinRNN-base & 0.220 & 0.063 & 0.201 \\
-            TextRank (\cite{mihalcea-tarau-2004-textrank}) & 0.220 & 0.064 & 0.196 \\
-            LexRank (\cite{Erkan2004LexRankGC}) & 0.250 & 0.086 & 0.227 \\
+            TextRank ~\cite{mihalcea-tarau-2004-textrank} & 0.220 & 0.064 & 0.196 \\
+            LexRank ~\cite{Erkan2004LexRankGC} & 0.250 & 0.086 & 0.227 \\
         \midrule
             FinRNN-base + back-translation & 0.266 & 0.100 & 0.247 \\
             FinRNN-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
@@ -92,15 +92,15 @@ We have the official English validation results for all but the T5~\cite{el-haj-
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            TextRank (\cite{mihalcea-tarau-2004-textrank}) & 0.220 & 0.064 & 0.196 \\
-            LexRank (\cite{Erkan2004LexRankGC}) & 0.250 & 0.086 & 0.227 \\
+            TextRank ~\cite{mihalcea-tarau-2004-textrank} & 0.220 & 0.064 & 0.196 \\
+            LexRank ~\cite{Erkan2004LexRankGC} & 0.250 & 0.086 & 0.227 \\
         \midrule
             FinRNN-base + attention + back-translation & \emph{0.276} & \emph{0.106} & \emph{0.249} \\
-            mT5 (\cite{foroutan-etal-2022-multilingual}) & 0.440 & 0.301 & 0.423 \\
-            LED (\cite{khanna-etal-2022-transformer}) & 0.442 & 0.302 & 0.434 \\
-            T5 (\cite{el-haj-etal-2022-financial}) (\emph{official testing set}) & 0.496 & 0.374 & 0.487 \\
+            mT5 ~\cite{foroutan-etal-2022-multilingual} & 0.440 & 0.301 & 0.423 \\
+            LED ~\cite{khanna-etal-2022-transformer} & 0.442 & 0.302 & 0.434 \\
+            T5 ~\cite{el-haj-etal-2022-financial} (\emph{official testing set}) & 0.496 & 0.374 & 0.487 \\
             FinBERT-base & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
-            Top-K NE (\cite{shukla-etal-2022-dimsum}) & \textbf{0.546} & \textbf{0.425} & - \\
+            Top-K NE ~\cite{shukla-etal-2022-dimsum} & \textbf{0.546} & \textbf{0.425} & - \\
         \bottomrule
     \end{tabular}\caption{ROUGE $F1$ Scores on official FNS22 validation set (used as testing in our models)}
     \label{tab:rouge_performance_validation_fns}
@@ -114,7 +114,7 @@ We can provide the following commentary on the results:
         Furthermore, our FinBERT-base also seems to \emph{slightly outperform} the \textbf{best English model} in the FNS22 - T5~\cite{el-haj-etal-2022-financial} with $0.008$,
         though this comparison is not entirely fair as we are not using the same datasets.
         Regarding the other FNS models, we observe that our FinBERT-base beats the LED~\cite{khanna-etal-2022-transformer} with a similar margin as the mT5~\cite{foroutan-etal-2022-multilingual}.
-        However, the Top-K NE (\cite{shukla-etal-2022-dimsum}) remains with the highest ROUGE-1 and ROUGE-2 $F1$ measures.
+        However, the Top-K NE ~\cite{shukla-etal-2022-dimsum} remains with the highest ROUGE-1 and ROUGE-2 $F1$ measures.
         Surprisingly, data augmentation does not improve the performance of our FinBERT-base (Table~\ref{tab:rouge_performance_validation}), and we believe this was caused by
         the \hyperlink{data_augment_hypothesis}{back-translation hypothesis} we made in Section~\ref{sec:hyperparameters}.
         Nevertheless, both models clearly outperform the official baselines: LexRank~\cite{Erkan2004LexRankGC} and TextRank~\cite{mihalcea-tarau-2004-textrank} (Table~\ref{tab:rouge_performance_validation}).
