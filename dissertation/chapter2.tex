@@ -602,7 +602,7 @@ LexRank~\cite{Erkan2004LexRankGC} builds up and resolves the issues of this algo
 LexRank~\cite{Erkan2004LexRankGC} is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
 It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
 To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes~\cite{Shearing2020AutomatedTS}.
-The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:idf},\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
+The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
 
 \begin{equation}
     \text{tf\_idf\_cosine\_similarity}(s_1, s_2) = \frac{\sum_{t \in T} \text{tf-idf}(t, s_1, D) \cdot \text{tf-idf}(t, s_2, D)}{ \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_1, D)^2} \cdot \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_2, D)^2}}
