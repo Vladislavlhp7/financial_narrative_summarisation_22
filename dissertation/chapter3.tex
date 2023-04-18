@@ -224,6 +224,119 @@ compute a new weighted context-aware representation from the extracted features 
 The final layer is a fully-connected feed-forward neural network (FCFFNN) with a softmax activation function, which is
 used to \emph{map the latent features to a binary classification} of the input sentence.
 
+\section{Fine-tuning FinBERT}\label{sec:finbert_finetuning}
+Financial BERT (FinBERT)~\cite{yang2020finbert} is a transformer-based language model pre-trained on financial communication (Section~\ref{sec:finbert}).
+We propose to fine-tune it for extractive summarisation on the sentence-level FNS datasets (Section~\ref{sec:data}), utilizing its demonstrated financial sentiment classification strengths.
+For this purpose, we tokenize the input sentences using the FinBERT tokenizer and feed them to the model as a sequence of tokens with a maximum length of 128 per sentence.
+The input tokens are then encoded as a combined representation of the token, segment, and position embeddings,
+which allow the model to attend to the overall semantic and syntactic aspects of the input sentence.
+As discussed in Section~\ref{sec:bert}, by prepending a special CLS token this allows the model to condense the whole sequence representation into a single vector.
+This vector can now be used as an input to a classification head~\cite{jurafsky2000}, where FinBERT's authors specify it as a Linear layer with a softmax activation function.
+Similarly to a typical supervised learning task (Section~\ref{sec:supervised_learning}), the model is fine-tuned to predict the binary label of the input sentence (i.e., whether it is a summary sentence or not).
+We further summarise the fine-tuning process in Figure~\ref{fig:bert_classification} and we specify the hyperparameters we used in Section~\ref{sec:hyperparameters}.
+
+% finetuning bert for classification
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}[
+  input/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=2.8em, draw, fill=red!20},
+  token/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=2.8em, draw, fill=blue!20},
+  seg_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=2.8em, draw, fill=orange!20},
+  pos_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=2.8em, draw, fill=green!20},
+  input_embed/.style={rectangle, rounded corners, minimum height=2.5em, minimum width=2.8em, draw, fill=purple!20},
+  plus/.style={},
+  background/.style={rectangle, draw, fill=blue!10, inner xsep=0.5cm, inner ysep=0.3cm},
+  dense/.style={rectangle, rounded corners, draw, fill=gray!30, text centered},
+  myarrow/.style={thick,->},
+        softmax/.style={trapezium, trapezium angle=60, trapezium stretches body, minimum height=1cm, text width=2cm, align=center, draw, fill=yellow!50},
+    summary/.style={rectangle, rounded corners, align=center, draw, fill=none, fill opacity=0.8, text opacity=1, draw=none},
+]
+
+    % Blue rectangle background
+    \node[background, fit={(t1) (t7) (p1) (p7)}] {};
+
+    % Stock anxiety risks surge amid doubt.
+
+    % Tokens
+    \node[input] (i1) {[CLS]};
+    \node[input, right=0.3cm of i1] (i2) {Stock};
+    \node[input, right=0.3cm of i2] (i3) {anxiety};
+    \node[input, right=0.3cm of i3] (i4) {risks};
+    \node[input, right=0.3cm of i4] (i5) {surge};
+    \node[input, right=0.3cm of i5] (i6) {amid};
+    \node[input, right=0.3cm of i6] (i7) {doubt};
+
+        % Tokens
+    \node[token, below=1cm of i1] (t1) {$E_{[CLS]}$};
+    \node[token, below=1cm of i2] (t2) {$E_{Stock}$};
+    \node[token, below=1cm of i3] (t3) {$E_{anxiety}$};
+    \node[token, below=1cm of i4] (t4) {$E_{risks}$};
+    \node[token, below=1cm of i5] (t5) {$E_{surge}$};
+    \node[token, below=1cm of i6] (t6) {$E_{amid}$};
+    \node[token, below=1cm of i7] (t7) {$E_{doubt}$};
+
+    % Add plus nodes between inputs
+    \draw ($(i1.south west) + (0,-0.3)$) -- ($(i7.south east) + (0,-0.3)$);
+
+    % Segmentation embeddings
+    \node[seg_embed, below=1cm of t1] (s1) {$E_{A}$};
+    \node[seg_embed, below=1cm of t2] (s2) {$E_{A}$};
+    \node[seg_embed, below=1cm of t3] (s3) {$E_{A}$};
+    \node[seg_embed, below=1cm of t4] (s4) {$E_{A}$};
+    \node[seg_embed, below=1cm of t5] (s5) {$E_{A}$};
+    \node[seg_embed, below=1cm of t6] (s6) {$E_{A}$};
+    \node[seg_embed, below=1cm of t7] (s7) {$E_{A}$};
+
+    % Position embeddings
+    \node[pos_embed, below=1cm of s1] (p1) {$E_{0}$};
+    \node[pos_embed, below=1cm of s2] (p2) {$E_{1}$};
+    \node[pos_embed, below=1cm of s3] (p3) {$E_{2}$};
+    \node[pos_embed, below=1cm of s4] (p4) {$E_{3}$};
+    \node[pos_embed, below=1cm of s5] (p5) {$E_{4}$};
+    \node[pos_embed, below=1cm of s6] (p6) {$E_{5}$};
+    \node[pos_embed, below=1cm of s7] (p7) {$E_{6}$};
+
+    % Pluses at 0.25 between each (s, t) pair
+    \node[above=0.25cm of $(s1)!.25!(t1)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s2)!.25!(t2)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s3)!.25!(t3)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s4)!.25!(t4)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s5)!.25!(t5)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s6)!.25!(t6)$, font=\large] {$+$};
+    \node[above=0.25cm of $(s7)!.25!(t7)$, font=\large] {$+$};
+
+    % Pluses at 0.25 between each (p, s) pair
+    \node[above=0.25cm of $(p1)!.25!(s1)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p2)!.25!(s2)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p3)!.25!(s3)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p4)!.25!(s4)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p5)!.25!(s5)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p6)!.25!(s6)$, font=\large] {$+$};
+    \node[above=0.25cm of $(p7)!.25!(s7)$, font=\large] {$+$};
+
+    % Details
+    \node[left=0.5cm of i1] (d1) {Input};
+    \node[left=0.5cm of t1] (d2) {Token Emb.};
+    \node[left=0.5cm of s1] (d3) {Segment Emb.};
+    \node[left=0.5cm of p1] (d4) {Position Emb.};
+
+    \node[dense, below=0.6cm of p4] (dense) {Linear Layer};
+
+    \draw[myarrow] (p1.south) ++(0,-0.3cm) |- (dense.west);
+
+    \node[softmax, below=0.3 of dense] (softmax) {Softmax};
+
+    \draw[myarrow] (dense.south) -- (softmax.north);
+
+    \node[summary, below=0.3 of softmax] (summary) {Summary Sentence};
+
+    \draw[myarrow] (softmax.south) -- (summary.north);
+
+\end{tikzpicture}
+    \caption{Fine-tuning FinBERT for extractive summarisation / sentence classification}
+    \label{fig:bert_classification}
+\end{figure}
+
 \section{Training}\label{sec:training}
 We trained both models on Tesla V100-SXM2-16GB\footnote{
     We extend our gratitude to the University of Manchester's Computational Shared Facility (CSF) for kindly agreeing to provide us with the computational resources for this research.
