@@ -1,7 +1,9 @@
 \chapter{Methodology}\label{ch:methodology}
 In this chapter we describe the FNS text reports and the issues they present (Section~\ref{sec:data}).
 We specify how we pre-process the data, and formulate our summarisation problem as a sentence extraction task (Section~\ref{sec:sentence_extraction}).
-We further outline how we deal with the data imbalance problem (Section~\ref{sec:data_augmentation}).
+We further outline how we deal with the data imbalance problem (Section~\ref{sec:data_augmentation}) and introduce the
+two different architectures we use for the summarisation task (Sections~\ref{sec:rnn_model}, and~\ref{sec:finbert_finetuning}).
+Finally, we describe the training (Section~\ref{sec:training}) and the hyper-parameter tuning process (Section~\ref{sec:hyperparameters}).
 
 \section{Data}\label{sec:data}
 The data for the FNS22 task is a collection of narrative parts of annual reports, converted from PDF to plain text.
@@ -379,7 +381,7 @@ It is worth noting that although we have managed to balance the training set wit
 our validation and testing sets are left unchanged (i.e., they are imbalanced).
 
 Throughout the hyperparameter tuning, we keep the learning rate fixed to $0.001$\footnote{
-    Preliminary results showed that considerably different values lead to unsatisfiable results.
+    Preliminary results showed that considerably different values such as $0.1$, $0.01$, $0.0005$, lead to unsatisfiable results.
 } and employ the following naming convention for our models: $\texttt{A-B-C-D-F}$, where:
 \begin{itemize}
     \item \texttt{A} - the number of hidden units
