@@ -48,11 +48,16 @@ Therefore, the final evaluation score for a model $m$ is the average ROUGE-2 sco
 where $|C|$ is the number of candidate summaries $c_{i}$.
 
 \section{Quantitative Evaluation}\label{sec:quantitative-evaluation}
-Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics in Table~\ref{tab:rouge_performance_validation}, which
-shows the results on the official validation set used as a testing set for our models.
+Following this evaluation mechanism, we compare our models in terms of their ROUGE metrics against the baselines and official FNS models.
+For that purpose, we produce two tables, namely:
+\begin{itemize}
+    \item Table~\ref{tab:rouge_performance_validation}, which compares \emph{all} of our models against the baselines;
+    \item Table~\ref{tab:rouge_performance_validation_fns}, which compares our \emph{best} models against the FNS ones.
+    Results are on the official validation set (used as a testing set for our models);
+\end{itemize}
 We again wish to remind the reader that we were not provided with the FNS22 testing set (Section~\ref{sec:data}).
 
-Therefore, in our comparison we include the following FNS22 models, namely:
+In our FNS comparison we include the following models, namely:
 \begin{enumerate}
     \item team LIPI's T5 model~\cite{el-haj-etal-2022-financial} (testing data is only available), which is the completely based on the T5-LONG-EXTRACT and also the best English model in that edition;
     \item team LSIR's mT5 model~\cite{foroutan-etal-2022-multilingual}, which is the best model overall for all languages in the competition (multilingual for English, Spanish, and Greek);
@@ -60,7 +65,6 @@ Therefore, in our comparison we include the following FNS22 models, namely:
     \item the Top-K Narrative Extractor (NE) ~\cite{shukla-etal-2022-dimsum}  ranking in the top three models overall for Spanish and Greek;
 \end{enumerate}
 We have the official English validation results for all but the LIPI's T5, for which we are going to use their testing evaluations (we are aware that this comparison is somewhat unfair).
-We will highlight the FNS models with a $\heartsuit$, and our top-performing ones with a $\spadesuit$ for ease of reference.
 
 \begin{table}[ht]
     \centering
@@ -68,21 +72,42 @@ We will highlight the FNS models with a $\heartsuit$, and our top-performing one
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            $\heartsuit$ Top-K NE & \textbf{0.546} & \textbf{0.425} & - \\
-            $\spadesuit$ FinBERT-base & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
-            $\heartsuit$ LIPI's T5 (\emph{official testing set}) & 0.496 & 0.374 & 0.487 \\
-            FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
-            $\heartsuit$ LSIR's mT5 & 0.440 & 0.301 & 0.423 \\
-            $\heartsuit$ LED & 0.442 & 0.302 & 0.434 \\
-            $\spadesuit$ GRU-base + attention + back-translation & \emph{0.276} & \emph{0.106} & \emph{0.249} \\
-            GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
-            LexRank & 0.250 & 0.086 & 0.227 \\
+            FinRNN-base + attention & 0.221 & 0.062 & 0.204 \\
+            FinRNN-base & 0.220 & 0.063 & 0.201 \\
             TaxtRank & 0.220 & 0.064 & 0.196 \\
-            GRU-base & 0.220 & 0.063 & 0.201 \\
-            GRU-base + attention & 0.221 & 0.062 & 0.204 \\
+            LexRank & 0.250 & 0.086 & 0.227 \\
+        \midrule
+            FinRNN-base + back-translation & 0.266 & 0.100 & 0.247 \\
+            FinRNN-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
+            FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
+            FinBERT-base & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
         \bottomrule
-    \end{tabular}\caption{ROUGE $F1$ Scores on official validation set (used as testing in our models)}
+    \end{tabular}\caption{ROUGE $F1$ Scores of our FinRNN and FinBERT models against baselines TextRank and LexRank}
     \label{tab:rouge_performance_validation}
+\end{table}
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
+        \midrule
+%            GRU-base + attention & 0.221 & 0.062 & 0.204 \\
+%            GRU-base & 0.220 & 0.063 & 0.201 \\
+            TaxtRank & 0.220 & 0.064 & 0.196 \\
+            LexRank & 0.250 & 0.086 & 0.227 \\
+        \midrule
+%            GRU-base + back-translation & 0.266 & 0.100 & 0.247 \\
+            FinRNN-base + attention + back-translation & \emph{0.276} & \emph{0.106} & \emph{0.249} \\
+            LSIR's mT5 & 0.440 & 0.301 & 0.423 \\
+            LED & 0.442 & 0.302 & 0.434 \\
+%            FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
+            LIPI's T5 (\emph{official testing set}) & 0.496 & 0.374 & 0.487 \\
+            FinBERT-base & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
+            Top-K NE & \textbf{0.546} & \textbf{0.425} & - \\
+        \bottomrule
+    \end{tabular}\caption{ROUGE $F1$ Scores on official FNS22 validation set (used as testing in our models)}
+    \label{tab:rouge_performance_validation_fns}
 \end{table}
 
 We can provide the following commentary on the results:
@@ -107,7 +132,7 @@ We can provide the following commentary on the results:
     Additionally, we must note that except of the Top-K NE~\cite{shukla-etal-2022-dimsum}, all other FNS models are transformer-based,
     hence they have more complex architectures and attention mechanisms than our GRU-based models with single-head attention (Sections~\ref{sec:transformers} and~\ref{sec:rnn_model}).
     \item At the same time, we acknowledge that the universal summarisation baselines: LexRank and TextRank, outperform
-        our simple GRU models (Table~\ref{tab:rouge_performance_validation}), and we attribute this to both:
+        our simple GRU models (Table~\ref{tab:rouge_performance_validation_fns}), and we attribute this to both:
     \begin{enumerate*}[label=(\alph*)]
         \item the lack of sufficient descriptive training data from the positive class (i.e., the summarising sentences, Table~\ref{tab:random_under_sampling}),
         \item the 90\% random under-sampling of the majority class data (see Section~\ref{sec:data}), and
