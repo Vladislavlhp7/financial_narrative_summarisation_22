@@ -226,14 +226,14 @@ used to \emph{map the latent features to a binary classification} of the input s
 
 \section{Fine-tuning FinBERT}\label{sec:finbert_finetuning}
 Financial BERT (FinBERT)~\cite{yang2020finbert} is a transformer-based language model pre-trained on financial communication (Section~\ref{sec:finbert}).
-We propose to fine-tune it for extractive summarisation on the sentence-level FNS datasets (Section~\ref{sec:data}), utilizing its demonstrated financial sentiment classification strengths.
+We propose to fine-tune it for extractive summarisation on the sentence-level FNS datasets (Section~\ref{sec:sentence_extraction}), utilizing its demonstrated financial sentiment classification strengths.
 For this purpose, we tokenize the input sentences using the FinBERT tokenizer and feed them to the model as a sequence of tokens with a maximum length of 128 per sentence.
 The input tokens are then encoded as a combined representation of the token, segment, and position embeddings,
 which allow the model to attend to the overall semantic and syntactic aspects of the input sentence.
 As discussed in Section~\ref{sec:bert}, by prepending a special CLS token this allows the model to condense the whole sequence representation into a single vector.
 This vector can now be used as an input to a classification head~\cite{jurafsky2000}, where FinBERT's authors specify it as a Linear layer with a softmax activation function.
 Similarly to a typical supervised learning task (Section~\ref{sec:supervised_learning}), the model is fine-tuned to predict the binary label of the input sentence (i.e., whether it is a summary sentence or not).
-We further summarise the fine-tuning process in Figure~\ref{fig:bert_classification} and we specify the hyperparameters we used in Section~\ref{sec:hyperparameters}.
+We further summarise the fine-tuning process in Figure~\ref{fig:bert_classification} and we specify the hyperparameters we used in Section~\ref{sec:training}.
 
 % finetuning bert for classification
 \begin{figure}[ht]

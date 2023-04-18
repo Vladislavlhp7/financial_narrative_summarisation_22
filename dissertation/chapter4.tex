@@ -58,7 +58,7 @@ Therefore, in our comparison we include the following FNS22 models, namely:
     \item team LSIR's mT5 model~\cite{foroutan-etal-2022-multilingual}, which is the best model overall for all languages in the competition (multilingual for English, Spanish, and Greek);
     \item the Longformer-Encoder-Decoder (LED)~\cite{khanna-etal-2022-transformer}
     \item the Top-K Narrative Extractor (NE) ~\cite{shukla-etal-2022-dimsum}  ranking in the top three models overall for Spanish and Greek;
-\end{enumerate}.
+\end{enumerate}
 We have the official English validation results for all but the LIPI's T5, for which we are going to use their testing evaluations (we are aware that this comparison is somewhat unfair).
 We will highlight the FNS models with a $\heartsuit$, and our top-performing ones with a $\spadesuit$ for ease of reference.
 
@@ -120,7 +120,7 @@ We can provide the following commentary on the results:
 \section{Qualitative Discussion}\label{sec:qualitative-discussion}
 After having established the quantitative performance of our models, we now turn to the qualitative discussion of the results.
 For a random annual report we generated a summary using the FinBERT-base + data augmentation model and
-the GRU-base + attention model (see Figures~\ref{fig:rnn_summary},~\ref{fig:finbert_summary}).
+the GRU-base + attention model (see Figures~\ref{fig:finbert_summary},~\ref{fig:rnn_summary}).
 where green colour indicates the summarising sentences, and red colour -- the non-summarising sentences).
 We chose these models over the best ones because they have slightly lower ROUGE scores, and make more mistakes, which will help us identify the issues in the summarisation process.
 We can make the following conclusions based on observation:
