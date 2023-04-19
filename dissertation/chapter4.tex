@@ -72,11 +72,11 @@ We have the official English validation results for all but the T5~\cite{el-haj-
         \toprule
         \textbf{Model} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
         \midrule
-            FinRNN-base + attention & 0.221 & 0.062 & 0.204 \\
-            FinRNN-base & 0.220 & 0.063 & 0.201 \\
             TextRank ~\cite{mihalcea-tarau-2004-textrank} & 0.220 & 0.064 & 0.196 \\
             LexRank ~\cite{Erkan2004LexRankGC} & 0.250 & 0.086 & 0.227 \\
         \midrule
+            FinRNN-base + attention & 0.221 & 0.062 & 0.204 \\
+            FinRNN-base & 0.220 & 0.063 & 0.201 \\
             FinRNN-base + back-translation & 0.266 & 0.100 & 0.247 \\
             FinRNN-base + attention + back-translation & 0.276 & 0.106 & 0.249 \\
             FinBERT-base + back-translation & 0.490 & 0.321 & 0.468 \\
@@ -95,12 +95,13 @@ We have the official English validation results for all but the T5~\cite{el-haj-
             TextRank ~\cite{mihalcea-tarau-2004-textrank} & 0.220 & 0.064 & 0.196 \\
             LexRank ~\cite{Erkan2004LexRankGC} & 0.250 & 0.086 & 0.227 \\
         \midrule
-            FinRNN-base + attention + back-translation & \emph{0.276} & \emph{0.106} & \emph{0.249} \\
             mT5 ~\cite{foroutan-etal-2022-multilingual} & 0.440 & 0.301 & 0.423 \\
             LED ~\cite{khanna-etal-2022-transformer} & 0.442 & 0.302 & 0.434 \\
             T5 ~\cite{el-haj-etal-2022-financial} (\emph{official testing set}) & 0.496 & 0.374 & 0.487 \\
-            FinBERT-base & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
             Top-K NE ~\cite{shukla-etal-2022-dimsum} & \textbf{0.546} & \textbf{0.425} & - \\
+        \midrule
+            FinRNN-base + attention + back-translation (ours) & \emph{0.276} & \emph{0.106} & \emph{0.249} \\
+            FinBERT-base (ours) & \emph{0.544} & \emph{0.382} & \emph{0.524} \\
         \bottomrule
     \end{tabular}\caption{ROUGE $F1$ Scores on official FNS22 validation set (used as testing in our models)}
     \label{tab:rouge_performance_validation_fns}
