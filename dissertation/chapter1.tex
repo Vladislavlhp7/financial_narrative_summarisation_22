@@ -127,19 +127,29 @@ We acknowledge that due to the scarcity of publicly available financial data thi
 
 \section{Aim and Objectives}\label{sec:aim-and-objectives}
 The summarisation of UK annual reports is a challenging task because of:
- \begin{enumerate}
+ \begin{itemize}
      \item the various inconveniences of the reports around their large-scale understanding (Section~\ref{sec:uk-annual-reports});
      \item the discrepancy between Accounting and Finance (AF) research in NLP and the general NLP field (Section~\ref{sec:nlp-in-accounting-and-finance});
      \item the nature of long-text summarisation in terms of available training data, financial language representation, complex model architectures, and reliability of evaluation metrics (Chapter~\ref{ch:background});
- \end{enumerate}
+ \end{itemize}
  Nevertheless, we decide to take up this challenge, being motivated by recent activities in the Financial NLP field
 (Section~\ref{sec:fns}), and design Extractive Summarisation Models that perform better than the established baselines: TextRank~\cite{mihalcea-tarau-2004-textrank}, and LexRank~\cite{Erkan2004LexRankGC}.
  For that purpose, several objectives had to be made:
  \begin{enumerate}
      \item pre-processing noisy report narratives (Section~\ref{sec:data}) and transforming them into suitable datasets for extractive summarisation (Section~\ref{sec:sentence_extraction});
      \item researching and incorporating the public financial state-of-the-art word embeddings (Section~\ref{sec:word-embeddings}) for an effective text representation;
-     \item building an extractive neural model and tuning its hyperparameters for optimal classification capabilities (Section~\ref{sec:hyperparameters});
+     \item building an extractive neural model (Section~\ref{sec:rnn_model}) and tuning its hyperparameters for optimal classification capabilities (Section~\ref{sec:hyperparameters});
      \item researching approaches on dealing with imbalanced datasets and implementing a data augmentation technique for a more discriminative learning process (Section~\ref{sec:data_augmentation});
      \item exploring the capabilities of a pre-trained financial transformer (Section~\ref{sec:finbert_finetuning});
      \item evaluating all summarisation models with the help of the FNS metric - ROUGE-2 (Section~\ref{sec:quantitative-evaluation});
  \end{enumerate}
+
+\section{Project Structure}\label{sec:project-structure}
+The project report is comprised of five chapters:
+\begin{enumerate}
+    \item Chapter~\ref{ch:introduction} outlines the background for UK annual reports and states our aim and objectives.
+    \item Chapter~\ref{ch:background} provides the necessary background information to comprehend the problem of text summarisation, including the related work, and the evaluation metrics.
+    \item Chapter~\ref{ch:methodology} outlines the methodology of the project, including the description of the data, the specifications of the models, and their hyperparameter tuning.
+    \item Chapter~\ref{ch:evaluation} presents our model results, including a quantitative and a qualitative evaluation of the produced output.
+    \item Chapter~\ref{ch:conclusion} concludes the project, summarising the main achievements and innovations, while also discussing a direction for future work.
+\end{enumerate}

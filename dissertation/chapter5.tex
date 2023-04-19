@@ -1,0 +1,96 @@
+\chapter{Conclusion}\label{ch:conclusion}
+In this chapter we summarise the main contributions of our work, highlighting its innovational aspects and discussing its limitations.
+
+\section{Summary of Achievements}\label{sec:summary}
+In this project we have explored the problem of summarising UK annual reports.
+To deal with the significant amount of noise in the plain text of these glossy documents, we have built a rigorous pre-processing pipeline (Section~\ref{sec:data}).
+We have further implemented a sentence extraction phase where we generate binary labels ($1$ being summary, $0$ - non-summary) from the reports and their multiple gold summaries (Section~\ref{sec:sentence_extraction}).
+Once our datasets are created, we
+\begin{enumerate*}[label=(\alph*)]
+    \item design a Recurrent Neural Network (RNN) architecture (Section~\ref{sec:rnn_model}), and
+    \item fine-tune a financial Transformer model - FinBERT (Section~\ref{sec:finbert})
+\end{enumerate*},
+training them in a supervised manner for a binary classification task (Sections~\ref{sec:training} and~\ref{sec:hyperparameters}).
+We quantitatively evaluate our models with the ROUGE metric and demonstrate them outperforming traditional baselines (Chapter~\ref{ch:evaluation}).
+
+
+Furthermore, at least for FinBERT we observe a clear ROUGE-2 improvement on the validation set over the best overall FNS22 model~\cite{foroutan-etal-2022-multilingual}.
+Additionally, we show that our FinBERT also achieves competitive performance with the best FNS22 English model,
+although noting that the our models are tested on different data (Section~\ref{sec:data}).
+We also discuss the quality of the produced summaries (Section~\ref{sec:qualitative-discussion}), and in
+Section~\ref{sec:limitations} we describe in more depth the limitations of our system and possible solutions.
+
+
+In terms of \emph{innovational aspects} of our project in the context of the FNS challenge, we are the first to our knowledge that:
+\begin{itemize}
+    \item \emph{Integrate FinText word embeddings} - While some FNS21 competitors use general-domain sentence embeddings
+    based on BERT~\cite{litvak-vanetik-2021-summarization, gokhan-etal-2021-extractive}, we represent sentences as
+    a vector of word embeddings purpose-built for financial text analysis~\cite{rahimikia2021realised}.
+    \item \emph{Perform back-translation as data augmentation} - In contrast to approaches where only the first 10\% of
+    the annual report is used~\cite{orzhenovskii-2021-t5}, we over-sample the summarising sentences (minority class)
+    by back-translating from French.
+    \item~\emph{Fine-tune FinBERT~\cite{yang2020finbert} for extractive summarisation} - Transformer-based models have become increasingly
+    popular in the FNP22 Workshop~\cite{khanna-etal-2022-transformer, pant-chopra-2022-multilingual},
+    where some have used FinBERT for classifying definitions~\cite{ghosh-etal-2022-finrad},
+    detecting hypernyms~\cite{peng-etal-2022-discovering}, and classifying financial sentiments~\cite{stepisnik-perdih-etal-2022-sentiment}.
+    However, we are the first to adapt FinBERT for extractive summarisation.
+\end{itemize}
+
+\section{Discussion of Limitations}\label{sec:limitations}
+Although, both our models have outperformed the baselines on ROUGE-2 and the fine-tuned FinBERT has achieved competitive
+performance for the FNS22 task, there are several limitations that we would like to discuss:
+\begin{itemize}
+    \item \emph{Sentence embedding} - Although, we note our use of domain-specific FastText word embeddings due to their
+    ability to handle noise and outperform general-domain embeddings~\cite{rahimikia2021realised}, we do not perform
+    any sentence--level aggregation (i.e., dimensionality reduction) like averaging to condense the overall representation.
+    While, this was a deliberate design decision to better capture the relationship between individual words,
+    our sentence vectors became of size $(100, 300)$ instead of $(300,)$, which became more computationally expensive.
+    Although, we are aware that FastText~\cite{bojanowski-etal-2017-enriching} provides average-pooling for any sequence,
+    we were pessimistic of using it due to the loss of word order information (e.g., ``the company is good'' being represented just as ``is the company good'').
+    Therefore, a limitation of our work is that we do not investigate the impact of using sentence embeddings
+    (be it with positional encoding or average-pooling) on the performance of our models.
+    \item \emph{Non-exhaustive evaluation} - Due to the FNS models being proprietary, and also evaluated on the official testing set,
+    we are unable to make a more comprehensive comparison with the other models.
+    However, in an ideal scenario we would perform further quantitative and qualitative evaluation of our performance.
+    We would also like to investigate more in-depth the effect of under-sampling and the random generator on the classification capabilities of our models and
+    compare with simply using the first $10\%$ of the annual reports as in~\cite{orzhenovskii-2021-t5}.
+    \item \emph{Summary Generation} - In our work we take top $k$ sentences based on the model's output probability distribution (Chapter~\ref{ch:evaluation}).
+        However, this is a very simplistic approach to summarisation that
+        \begin{enumerate*}[label=(\alph*)]
+            \item introduces incoherence issues (like the \emph{dangling anaphora phenomenon} from Section~\ref{sec:sentence_extraction}),
+            \item trims the last sentence to fit the $1,000$ word limit, and it
+            \item does not account for the \emph{informativeness} of the individual sentences
+        \end{enumerate*}.
+        To address the incoherence issues, we can try resolving the coreferences in the either through a
+        graph-based approach on the generated summary~\cite{sonawane2016coreference}, or by introducing a more complex
+        encoder architecture that represents and attends to entities as well as sentences~\cite{Huang2021ExtractiveSC}.
+        Regarding the trimming heuristic, a natural improvement can be to use text compression techniques for the final predicted sentence~\cite{ghalandari2022efficient, KNIGHT200291}.
+        As for the third point, we believe this is very exacerbating reason why our FinRNN architecture returns a summary
+        without any single whole--sentence overlap with the gold standard (Fig.~\ref{fig:rnn_summary}).
+        Instead, what~\cite{zmandar-etal-2021-joint} propose is a reinforcement learning approach which incorporates
+        the \emph{sentence-level} ROUGE-2 score with the whole gold summary.
+        While this method is much more sophisticated, it conveys the intuitive idea that the top-$k$ sentences comprising the
+        \emph{optimal candidate summary} should be \emph{greedily maximising the global summary-level ROUGE-2} score.
+\end{itemize}
+
+\section{Future Work}\label{sec:future-work}
+While in our project we only consider the narrative summarisation of
+financial reports already converted to plain text, we propose the following pipeline as a direction for future work:
+\begin{enumerate}
+    \item \emph{PDF-to-Text} - Integrate into the summarisation system a PDF-to-Text conversion tool for annual
+    reports like the CFIE-FRSE\footnote{\url{https://github.com/drelhaj/CFIE-FRSE}}~\cite{elhaj2019multilingual}, which
+    also extracts the text into 8 generic section headers (Section~\ref{sec:uk-annual-reports}).
+    \item \emph{Text-to-Summary} - Implement an extractive method that addresses the limitations from Section~\ref{sec:limitations},
+    or alternatively, an abstractive method producing \emph{lay summaries} for non-expert users~\cite{vinzelberg2023lay, Guo2020AutomatedLL}.
+    \item \emph{Text-to-Analysis} - Apply NLP techniques like sentiment analysis~\cite{araci2019finbert}, named entity recognition
+   ~\cite{zhang2022finbertmrc}, and detection of forward-looking sentences~\cite{stihec-etal-2021-preliminary},
+    to extract useful information from the summary and the text.
+    Additionally, important financial disclosure characteristics as amount, tone, and transparency~\cite{li2010textual, Li2011TextualAO}
+    would be beneficial for AF researchers and users.
+    \item \emph{Packaged Software} - Build a drag-and-drop software application that allows users to upload a PDF file of an
+    annual report, where the backend will perform the steps above and return a summary.
+    The suggested textual analysis features could be integrated as interactive visual elements.
+    Furthermore, through recognising company names, the system could also provide dashboard of news and stock prices
+    with the help of company-to-identifier mapping~\cite{el-haj2019retrieving}
+    (i.e., getting the company ticker, e.g., \emph{NASDAQ: AAPL} for Apple Inc).
+\end{enumerate}

@@ -532,7 +532,7 @@ We will outline some key models from the FNS21 (the previous year competition) t
 
 Additionally, we briefly describe the FNS22 competitors' approaches, against which we perform our evaluation in Section~\ref{sec:quantitative-evaluation}:
 \begin{itemize}
-    \item \textbf{Team LIPI's T5~\cite{pant-chopra-2022-multilingual}}: This model is entirely based on the FNS21's T5-LONG-EXTRACT
+    \item \textbf{T5~\cite{pant-chopra-2022-multilingual}}: This model is entirely based on the FNS21's T5-LONG-EXTRACT
     approach~\cite{orzhenovskii-2021-t5} and achieves the best ROUGE-2 $F1$ score of $0.374$ on the English testing set.
     Unfortunately, results on the validation set are not made available.
 
@@ -549,7 +549,7 @@ Additionally, we briefly describe the FNS22 competitors' approaches, against whi
     While their LED model performs well in recognising the beginning of the summary, it struggles with identifying the end,
     and hence their summarisation suffers from a lower ROUGE-2 score of $0.302$ on the English validation set.
 
-    \item \textbf{Team LSIR's mT5}~\cite{foroutan-etal-2022-multilingual}: The authors propose the usage of a multilingual
+    \item \textbf{mT5}~\cite{foroutan-etal-2022-multilingual}: The authors propose the usage of a multilingual
     pre-trained text-to-text transformer~\cite{raffel2020exploring} to generate the start of a report's summary in the same way
     as~\cite{orzhenovskii-2021-t5, khanna-etal-2022-transformer}.
     This system is ranked best overall for the three languages, while achieving a ROUGE-2 $F1$ score of $0.365$ on the English validation set.
@@ -621,6 +621,9 @@ The authors further propose finding the most important sentences by \begin{enume
 \end{enumerate*}
 
 \section{Evaluation Metrics}\label{sec:evaluation-metrics}
+In this section we discuss the evaluation metrics used in our project, specifically -
+the performance metrics derived from the confusion matrix (Section~\ref{subsec:confusion-matrix}),
+and the ROUGE metrics (Section~\ref{subsec:rouge}).
 \subsection{Confusion Matrix}\label{subsec:confusion-matrix}
 The confusion matrix is an essential tool to visualise and help assessing the performance of trained classifiers against
 the true labels $y_{i}$.
