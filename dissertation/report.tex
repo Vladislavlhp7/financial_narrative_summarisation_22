@@ -108,8 +108,8 @@
 
 \usepackage[many]{tcolorbox}
 
-\definecolor{greentitle}{RGB}{61,170,61}
-\definecolor{greentitleback}{RGB}{216,233,213}
+\definecolor{purpletitle}{RGB}{155, 66, 245}
+\definecolor{purpletitleback}{RGB}{216,233,213}
 
 \newtcolorbox[
   auto counter,
@@ -125,7 +125,7 @@
   toprule=0pt,
   bottomrule=0pt,
   titlerule=0pt,
-  colframe=greentitleback,
+  colframe=purpletitleback,
   fonttitle=\normalcolor,
   overlay={
     \node[
@@ -133,8 +133,8 @@
       anchor=east,
       text width=2.5cm,
       minimum height=4ex,
-      fill=greentitleback,
-      font=\color{greentitle}\sffamily\scshape
+      fill=purpletitleback,
+      font=\color{purpletitle}\sffamily\scshape
     ] at (title.west) {example~\thetcbcounter};
   },
   title=#2,
