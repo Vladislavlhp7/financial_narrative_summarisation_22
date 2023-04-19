@@ -129,6 +129,7 @@
 \NeedsTeXFormat{LaTeX2e} \ProvidesClass{muthesis}[2017/09/06 MU Thesis Class]
 
 \RequirePackage{setspace}
+\RequirePackage{nameauth}
 \newif\ifwordctp@
 \newif\ifsinglesp@
 \newif\ifdoublesp@

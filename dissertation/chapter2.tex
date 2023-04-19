@@ -568,23 +568,48 @@ TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algor
     \item \textbf{Sentence similarity}: TextRank computes the similarity between two sentences based on either the \emph{cosine similarity}
         \footnote{
             Cosine similarity is defined as the dot product of two vectors divided by the product of their norms.
-        } (Eq.\ref{eq:cosine_similarity}) of their vectors (e.g., bag-of-words, Word2Vec, FastText, etc.) or the \emph{Jaccard similarity}
+        } of their vectors like bag-of-words, Word2Vec, FastText (see Eq.\ref{eq:cosine_similarity} and Example~\ref{ex:cosine}) or the \emph{Jaccard similarity}
         \footnote{
             Jaccard similarity is defined as the size of the intersection divided by the size of the union of two sets.
-        } of their sets of words (Eq.\ref{eq:jaccard_similarity} and Example~\ref{ex:jaccard}),
+        } of their sets of words (see Eq.\ref{eq:jaccard_similarity} and Example~\ref{ex:jaccard}),
         \begin{equation}\label{eq:cosine_similarity}
             \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}
         \end{equation}
+        \begin{beaux_exemples}{\textbf{Calculating Jaccard Similarity}}\label{ex:cosine}
+            If vector A is $[1, 1, 0]$ and vector B is $[1, 0, 1]$, we can calculate their cosine similarity as follows:
+
+            Firstly, we calculate the dot product of the two vectors:
+            \[
+                A \cdot B = (1x1) + (1x0) + (0x1) = 1
+            \]
+            Next, we compute the magnitude (Euclidean norm) of each vector:
+            \[
+                \|\mathbf{A}\| = \sqrt{1^2 + 1^2 + 0^2} = \sqrt{2}
+            \]
+            and
+            \[
+                \|\mathbf{B}\| = \sqrt{1^2 + 0^2 + 1^2} = \sqrt{2}
+            \]
+            Finally, we calculate the cosine similarity:
+            \[
+                \cos(\theta) = \cos(\mathbf{A},\mathbf{B}) = \frac{1}{\sqrt{2} \sqrt{2}} = \frac{1}{2}
+            \]
+        \end{beaux_exemples}
         \begin{equation}\label{eq:jaccard_similarity}
             J(A,B)= \frac{|A\cup B|}{|A\cap B|}
         \end{equation}
-        \begin{example}\label{ex:jaccard}
-            If sentence A is ``I love apples'' and sentence B is ``I love oranges'', then
+        \begin{beaux_exemples}{\textbf{Calculating Jaccard Similarity}}\label{ex:jaccard}
+            If sentence A is ``I love apples'' and sentence B is ``I love oranges'', then:
+            \begin{itemize}
+                \item the word intersection between A and B is \{``I'', ``love''\}
+                \item while the word union is \{``I'', ``love'', ``apples'', ``oranges''\}.
+            \end{itemize}
+            Therefore,
             \[
                 J(A,B)=\frac{2}{4}=\frac{1}{2},
             \]
             which indicates that $A$ and $B$ share 50\% of their unique words.
-        \end{example}
+        \end{beaux_exemples}
     \item \textbf{Graph Construction}: TextRank represents sentences as nodes in a graph, and the similarity between each two sentences is represented as an edge between them.
     \item \textbf{Sentence ranking}: The constructed graph is passed into the PageRank algorithm~\cite{page1998anatomy} that assigns each sentence a score based on the importance of its neighbours.
     The final summary is then assembled from the selection of the top $k$ sentences with the highest scores.
@@ -677,18 +702,35 @@ summarisation tasks which measures the overlapping units (i.e., n-grams) of a pr
 Here we briefly describe some of the most common variants of ROUGE (especially in the context of the FNS Task):
 \begin{enumerate}
     \item \textbf{ROUGE-N} measures the overlap of $n$-grams (sequences of $n$ words) between $c$ and $c^{*}$.
-    For example, ROUGE-1 and ROUGE-2 which is the official FNS metric (see Example~\ref{ex:rouge}) correspond to the overlap measurement of unigrams and bigrams, respectively, calculated as:
+    For example, the ROUGE-1 and ROUGE-2 correspond to the overlap measurement of unigrams and bigrams, respectively, calculated as:
     \begin{equation}\label{eq:rouge_formula}
         ROUGE-N = \frac{\sum_{S \in R} \sum_{n-gram \in S} count_{match}(n-gram)}{\sum_{S \in R} \sum_{n-gram \in S} count(n-gram)}
     \end{equation}
-    \begin{example}\label{ex:rouge}
-        We briefly demonstrate how to compute ROUGE-2 for a sentence pair:\\
-        $c$ = ``Fox can run'' and $c^{*}$ = ``Fox can walk''.\\
-        Here, the bigrams of $c$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``run''})\}$. \\
-        Meanwhile, the bigrams of $c^{*}$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``walk''})\}$.\\
-        The intersection of the two sets is $\{(\text{``Fox''}, \text{``can''})\}$, which is the only bigram that appears in both $c$ and $c^{*}$.\\
-        Therefore, $\text{ROUGE-2 recall} = \frac{\text{Overlapping bigrams}}{\text{Total bigrams in reference summary}} = \frac{1}{2}=0.5$.
-    \end{example}
+    We further provide a demonstration on how to compute the ROUGE-2 $F1$ score which is the official FNS metric (see Example~\ref{ex:rouge})
+    \begin{beaux_exemples}{\textbf{Calculating ROUGE-2 $F1$ score}}\label{ex:rouge}
+        We briefly demonstrate how to compute ROUGE-2 for a sentence pair $c$ = ``Fox can run'' and $c^{*}$ = ``Fox can walk''.
+
+        Here, the bigrams of $c$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``run''})\}$.
+
+        Meanwhile, the bigrams of $c^{*}$ are $\{(\text{``Fox''}, \text{``can''}), (\text{``can''}, \text{``walk''})\}$.
+
+        The intersection of the two bigram sets is $\{(\text{``Fox''}, \text{``can''})\}$, which is the only bigram that appears in both $c$ and $c^{*}$.
+
+        Therefore, to compute the recall of ROUGE-2:
+        \[
+            \text{ROUGE-2 recall} = \frac{\text{Overlapping bigrams}}{\text{Total bigrams in reference summary}} = \frac{1}{2}=0.5
+        \]
+
+        Next, we can find the precision of ROUGE-2:
+        \[
+            \text{ROUGE-2 precision} = \frac{\text{Overlapping bigrams}}{\text{Total bigrams in candidate summary}} = \frac{1}{2}=0.5
+        \]
+
+        Finally, we can calculate the F1 score of ROUGE-2:
+        \[
+            \text{ROUGE-2 F1 score} = \frac{2 \times \text{ROUGE-2 recall} \times \text{ROUGE-2 precision}}{\text{ROUGE-2 recall} + \text{ROUGE-2 precision}} = \frac{2 \times 0.5 \times 0.5}{0.5 + 0.5} = 0.5
+        \]
+    \end{beaux_exemples}
     \item \textbf{ROUGE-L} uses the longest common subsequence (LCS) to measure the similarity between $c$ and $c^{*}$.
     The LCS is the longest sequence of words that appears in both summaries \emph{in the same order}, but \emph{not necessarily consecutively}.
     Thus, ROUGE-L is less sensitive to word order compared to ROUGE-N and can capture longer-range dependencies.
