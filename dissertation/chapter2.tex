@@ -10,6 +10,18 @@ The difference between $f(x)$ and $y$ is quantified by a loss function $L$, whic
 In the context of extractive summarisation, supervised learning can be used to identify the most important sentences in a document, which can then be used to generate a summary.
 In this case, the task can be cast as a binary classification problem, where the sentence labels are either $1$ (summarising) or $0$ (non-summarising)~\cite{manning_raghavan_schutze_2008}.
 
+\section{Unsupervised Learning}\label{sec:unsupervised_learning}
+Unsupervised learning is a machine learning paradigm where no labels are provided.
+
+
+
+\subsection{K-Means Clustering}\label{sec:kmeans}
+K-Means clustering~\cite{kmeans} is an unsupervised learning algorithm that partitions a set of data points into $k$ clusters,
+where each data point belongs to the cluster with the nearest mean.
+It is extensively used in extractive text summarisation for clustering of sentence embeddings~\cite{gokhan-etal-2021-extractive, foroutan-etal-2022-multilingual}.
+
+
+
 
 \section{Tf-Idf}\label{sec:tfidf}
 Tf-Idf (Term Frequency - Inverse Document Frequency) is a statistical technique intended to reflect the importance of a word to a document in a corpus.
