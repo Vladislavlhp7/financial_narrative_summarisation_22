@@ -149,7 +149,7 @@ where green colour indicates the summarising sentences, and red colour -- the no
 We chose these models over the best ones because they have slightly lower ROUGE scores, and make more mistakes, which will help us identify the issues in the summarisation process.
 We can make the following conclusions based on observation:
 \begin{enumerate}
-    \item The FinBERT model has \emph{around 50\% of its contents} belonging to any of the gold summaries (Figure~\ref{fig:finbert_summary}),
+    \item The FinBERT model has \emph{around 50\% of its contents} belonging to the gold summary (Figure~\ref{fig:finbert_summary}),
         while all other sentences look very convincing in terms of their summarising potential (i.e., they are informative of the financial situation but also concise)
     \item At the same time, the FinRNN has the opposite characteristics:
     \begin{enumerate*}[label=(\alph*)]
@@ -164,7 +164,7 @@ Therefore, we believe the summary generation process (i.e., the mechanism to com
 exacerbates the accuracy of the summarisation.
 
 Although, the practical results from Figures~\ref{fig:rnn_summary} might seem disappointing, we must once again remind the reader that the reports are extremely
-long with an average number of sentences and words at around $2,700$ and $58,000$, respectively~\cite{litvak-vanetik-2021-summarization}.
+long with an average number of sentences and words at around $2,700$ and $58,000$, respectively per annual report~\cite{litvak-vanetik-2021-summarization}.
 Meanwhile, we are constrained to producing a summary of at most $40$ sentences (Section~\ref{sec:data}) or $1,000$ words (Section~\ref{sec:fns}).
 
 \newpage

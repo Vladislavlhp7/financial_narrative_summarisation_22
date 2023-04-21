@@ -3,17 +3,19 @@ In this chapter we describe the FNS text reports and the issues they present (Se
 We specify how we pre-process the data, and formulate our summarisation problem as a sentence extraction task (Section~\ref{sec:sentence_extraction}).
 We further outline how we deal with the data imbalance problem (Section~\ref{sec:data_augmentation}) and introduce the
 two different architectures we use for the summarisation task (Sections~\ref{sec:rnn_model}, and~\ref{sec:finbert_finetuning}).
-Finally, we describe the training (Section~\ref{sec:training}) and the hyper-parameter tuning process (Section~\ref{sec:hyperparameters}).
+Next, we describe the training (Section~\ref{sec:training}) and the hyper-parameter tuning (Section~\ref{sec:hyperparameters}).
+Finally, we present the process of Summary Generation (Section~\ref{sec:summary-generation}).
 
 \section{Data}\label{sec:data}
 The data for the FNS22 task is a collection of narrative parts of annual reports, converted from PDF to plain text.
-As discussed in Section~\ref{sec:fns} due to the rich visual representations in the PDFs, the resulting text suffers from various problems like
-\begin{enumerate*}[label=(\alph*)]
-    \item \emph{spacing inconsistencies} - mixing of tab-space word delimiters, over-segmentation (i.e., a split into incoherent chunks) and under-segmentation (i.e., merging of unrelated words),
-    \item \emph{symbol encoding issues} - introduction of unreadable non-alphanumeric characters, and
-    \item \emph{formatting issues} - words having different casing, hyphenation at the end of a line, etc
-    \item \emph{conversion of tables to text} - financial figures spanning over multiple lines and being mixed with the text.
-\end{enumerate*} (Figure~\ref{fig:pdf_to_text}).
+As discussed in Section~\ref{sec:fns} due to the rich visual representations in the PDFs,
+the resulting text suffers from various problems (Figure~\ref{fig:pdf_to_text}) such as:
+\begin{itemize}
+    \item \emph{spacing inconsistencies} - mixing of tab-space word delimiters, over-segmentation (i.e., a split into incoherent chunks) and under-segmentation (i.e., merging of unrelated words);
+    \item \emph{symbol encoding issues} - introduction of unreadable non-alphanumeric characters;
+    \item \emph{formatting issues} - words having different casing, hyphenation at the end of a line, etc;
+    \item \emph{conversion of tables to text} - financial figures spanning over multiple lines and being mixed with the text;
+\end{itemize}
 
 % PDF-to-text conversion issues
 \begin{figure}[ht]
@@ -46,13 +48,13 @@ As discussed in Section~\ref{sec:fns} due to the rich visual representations in 
 \end{figure}
 
 To address these issues, we have developed a rigorous data cleaning pipeline that achieves the following key objectives:
-\begin{enumerate*}[label=(\alph*)]
+\begin{itemize}
     \item handles space-tab mixing via hand-crafted rules (derived from observation\footnote{
       E.g., for some of the lines, characters were separated by spaces and words with tabs, hence the need for a custom rule.
-    }),
-    \item retains alphanumeric characters, punctuation, spaces, financial symbols, and
-    \item removes sentences shorter than 3 words
-\end{enumerate*}.
+    });
+    \item retains alphanumeric characters, punctuation, spaces, financial symbols;
+    \item removes sentences shorter than 3 words;
+\end{itemize}
 
 As discussed in Section~\ref{sec:fns}, the annual reports are extremely long documents with an average length reported at 80 pages~\cite{litvak-vanetik-2021-summarization}.
 Each one has at least two--three gold summaries provided by the FNS22 organisers, and we compute some statistics
@@ -116,7 +118,7 @@ Then, a candidate summary\footnote{
 We further need to define the \emph{gold summary}, $c^{*}$ for a document $d$.
 In the case of the FNS22 task, there are at least two summaries per report, hence we will use the following notation for the set of all gold summaries for each document $C^{*} = \{c^{*}_{1}, c^{*}_{2}, \dots, c^{*}_{p}\}$.
 Furthermore, the supervised learning labels are $y_{i} \in \{1,0\}$ for each sentence $s_{i}$ in $d$ if the sentence is or is not in \textbf{\emph{any}} of the gold summaries $c^{*}_{j}$ for that document.
-We argue that in order to increase the positive samples (i.e., the summarizing sentences) we should not restrict
+We argue that in order to increase the positive samples (i.e., the summarising sentences) we should not restrict
 ourselves to just one gold summary in the training process unlike~\cite{orzhenovskii-2021-t5}.
 Our goal is to achieve better latent feature extraction of summaries through the employment of all existing data, hence using \textbf{\emph{any}} gold summaries.
 However, we are aware that this approach is more likely to encounter standard ETS issues, specifically - extracted summary sentences could be retrieved from unrelated paragraphs in the report.
@@ -157,7 +159,7 @@ Therefore, we took two\footnote{
         \end{tabular}
         \caption{90\% Random Under-sampling}\label{tab:random_under_sampling}
     \end{table}
-    \item \textbf{Data Augmentation} -- We use the \emph{back-translation} technique~\cite{hoang-etal-2018-iterative} to generate new sentences from the minority class (i.e., summary sentences), followed by a 80\% random under-sampling of the majority class (Figure~\ref{tab:data_augmentation}).
+    \item \textbf{Data Augmentation} -- We use the \emph{back-translation} technique~\cite{hoang-etal-2018-iterative} to generate new sentences from the minority class (i.e., summary sentences), followed by an 80\% random under-sampling of the majority class (Figure~\ref{tab:data_augmentation}).
     For that purpose, we translate all training summary sentences from English to French and back to English with the help of the MarianMT model~\cite{junczysdowmunt2018marian}\footnote{\url{https://huggingface.co/Helsinki-NLP/opus-mt-fr-en}}.
     The resulting dataset is then directly injected during the training process.
     Refer to Section~\ref{sec:hyperparameters} for the experiments with the different data balancing techniques.

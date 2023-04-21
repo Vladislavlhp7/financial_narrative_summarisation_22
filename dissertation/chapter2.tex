@@ -11,19 +11,19 @@ In the context of extractive summarisation, supervised learning can be used to i
 In this case, the task can be cast as a binary classification problem, where the sentence labels are either $1$ (summarising) or $0$ (non-summarising)~\cite{manning_raghavan_schutze_2008}.
 
 \section{Unsupervised Learning}\label{sec:unsupervised_learning}
-Unsupervised learning is a different machine learning paradigm where which does not rely on labels or external feedback~\cite{sammut2011encyclopedia}.
+Unsupervised learning is a different machine learning paradigm which does not rely on labels or external feedback~\cite{sammut2011encyclopedia}.
 Instead, the goal is to find patterns in the data, by discovering groups of similar data points~\cite{bishop2006pattern},
 where the technique employed is called \emph{clustering}~\cite{andhale2016overview, kmeans}.
 In the context of extractive summarisation, unsupervised learning can be used to cluster sentences into groups that are semantically similar~\cite{deerwester1990indexing}.
 This can then be used to generate a summary by selecting the most representative sentence from each cluster~\cite{gokhan-etal-2021-extractive}.
 Other approaches like TextRank and LexRank~\cite{mihalcea-tarau-2004-textrank, Erkan2004LexRankGC} also use unsupervised learning,
-but they do not cluster sentences into groups, but rather rank them based on their similarity to other sentences in the document.
+though they do not cluster sentences into groups, but rather rank them based on their similarity to other sentences in the document.
 The difference between clustering and ranking is therefore that clustering makes a \emph{hard} assignment,
 where each data point belongs to exactly one cluster, while ranking makes a \emph{soft} assignment,
 where each data point is assigned a numerical score~\cite{bishop2006pattern}.
 As we discuss ranking in Sections~\ref{sec:textrank} and~\ref{sec:lexrank}, we will focus on clustering in the following subsection and namely the K-Means algorithm~\cite{kmeans}.
 
-\subsection{K-Means Clustering}\label{sec:kmeans}
+\subsection{K-Means Clustering}\label{subsec:kmeans}
 K-Means clustering~\cite{kmeans} is an unsupervised learning algorithm that partitions a set of data points into $k$ clusters,
 where each data point is assigned to the cluster with the nearest mean.
 The algorithm starts by randomly selecting $k$ data points as the initial cluster centroids.
@@ -31,7 +31,6 @@ Then, it iteratively assigns each point to the cluster with the nearest centroid
 updating the centroid of that cluster as the mean of the points assigned to it.
 While being quite simple, it is extensively used in extractive text summarisation for the clustering of
 embedded sentences~\cite{gokhan-etal-2021-extractive} or even blocks of text~\cite{foroutan-etal-2022-multilingual}.
-
 
 \section{Tf-Idf}\label{sec:tfidf}
 Tf-Idf (Term Frequency - Inverse Document Frequency) is a statistical technique intended to reflect the importance of a word to a document in a corpus.
@@ -361,7 +360,7 @@ The Transformer~\cite{vaswani2017attention} is another sequence-to-sequence arch
 
 \section{BERT}\label{sec:bert}
 BERT (Bidirectional Encoder Representations from Transformers) is a Transformer-based language model that was proposed by Google AI in 2018~\cite{devlin-etal-2019-bert}.
-It revolutionised the field of NLP by introducing a new pre-training paradigm that outperformed previous state-of-the-art models on a wide range of NLP tasks while being easily applicable to autoregressive generation problems (e.g., abstractive summarization and machine translation).
+It revolutionised the field of NLP by introducing a new pre-training paradigm that outperformed previous state-of-the-art models on a wide range of NLP tasks while being easily applicable to autoregressive generation problems (e.g., abstractive summarisation and machine translation).
 We will discuss the main components of BERT and how it differs from the original Transformer model.
 \begin{enumerate}
     \item \emph{Bidirectional Nature} - ~\cite{jurafsky2000} argue that the uni-directional nature of the Transformer (i.e., causal self-attention) is a drawback that
@@ -414,7 +413,7 @@ We will discuss the main components of BERT and how it differs from the original
         They further propose using 50\% of the training data as positive examples (i.e., $A$ and $B$ are consecutive sentences) and 50\% as negative examples (i.e., $B$ is a random sentence from the corpus).
     \end{enumerate}
     \item \emph{Fine-tuning for Sequence Classification} - Unlike in Word2Vec~\cite{mikolov2013efficient} where the word embeddings are \emph{static} (i.e., related to the single word token only), BERT learns \emph{contextualised word embeddings} which can produce different representations for the same word depending on the context around it.
-    Here, instead of using the output of the last hidden layer (as we do with RNNs and the Transformer), the authors~\cite{devlin-etal-2019-bert} propose a \emph{sentence embedding} $y_{CLS}$ that summarizes the entire sequence of hidden states - the output vector of the model for the [CLS] token.
+    Here, instead of using the output of the last hidden layer (as we do with RNNs and the Transformer), the authors~\cite{devlin-etal-2019-bert} propose a \emph{sentence embedding} $y_{CLS}$ that summarises the entire sequence of hidden states - the output vector of the model for the [CLS] token.
     The reasoning is that BERT is pre-trained with the [CLS] token being prepended to the input sequence (during the NSP task) and it can be used as an aggregate representation of the entire sequence.
     Therefore, fine-tuning for text classification amounts to learning the probability distribution over the possible labels (e.g., 0/1 for a binary task) from the linearly-projected $y_{CLS}$, i.e. $\text{softmax}(y_{CLS}W_{C} + b)$, complying with the typical supervised learning paradigm.
     A slight difference, as~\cite{jurafsky2000} suggest, is that the backpropagation can affect not only the classifier but also the pretrained language model (resulting in minimal changes in practice).
@@ -524,14 +523,14 @@ BERT~\cite{devlin-etal-2019-bert} (Section~\ref{sec:bert}) that is trained on a 
 This makes FinBERT a natural choice for our experiments, as the language of the training data is very similar to the one of the UK annual reports (Section~\ref{sec:uk-annual-reports}).
 Furthermore, the authors demonstrate that FinBERT outperforms BERT on three financial sentiment classification tasks, which is why we select to fine-tune it on our extractive summarisation task.
 
-\section{Text Summarisation}\label{sec:text-summarisation}
+\section{Related Work}\label{sec:text-summarisation}
 Text summarisation is the task of transforming a piece of text into a shorter  version that retains the most important information.
 There are two overarching categories: extractive and abstractive text summarisation.
 The former formulates the problem as a subset selection problem by returning only the most salient text excerpts from the original document~\cite{zhong-etal-2020-extractive}, while the latter aims to generate content anew, similar to how humans would do.
 
 We will outline some key models from the FNS21 (the previous year competition) that inspired our work below:
 \begin{itemize}
-    \item \textbf{Extractive SentenceBERT~\cite{gokhan-etal-2021-extractive})}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
+    \item \textbf{Extractive SentenceBERT~\cite{gokhan-etal-2021-extractive}}: The authors employ an unsupervised summariser based on K-Means clustering of sentences encoded with SentenceBERT~\cite{reimers2019sentence}.
     However, their embeddings are pre-trained on general text, and they suggest that employing in-domain language models would result in a better performance.
 
     \item \textbf{AMUSE}~\cite{litvak-vanetik-2021-summarization}: The authors design an ETS system comprised of the following steps \begin{enumerate*}
@@ -561,7 +560,7 @@ Additionally, we briefly describe the FNS22 competitors' approaches, against whi
     \item \textbf{Top-K Narrative Extractor~\cite{shukla-etal-2022-dimsum}}: The authors implement a narrative
     classification method recognising unique report sections, their titles (see Section~\ref{sec:uk-annual-reports}), and the Table of Content.
     They further propose an algorithm for word allocation to assemble various sentences from different sections into a single summary.
-    To fit in the $1,000$ word limit, they use a Top-k summarizer, which extracts the first $k$ words from a given text.
+    To fit in the $1,000$ word limit, they use a Top-k summariser, which extracts the first $k$ words from a given text.
     Their system achieves a ROUGE-2 $F1$ score of $0.425$ on the English validation set, while ranking in the top three
     overall for Spanish and Greek report summarisation.
 
@@ -582,7 +581,8 @@ Additionally, we briefly describe the FNS22 competitors' approaches, against whi
     the number of reports is significantly smaller than the one in English.
 \end{itemize}
 
-In this work we will be solely exploring the extractive summarisation method, and more specifically - the \emph{supervised neural-based} (i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
+In this work we will be solely exploring the extractive summarisation method, and more specifically - the \emph{supervised neural-based}
+(i.e., RNN, Transformer) type and the \emph{unsupervised graph-based} (i.e., TextRank, LexRank) type.
 
 \section{TextRank}\label{sec:textrank}
 TextRank~\cite{mihalcea-tarau-2004-textrank} is a graph-based unsupervised algorithm for extractive summarisation with the following key components:
@@ -649,7 +649,7 @@ LexRank~\cite{Erkan2004LexRankGC} builds up and resolves the issues of this algo
 LexRank~\cite{Erkan2004LexRankGC} is another unsupervised extractive summarisation method consistently used as a baseline in the FNS challenges over the years.
 It retrieves the most salient document sentences by computing their importance based on \emph{eigenvector centrality}.
 To do that the algorithm creates a graph where each sentence represents a node and each edge is a weight between two nodes~\cite{Shearing2020AutomatedTS}.
-The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:tfidf}) and cosine similarity - Eq.\ref{eq:cosinesimtfidf}.
+The sentences are encoded as bag-of-words vectors of size $N$ - the vocabulary size, and the weight metric is a combination of tf-idf (Eq.\ref{eq:tfidf}) and cosine similarity (Eq.\ref{eq:cosinesimtfidf}).
 
 \begin{equation}
     \text{tf\_idf\_cosine\_similarity}(s_1, s_2) = \frac{\sum_{t \in T} \text{tf-idf}(t, s_1, D) \cdot \text{tf-idf}(t, s_2, D)}{ \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_1, D)^2} \cdot \sqrt{\sum_{t \in T} \text{tf-idf}(t, s_2, D)^2}}
@@ -758,10 +758,10 @@ Here we briefly describe some of the most common variants of ROUGE (especially i
     Thus, ROUGE-L is less sensitive to word order compared to ROUGE-N and can capture longer-range dependencies.
 \end{enumerate}
 
-While ROUGE scores are explainable and easily implementable, they have certain limitations like
-\begin{enumerate*}
-    \item inability to capture semantic similarity~\cite{akter-etal-2022-revisiting},
-    \item insensitivity to summary coherence~\cite{christensen-etal-2013-towards}, and
-    \item lack of correlation with human evaluation~\cite{liu2010exploring}
-\end{enumerate*}.
-Despite these limitations, ROUGE remains a widely-used evaluation measure, particularly in extractive summarization and we use it in this work as well.
+While ROUGE scores are explainable and easily implementable, they have certain limitations such as:
+\begin{enumerate}
+    \item inability to capture semantic similarity~\cite{akter-etal-2022-revisiting};
+    \item insensitivity to summary coherence~\cite{christensen-etal-2013-towards};
+    \item lack of correlation with human evaluation~\cite{liu2010exploring};
+\end{enumerate}
+Despite these limitations, ROUGE remains a widely-used evaluation measure, particularly in extractive summarisation and we use it in this work as well.
