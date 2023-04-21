@@ -6,14 +6,15 @@ Afterwards, we provide the results of our evaluation (Section~\ref{sec:quantitat
 Finally, we discuss the qualitative limitations of our produced summaries (Section~\ref{sec:qualitative-discussion}) before we conclude our work in Chapter~\ref{ch:conclusion}.
 
 \section{Evaluation Mechanism}\label{sec:evaluation-mechanism}
-To assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the FinRNN and FinBERT, respectively).
+Now we will provide a formal formulation of the summary generation process (Section~\ref{sec:summary-generation}) -
+to assemble a candidate summary $c_{i}$ we prepare the sentences $s_{j}^{i}$ from a report $d_{m}$ (e.g., embed or tokenize sentences for the FinRNN and FinBERT, respectively).
 Afterwards, we feed them into our model computing the output summary probabilities $p_{j}^{i}$, and then we select the
 top-$k$ sentences ($k=40$, Section~\ref{sec:data}) based on the highest sentence probabilities $p_{j}^{i}$.
 Finally, we concatenate them to form the summary $c_{i}$ in natural order (i.e., the order in the input text),
 but also trim it to the maximum length of $1,000$ words (Section~\ref{sec:fns}).
 
 In general, to assess the quality of a candidate summary $c$, we measure its similarity with the gold summary $c^{*}$
-based on their n-gram overlap $R=(c, c^{*})$, where $R$ is the ROUGE-2\footnote{
+based on their subsequence (i.e., n-gram) overlap $R=(c, c^{*})$, where $R$ is the ROUGE-2\footnote{
         We use a slightly different but faster version of ROUGE compared to the official metric~\cite{lin2004rouge}.
         It can be accessed at: \url{https://github.com/pltrdy/rouge}. \\
         The FNS evaluation metric is the $F1$-score of ROUGE-2, and we will use it for the final evaluation.
@@ -57,12 +58,12 @@ For that purpose, we produce two tables, namely:
 \end{itemize}
 We again wish to remind the reader that we were not provided with the FNS22 testing set (Section~\ref{sec:data}).
 
-In our FNS comparison we include the following models, namely:
+In our FNS comparison we include the following models, namely the:
 \begin{enumerate}
-    \item the T5 model~\cite{el-haj-etal-2022-financial} (testing data is only available), which is the completely based on the T5-LONG-EXTRACT and also the best English model in that edition;
-    \item the mT5 model~\cite{foroutan-etal-2022-multilingual}, which is the best model overall for all languages in the competition (multilingual for English, Spanish, and Greek);
-    \item the Longformer-Encoder-Decoder (LED)~\cite{khanna-etal-2022-transformer}
-    \item the Top-K Narrative Extractor (NE) ~\cite{shukla-etal-2022-dimsum}  ranking in the top three models overall for Spanish and Greek;
+    \item T5 model~\cite{el-haj-etal-2022-financial} (testing data is only available), which is the completely based on the T5-LONG-EXTRACT and also the best English model in that edition;
+    \item mT5 model~\cite{foroutan-etal-2022-multilingual}, which is the best model overall for all languages in the competition (multilingual for English, Spanish, and Greek);
+    \item Longformer-Encoder-Decoder (LED)~\cite{khanna-etal-2022-transformer}
+    \item Top-K Narrative Extractor (NE) ~\cite{shukla-etal-2022-dimsum}  ranking in the top three models overall for Spanish and Greek;
 \end{enumerate}
 We have the official English validation results for all but the T5~\cite{el-haj-etal-2022-financial}, for which we are going to use their testing evaluations (we are aware that this comparison is somewhat unfair).
 

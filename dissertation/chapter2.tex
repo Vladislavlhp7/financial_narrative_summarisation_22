@@ -11,16 +11,24 @@ In the context of extractive summarisation, supervised learning can be used to i
 In this case, the task can be cast as a binary classification problem, where the sentence labels are either $1$ (summarising) or $0$ (non-summarising)~\cite{manning_raghavan_schutze_2008}.
 
 \section{Unsupervised Learning}\label{sec:unsupervised_learning}
-Unsupervised learning is a machine learning paradigm where no labels are provided.
-
-
+Unsupervised learning is a different machine learning paradigm where which does not rely on labels or external feedback~\cite{sammut2011encyclopedia}.
+Instead, the goal is to find patterns in the data, by discovering groups of similar data points~\cite{bishop2006pattern},
+where the technique employed is called \emph{clustering}~\cite{andhale2016overview, kmeans}.
+In the context of extractive summarisation, unsupervised learning can be used to cluster sentences into groups that are semantically similar~\cite{deerwester1990indexing}.
+This can then be used to generate a summary by selecting the most representative sentence from each cluster~\cite{gokhan-etal-2021-extractive}.
+Other approaches like TextRank and LexRank~\cite{mihalcea-tarau-2004-textrank, Erkan2004LexRankGC} also use unsupervised learning,
+but they do not cluster sentences into groups, but rather rank them based on their similarity to other sentences in the document.
+The difference between clustering and ranking is therefore that clustering makes a \emph{hard} assignment,
+where each data point belongs to exactly one cluster, while ranking makes a \emph{soft} assignment,
+where each data point is assigned a numerical score~\cite{bishop2006pattern}.
+As we discuss ranking in Sections~\ref{sec:textrank} and~\ref{sec:lexrank}, we will focus on clustering in the following subsection and namely the K-Means algorithm~\cite{kmeans}.
 
 \subsection{K-Means Clustering}\label{sec:kmeans}
 K-Means clustering~\cite{kmeans} is an unsupervised learning algorithm that partitions a set of data points into $k$ clusters,
 where each data point belongs to the cluster with the nearest mean.
 It is extensively used in extractive text summarisation for clustering of sentence embeddings~\cite{gokhan-etal-2021-extractive, foroutan-etal-2022-multilingual}.
 
-
+Gokhan and mt5
 
 
 \section{Tf-Idf}\label{sec:tfidf}
