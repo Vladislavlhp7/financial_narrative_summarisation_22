@@ -25,10 +25,12 @@ As we discuss ranking in Sections~\ref{sec:textrank} and~\ref{sec:lexrank}, we w
 
 \subsection{K-Means Clustering}\label{sec:kmeans}
 K-Means clustering~\cite{kmeans} is an unsupervised learning algorithm that partitions a set of data points into $k$ clusters,
-where each data point belongs to the cluster with the nearest mean.
-It is extensively used in extractive text summarisation for clustering of sentence embeddings~\cite{gokhan-etal-2021-extractive, foroutan-etal-2022-multilingual}.
-
-Gokhan and mt5
+where each data point is assigned to the cluster with the nearest mean.
+The algorithm starts by randomly selecting $k$ data points as the initial cluster centroids.
+Then, it iteratively assigns each point to the cluster with the nearest centroid,
+updating the centroid of that cluster as the mean of the points assigned to it.
+While being quite simple, it is extensively used in extractive text summarisation for the clustering of
+embedded sentences~\cite{gokhan-etal-2021-extractive} or even blocks of text~\cite{foroutan-etal-2022-multilingual}.
 
 
 \section{Tf-Idf}\label{sec:tfidf}
