@@ -8,15 +8,15 @@ from nltk import sent_tokenize
 def clean_company_name(line: str):
     line = line.strip()
     # Clear of irrelevant strings
-    reg_to_drop = r'''(?x) # flag to allow comments and multi-line regex
+    reg_to_drop = r"""(?x) # flag to allow comments and multi-line regex
             Annual | Report | Accounts | Financial | Statements | Chairman | Executive
-    '''
+    """
     pattern = regex.compile(reg_to_drop, regex.IGNORECASE)
     line = pattern.sub("", line)
     # Extract the name of the company
-    name = line.split('plc')[0] + ' plc '
+    name = line.split("plc")[0] + " plc "
     # Try to match the year on the line and add to the identifier
-    year = regex.findall(r'\d{4}', line)
+    year = regex.findall(r"\d{4}", line)
     if year:
         name += year[0]
     # Ensure unnecessary spaces are removed
@@ -27,7 +27,7 @@ def clean_company_name(line: str):
 def tokenized_sent_to_str(tokenized_sent) -> str:
     # remove redundant spaces around sentence delimiters
     for p in ".,?!:;":
-        tokenized_sent = tokenized_sent.replace(f' {p}', f'{p}')
+        tokenized_sent = tokenized_sent.replace(f" {p}", f"{p}")
     return tokenized_sent
 
 
@@ -40,37 +40,39 @@ def merge_characters(doc: str):
     """
     # Rule-based merging
     doc_merged = ""
-    doc_split = doc.split('\n')
+    doc_split = doc.split("\n")
     max_lines = len(doc_split)
     # Line-level operation is safer and more flexible
     # as in some reports only a few lines require character merging
     for i, line in enumerate(doc_split):
         line_new = str(line)
         # If there is a `\ \t \ ` assume tabs are spaces and delete spaces
-        if regex.findall(pattern=r'(?<=\w)\ \t\ ', string=line):
-            pattern = regex.compile(r'\ ')
+        if regex.findall(pattern=r"(?<=\w)\ \t\ ", string=line):
+            pattern = regex.compile(r"\ ")
             line_new = pattern.sub("", line)
         if i != max_lines - 1:  # control final end-line
-            line_new += '\n'
+            line_new += "\n"
         doc_merged += line_new
     # Swap tabs for single spaces
-    doc_merged = doc_merged.replace('\t', ' ')
+    doc_merged = doc_merged.replace("\t", " ")
     return doc_merged
 
 
 def clean(doc: str):
     # Remove upper-cased lines
-    doc = "\n".join([l for l in doc.split('\n') if not l.isupper()]).strip()
+    doc = "\n".join([l for l in doc.split("\n") if not l.isupper()]).strip()
     # Perform character-level merging when tabs are used as spaces
-    doc = "\n".join([merge_characters(l) for l in doc.split('\n')])
+    doc = "\n".join([merge_characters(l) for l in doc.split("\n")])
     # Make document compact
-    doc = doc.replace('\n', ' ')
+    doc = doc.replace("\n", " ")
     # remove duplicated spaces
     doc = " ".join(doc.split())
     # reconnect words split by end-of-line hyphenation with lookbehind
-    doc = regex.sub(r"(?<=[a-z])-\s", '', doc)
+    doc = regex.sub(r"(?<=[a-z])-\s", "", doc)
     # remove emails, urls, hours, UK phones, dates
-    doc = doc.replace('WWW.', 'www.')  # ensure url starts lowercase to be caught by regex below
+    doc = doc.replace(
+        "WWW.", "www."
+    )  # ensure url starts lowercase to be caught by regex below
     reg_to_drop = r"""(?x)
         (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])
         | (https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})
@@ -81,11 +83,11 @@ def clean(doc: str):
     pattern = regex.compile(reg_to_drop, regex.UNICODE)
     doc = pattern.sub("", doc)
     # Remove non-alphanumeric and non-special financial characters
-    reg_to_drop = r'''(?x) # flag to allow comments and multi-line regex
+    reg_to_drop = r"""(?x) # flag to allow comments and multi-line regex
             [^\w_ |        # alpha-numeric
             \p{Sc} |       # currencies
             \%\&\"\\'\’\(\)\.\,\?\!\-\;\\\/ ]  # preserve apostrophe `’`
-        '''
+        """
     pattern = regex.compile(reg_to_drop, regex.UNICODE)
     doc = pattern.sub("", doc)
     doc = doc.replace("’", "'")  # replace special unicode apostrophe with normal one
@@ -97,7 +99,7 @@ def clean(doc: str):
     doc = " ".join(doc.split())
     # remove redundant spaces around sentence delimiters
     for p in ".,?!:;":
-        doc = doc.replace(f' {p}', f'{p}')
+        doc = doc.replace(f" {p}", f"{p}")
     # normalise accents and umlauts
     # doc = unidecode(doc)  # unfortunately normalizes currencies as well
     return doc
@@ -106,12 +108,12 @@ def clean(doc: str):
 class Tokenize:
     def __init__(self, doc):
         """
-           Initializes the Tokenize class with the given document `doc` and tokenizes it into sentences using the
-           sent_tokenize method from the nltk library.
+        Initializes the Tokenize class with the given document `doc` and tokenizes it into sentences using the
+        sent_tokenize method from the nltk library.
 
-           Args:
-               doc (str): The text document to be tokenized.
-           """
+        Args:
+            doc (str): The text document to be tokenized.
+        """
         self.sentences = sent_tokenize(doc)
 
     def remove_short_sentences(self, num_words: int = 3):
@@ -121,7 +123,9 @@ class Tokenize:
         Args:
             num_words (int, optional): The minimum number of words required for a sentence to be kept. Defaults to 3.
         """
-        self.sentences = [s for s in self.sentences if len(re.findall(r'\w+', s)) >= num_words]
+        self.sentences = [
+            s for s in self.sentences if len(re.findall(r"\w+", s)) >= num_words
+        ]
 
     def lowercase_sentences(self):
         for i, s in enumerate(self.sentences):
@@ -133,7 +137,7 @@ class Tokenize:
     def __str__(self):
         d = ""
         for i, sentence in enumerate(self.sentences):
-            d += tokenized_sent_to_str(sentence) + ' '
+            d += tokenized_sent_to_str(sentence) + " "
         d = d.strip()
         return d
 

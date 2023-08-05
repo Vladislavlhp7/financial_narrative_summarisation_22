@@ -7,7 +7,13 @@ from datasets import Dataset
 from rouge import Rouge
 from scipy.special import softmax
 from tqdm import tqdm
-from transformers import BertTokenizer, Trainer, BertForSequenceClassification, BertConfig, TrainingArguments
+from transformers import (
+    BertTokenizer,
+    Trainer,
+    BertForSequenceClassification,
+    BertConfig,
+    TrainingArguments,
+)
 
 from baseline_summarizers import get_baseline_summary
 from extractor import batch_str_to_batch_tensors, FinRNN
@@ -16,23 +22,23 @@ from preprocessing import clean
 from query import get_all_summaries, get_embedding_model, get_report
 
 args = TrainingArguments(
-    output_dir='../tmp/',
-    evaluation_strategy='epoch',
-    save_strategy='epoch',
+    output_dir="../tmp/",
+    evaluation_strategy="epoch",
+    save_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=32,
     per_device_eval_batch_size=32,
     num_train_epochs=3,
     weight_decay=0.01,
     load_best_model_at_end=True,
-    metric_for_best_model='accuracy'
+    metric_for_best_model="accuracy",
 )
 
 
 def trim_string(text, max_length=1000):
     words = text.split()
     if len(words) > 1000:
-        return ' '.join(words[:max_length])
+        return " ".join(words[:max_length])
     else:
         return text
 
@@ -55,7 +61,10 @@ def rouge_max_top_n_sentences(summary_sentences, reference_summary: str, n: int 
     rouge = Rouge()
 
     # Compute the ROUGE-2 scores for each sentence in summary_sentences
-    rouge_2_scores = [rouge.get_scores(sentence, reference_summary, avg=True)["rouge-2"]["f"] for sentence in summary_sentences]
+    rouge_2_scores = [
+        rouge.get_scores(sentence, reference_summary, avg=True)["rouge-2"]["f"]
+        for sentence in summary_sentences
+    ]
 
     # Get the indices that would sort the sentences by their ROUGE-2 scores in descending order
     sorted_indices = np.argsort(rouge_2_scores)[::-1]
@@ -72,7 +81,13 @@ def rouge_max_top_n_sentences(summary_sentences, reference_summary: str, n: int 
     return summary_sentences_top
 
 
-def select_summary_sents(probabilities, sentences, max_sents=int(1000/25), rouge_maximisation=False, reference_summary=None):
+def select_summary_sents(
+    probabilities,
+    sentences,
+    max_sents=int(1000 / 25),
+    rouge_maximisation=False,
+    reference_summary=None,
+):
     """
     Selects a summary of the input sentences based on the predicted probabilities of label 1.
 
@@ -94,10 +109,16 @@ def select_summary_sents(probabilities, sentences, max_sents=int(1000/25), rouge
     summary_probs = predictions[summary_indices]
     summary_sentences = [sentences[i] for i in summary_indices]
     if rouge_maximisation and reference_summary is not None:
-        summary_sentences_top = rouge_max_top_n_sentences(summary_sentences, reference_summary, n=min(max_sents, len(summary_sentences)))
+        summary_sentences_top = rouge_max_top_n_sentences(
+            summary_sentences,
+            reference_summary,
+            n=min(max_sents, len(summary_sentences)),
+        )
     else:
         # Get the top-k probabilities and corresponding sentence indices
-        summary_probs_top, summary_indices_top = torch.topk(summary_probs[:, 1], k=min(max_sents, summary_probs.shape[0]))
+        summary_probs_top, summary_indices_top = torch.topk(
+            summary_probs[:, 1], k=min(max_sents, summary_probs.shape[0])
+        )
         # Get the top-k sentences based on the selected indices
         summary_sentences_top = [summary_sentences[i] for i in summary_indices_top]
     # Join the selected sentences to form the summary
@@ -110,8 +131,14 @@ def select_summary_sents(probabilities, sentences, max_sents=int(1000/25), rouge
 def load_data_transformer(tokenizer, df_test):
     dataset_test = Dataset.from_pandas(df_test)
     dataset_test = dataset_test.map(
-        lambda e: tokenizer(e['sent'], truncation=True, padding='max_length', max_length=128), batched=True)
-    dataset_test.set_format(type='torch', columns=['input_ids', 'token_type_ids', 'attention_mask', 'label'])
+        lambda e: tokenizer(
+            e["sent"], truncation=True, padding="max_length", max_length=128
+        ),
+        batched=True,
+    )
+    dataset_test.set_format(
+        type="torch", columns=["input_ids", "token_type_ids", "attention_mask", "label"]
+    )
     return dataset_test
 
 
@@ -140,9 +167,9 @@ def get_max_dict(dict_list):
         empty, returns `None`.
     """
     max_dict = None
-    max_f = -float('inf')
+    max_f = -float("inf")
     for d in dict_list:
-        f = d[list(d.keys())[0]]['f']
+        f = d[list(d.keys())[0]]["f"]
         if f > max_f:
             max_dict = d
             max_f = f
@@ -153,13 +180,13 @@ def get_max_rouge_l_score(data):
     max_score = 0
     max_dict = {}
     for d in data:
-        if d['rouge-l']['f'] > max_score:
-            max_score = d['rouge-l']['f']
+        if d["rouge-l"]["f"] > max_score:
+            max_score = d["rouge-l"]["f"]
             max_dict = d
     return max_dict
 
 
-def load_model_transformer(model_dir, device='cpu'):
+def load_model_transformer(model_dir, device="cpu"):
     output_model_file = f"{model_dir}/pytorch_model.bin"
     output_config_file = f"{model_dir}/config.json"
 
@@ -167,39 +194,47 @@ def load_model_transformer(model_dir, device='cpu'):
     model_transformer = BertForSequenceClassification(config)
 
     state_dict = torch.load(output_model_file, map_location=torch.device(device))
-    model_transformer.load_state_dict(state_dict, )
+    model_transformer.load_state_dict(
+        state_dict,
+    )
     return model_transformer
 
 
 def evaluate_model(model, config, embedding_model=None, rouge_maximisation=False):
     """
-        Evaluates the model on the test set. The model is evaluated using the ROUGE evaluation metric.
+    Evaluates the model on the test set. The model is evaluated using the ROUGE evaluation metric.
     """
     trainer = None
     tokenizer = None
     predictions = None
     sentences = None
-    if config['model_type'] == 'transformer':
+    if config["model_type"] == "transformer":
         trainer = Trainer(model=model, args=args)
 
     model.eval()
     df_test = pd.read_csv(f'{config["df_test_path"]}')
-    report_ids = df_test['report'].unique()
+    report_ids = df_test["report"].unique()
     rouge_scores = []
     for report_id in tqdm(report_ids):
-        df_test_report = df_test.loc[df_test.report.isin([int(report_id), str(report_id)])]
-        sentences = df_test_report['sent'].tolist()
+        df_test_report = df_test.loc[
+            df_test.report.isin([int(report_id), str(report_id)])
+        ]
+        sentences = df_test_report["sent"].tolist()
         # labels = df_test_report['label'].tolist()
-        if config['model_type'] == 'gru':
-            inputs_embedded = batch_str_to_batch_tensors(sentence_list=sentences, embedding_model=embedding_model)
+        if config["model_type"] == "gru":
+            inputs_embedded = batch_str_to_batch_tensors(
+                sentence_list=sentences, embedding_model=embedding_model
+            )
             with torch.no_grad():
                 outputs = model(inputs_embedded)
                 if isinstance(outputs, tuple):
                     outputs = outputs[0]
             predictions = outputs.numpy()
-        elif config['model_type'] == 'transformer':
-            tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
-            inputs_embedded = load_data_transformer(tokenizer=tokenizer, df_test=df_test_report)
+        elif config["model_type"] == "transformer":
+            tokenizer = BertTokenizer.from_pretrained("yiyanghkust/finbert-pretrain")
+            inputs_embedded = load_data_transformer(
+                tokenizer=tokenizer, df_test=df_test_report
+            )
             outputs = trainer.predict(inputs_embedded)
             print(outputs)
             predictions = softmax(outputs.predictions, axis=1)
@@ -211,10 +246,19 @@ def evaluate_model(model, config, embedding_model=None, rouge_maximisation=False
         for _, gold_summary in gold_summaries_dict.items():
             try:
                 gold_summary_ = clean(gold_summary).lower()
-                generated_summary = select_summary_sents(predictions, sentences, rouge_maximisation=rouge_maximisation, reference_summary=gold_summary_)
+                generated_summary = select_summary_sents(
+                    predictions,
+                    sentences,
+                    rouge_maximisation=rouge_maximisation,
+                    reference_summary=gold_summary_,
+                )
                 rouge_score = calc_rouge(generated_summary, gold_summary_)
             except ValueError:
-                rouge_score = {'rouge-l': {'f': 0}, 'rouge-1': {'f': 0}, 'rouge-2': {'f': 0}}
+                rouge_score = {
+                    "rouge-l": {"f": 0},
+                    "rouge-1": {"f": 0},
+                    "rouge-2": {"f": 0},
+                }
             rouge_scores_per_summary.append(rouge_score)
         # Get the maximum ROUGE-L score from the list of scores per summary
         max_rouge_l_score = get_max_rouge_l_score(rouge_scores_per_summary)
@@ -225,48 +269,58 @@ def evaluate_model(model, config, embedding_model=None, rouge_maximisation=False
 
 def generate_summaries(model, config, embedding_model=None, num_reports=10):
     """
-        Evaluates the model on the test set. The model is evaluated using the ROUGE evaluation metric.
+    Evaluates the model on the test set. The model is evaluated using the ROUGE evaluation metric.
     """
     trainer = None
     tokenizer = None
     predictions = None
     sentences = None
-    if config['model_type'] == 'transformer':
+    if config["model_type"] == "transformer":
         trainer = Trainer(model=model, args=args)
 
     model.eval()
     df_test = pd.read_csv(f'{config["df_test_path"]}')
-    report_ids = df_test['report'].unique()
+    report_ids = df_test["report"].unique()
     generated_summaries = []
     for report_id in tqdm(report_ids[:num_reports]):
-        df_test_report = df_test.loc[df_test.report.isin([int(report_id), str(report_id)])]
-        sentences = df_test_report['sent'].tolist()
-        if config['model_type'] == 'gru':
-            inputs_embedded = batch_str_to_batch_tensors(sentence_list=sentences, embedding_model=embedding_model)
+        df_test_report = df_test.loc[
+            df_test.report.isin([int(report_id), str(report_id)])
+        ]
+        sentences = df_test_report["sent"].tolist()
+        if config["model_type"] == "gru":
+            inputs_embedded = batch_str_to_batch_tensors(
+                sentence_list=sentences, embedding_model=embedding_model
+            )
             with torch.no_grad():
                 outputs = model(inputs_embedded)
                 if isinstance(outputs, tuple):
                     outputs = outputs[0]
             predictions = outputs.numpy()
-        elif config['model_type'] == 'transformer':
-            tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-pretrain')
-            inputs_embedded = load_data_transformer(tokenizer=tokenizer, df_test=df_test_report)
+        elif config["model_type"] == "transformer":
+            tokenizer = BertTokenizer.from_pretrained("yiyanghkust/finbert-pretrain")
+            inputs_embedded = load_data_transformer(
+                tokenizer=tokenizer, df_test=df_test_report
+            )
             outputs = trainer.predict(inputs_embedded)
             print(outputs)
             predictions = softmax(outputs.predictions, axis=1)
             print(predictions)
-        generated_summary = select_summary_sents(predictions, sentences, rouge_maximisation=False)
+        generated_summary = select_summary_sents(
+            predictions, sentences, rouge_maximisation=False
+        )
         generated_summaries.append(str(generated_summary))
     return generated_summaries
 
 
-def evaluate_baseline(config, max_sents=int(1000/25)):
+def evaluate_baseline(config, max_sents=int(1000 / 25)):
     df_test = pd.read_csv(f'{config["df_test_path"]}')
-    reports = df_test['report'].unique()
+    reports = df_test["report"].unique()
     rouge_scores = []
     for report_id in tqdm(reports):
         report = get_report(report_id, training=False)
-        generated_summary = get_baseline_summary(text=clean(report), max_sents=max_sents, method=config['model_name'])
+        generated_summary = get_baseline_summary(
+            text=clean(report), max_sents=max_sents, method=config["model_name"]
+        )
 
         # Calculate ROUGE scores for each summary compared to the generated summary
         rouge_scores_per_summary = []
@@ -283,7 +337,7 @@ def evaluate_baseline(config, max_sents=int(1000/25)):
     return rouge_scores
 
 
-def evaluate_baselines(configs, max_sents=int(1000/25)):
+def evaluate_baselines(configs, max_sents=int(1000 / 25)):
     rouge_scores_list = []
     for c in tqdm(configs):
         rouge_scores = evaluate_baseline(config=c, max_sents=max_sents)
@@ -296,16 +350,16 @@ def evaluate_baselines(configs, max_sents=int(1000/25)):
             json.dump(rouge_scores_list, outfile)
 
 
-def unpack_rouge_metric(d, key='f'):
+def unpack_rouge_metric(d, key="f"):
     """
-        Unpacks the 'f' key from the ROUGE dictionary.
+    Unpacks the 'f' key from the ROUGE dictionary.
 
-        Args:
-        - d: a dictionary containing ROUGE scores
-        - key: the key to unpack, default is 'f'
+    Args:
+    - d: a dictionary containing ROUGE scores
+    - key: the key to unpack, default is 'f'
 
-        Returns:
-        - a dictionary with the 'f' key unpacked
+    Returns:
+    - a dictionary with the 'f' key unpacked
     """
     d_new = {k: v[key] for k, v in d.items() if key in v}
     return d_new
@@ -313,13 +367,13 @@ def unpack_rouge_metric(d, key='f'):
 
 def rouge_dict_to_df(data):
     """
-        Converts a list of ROUGE dictionaries into a pandas DataFrame.
+    Converts a list of ROUGE dictionaries into a pandas DataFrame.
 
-        Args:
-        - data: a list of dictionaries containing ROUGE scores
+    Args:
+    - data: a list of dictionaries containing ROUGE scores
 
-        Returns:
-        - a pandas DataFrame with ROUGE scores as columns and each row corresponding to a single document
+    Returns:
+    - a pandas DataFrame with ROUGE scores as columns and each row corresponding to a single document
     """
     data_ = []
     for i, d in enumerate(data):
@@ -329,24 +383,41 @@ def rouge_dict_to_df(data):
     return df
 
 
-def evaluate_models(configs, embedding_model=None, rouge_maximisation=True, device='cpu'):
+def evaluate_models(
+    configs, embedding_model=None, rouge_maximisation=True, device="cpu"
+):
     rouge_scores_list = []
-    for c in tqdm(configs, desc='Evaluating models'):
+    for c in tqdm(configs, desc="Evaluating models"):
         print(f"{c['model_type']}")
         rouge_scores = None
-        if c['model_type'] == 'transformer':
-            model_transformer = load_model_transformer(c['model_dir'], device=device)
-            rouge_scores = evaluate_model(config=c, model=model_transformer, embedding_model=None, rouge_maximisation=rouge_maximisation)
-        elif c['model_type'] == 'gru':
-            model_rnn = FinRNN(hidden_size=c['hidden_size'])
-            model_rnn.load_state_dict(torch.load(c['model_path'], map_location=torch.device(device)), strict=False)
-            rouge_scores = evaluate_model(config=c, model=model_rnn, embedding_model=embedding_model, rouge_maximisation=rouge_maximisation)
+        if c["model_type"] == "transformer":
+            model_transformer = load_model_transformer(c["model_dir"], device=device)
+            rouge_scores = evaluate_model(
+                config=c,
+                model=model_transformer,
+                embedding_model=None,
+                rouge_maximisation=rouge_maximisation,
+            )
+        elif c["model_type"] == "gru":
+            model_rnn = FinRNN(hidden_size=c["hidden_size"])
+            model_rnn.load_state_dict(
+                torch.load(c["model_path"], map_location=torch.device(device)),
+                strict=False,
+            )
+            rouge_scores = evaluate_model(
+                config=c,
+                model=model_rnn,
+                embedding_model=embedding_model,
+                rouge_maximisation=rouge_maximisation,
+            )
         print(rouge_scores)
         rouge_scores_list.append(rouge_scores)
         df = rouge_dict_to_df(rouge_scores)
         df.to_csv(f"{c['model_name']}_rouge_scores{str(rouge_maximisation)}.csv")
         # Save the list of dictionaries to a file
-        with open(f"{c['model_name']}_rouge_scores{str(rouge_maximisation)}.json", "w") as outfile:
+        with open(
+            f"{c['model_name']}_rouge_scores{str(rouge_maximisation)}.json", "w"
+        ) as outfile:
             json.dump(rouge_scores_list, outfile)
 
 
@@ -359,56 +430,80 @@ def main():
     configs = []
     # GRU models
     # 64-0.9-None-None
-    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-              'model_name': 'model-0.001-64-0.9-2023-04-12-18-30.h5'}
-    config['model_path'] = config['model_name']
+    config = {
+        "model_type": "gru",
+        "df_test_path": "../tmp/validation_corpus_2023-02-07 16-33.csv",
+        "hidden_size": 64,
+        "model_name": "model-0.001-64-0.9-2023-04-12-18-30.h5",
+    }
+    config["model_path"] = config["model_name"]
     configs.append(config)
 
     # 64-0.9-None-dot
-    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-              'model_name': 'model-0.001-64-0.9-2023-04-12-17-05.h5'}
-    config['model_path'] = config['model_name']
+    config = {
+        "model_type": "gru",
+        "df_test_path": "../tmp/validation_corpus_2023-02-07 16-33.csv",
+        "hidden_size": 64,
+        "model_name": "model-0.001-64-0.9-2023-04-12-17-05.h5",
+    }
+    config["model_path"] = config["model_name"]
     configs.append(config)
 
     # 64-0.8-fr-None
-    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-              'model_name': 'model-0.001-64-0.8-2023-04-13-04-12.h5'}
-    config['model_path'] = config['model_name']
+    config = {
+        "model_type": "gru",
+        "df_test_path": "../tmp/validation_corpus_2023-02-07 16-33.csv",
+        "hidden_size": 64,
+        "model_name": "model-0.001-64-0.8-2023-04-13-04-12.h5",
+    }
+    config["model_path"] = config["model_name"]
     configs.append(config)
 
     # 64-0.8-fr-dot
-    config = {'model_type': 'gru', 'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv', 'hidden_size': 64,
-              'model_name': 'model-0.001-64-0.8-2023-04-12-21-08.h5'}
-    config['model_path'] = config['model_name']
+    config = {
+        "model_type": "gru",
+        "df_test_path": "../tmp/validation_corpus_2023-02-07 16-33.csv",
+        "hidden_size": 64,
+        "model_name": "model-0.001-64-0.8-2023-04-12-21-08.h5",
+    }
+    config["model_path"] = config["model_name"]
     configs.append(config)
 
     # Transformer model
     config = {
-        'seed_v': 42,
-        'data_augmentation': 'fr',
-        'lr': 2e-5,
-        'training_downsample_rate': 0.8,
-        'model_type': 'transformer',
-        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+        "seed_v": 42,
+        "data_augmentation": "fr",
+        "lr": 2e-5,
+        "training_downsample_rate": 0.8,
+        "model_type": "transformer",
+        "df_test_path": "../tmp/validation_corpus_2023-02-07 16-33.csv",
     }
-    config['model_name'] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
-    config['model_dir'] = config['model_name']
+    config[
+        "model_name"
+    ] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
+    config["model_dir"] = config["model_name"]
     configs.append(config)
 
     config = {
-        'seed_v': 42,
-        'data_augmentation': None,
-        'lr': 2e-5,
-        'training_downsample_rate': 0.9,
-        'model_type': 'transformer',
-        'df_test_path': '../tmp/validation_corpus_2023-02-07 16-33.csv',
+        "seed_v": 42,
+        "data_augmentation": None,
+        "lr": 2e-5,
+        "training_downsample_rate": 0.9,
+        "model_type": "transformer",
+        "df_test_path": "../tmp/validation_corpus_2023-02-07 16-33.csv",
     }
     config[
-        'model_name'] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
-    config['model_dir'] = config['model_name']
+        "model_name"
+    ] = f"finbert-sentiment-seed-{config['seed_v']}-dataaugm-{config['data_augmentation']}-lr-{config['lr']}-downsample-{config['training_downsample_rate']}"
+    config["model_dir"] = config["model_name"]
     configs.append(config)
 
-    evaluate_models(configs=configs, embedding_model=embedding_model, rouge_maximisation=True, device=device)
+    evaluate_models(
+        configs=configs,
+        embedding_model=embedding_model,
+        rouge_maximisation=True,
+        device=device,
+    )
 
     # configs = []
     # config = {
@@ -424,5 +519,5 @@ def main():
     # evaluate_baselines(configs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
